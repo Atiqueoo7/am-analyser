@@ -11,7 +11,7 @@
   <meta name="theme-color" content="#090d16">
   <link rel="apple-touch-icon" href="https://placehold.co/192x192/ea580c/ffffff?text=AM">
 
-  <!-- INLINE WEB APP MANIFEST: Forces Chrome & Safari into standalone full-screen window mode -->
+  <!-- INLINE WEB APP MANIFEST -->
   <link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22A.M%20Analyser%22%2C%22short_name%22%3A%22AM%20Analyser%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23090d16%22%2C%22theme_color%22%3A%22%23090d16%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22https%3A%2F%2Fplacehold.co%2F192x192%2Fea580c%2Fffffff%3Ftext%3DAM%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image%2Fpng%22%2C%22purpose%22%3A%22any%20maskable%22%7D%2C%7B%22src%22%3A%22https%3A%2F%2Fplacehold.co%2F512x512%2Fea580c%2Fffffff%3Ftext%3DAM%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fpng%22%2C%22purpose%22%3A%22any%20maskable%22%7D%5D%7D">
 
   <!-- Tailwind CSS -->
@@ -50,7 +50,6 @@
     .tap-active:active {
       transform: scale(0.97);
     }
-    /* Hide spin buttons for clean mobile inputs */
     input[type=number]::-webkit-inner-spin-button, 
     input[type=number]::-webkit-outer-spin-button { 
       -webkit-appearance: none; 
@@ -141,7 +140,6 @@
 
       <!-- Sort & Filter Control Strip -->
       <div class="mt-2.5 flex flex-col gap-2">
-        <!-- Stock Filter Pills -->
         <div class="flex items-center gap-1.5 overflow-x-auto pb-0.5 custom-scroll text-[11px]">
           <button 
             type="button" 
@@ -173,7 +171,6 @@
           </button>
         </div>
 
-        <!-- Sort Select Bar -->
         <div class="flex items-center justify-between gap-2 bg-workshop-900 border border-workshop-700/80 px-2.5 py-1.5 rounded-xl">
           <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
             <i class="fa-solid fa-arrow-down-short-wide text-orange-400"></i>
@@ -199,7 +196,6 @@
 
     <!-- VIEW 1: COUNTER (SALES / FAST OUT) -->
     <section id="viewCounter" class="space-y-3">
-      <!-- Quick Info Bar -->
       <div class="bg-gradient-to-r from-workshop-900 to-workshop-800 border border-workshop-700/80 rounded-xl p-3 flex items-center justify-between">
         <div>
           <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Today's Counter Sales</span>
@@ -211,15 +207,13 @@
         </div>
       </div>
 
-      <!-- Parts Card List -->
       <div id="counterItemsList" class="space-y-2.5">
-        <!-- Rendered dynamically via JavaScript -->
+        <!-- Rendered dynamically -->
       </div>
     </section>
 
-    <!-- VIEW 2: DAILY LOGS (UPGRADED 365-DAY ARCHIVE & DATE PICKER) -->
+    <!-- VIEW 2: DAILY LOGS -->
     <section id="viewLogs" class="hidden space-y-3">
-      <!-- Header & Export Action -->
       <div class="flex items-center justify-between px-1">
         <div>
           <h2 class="text-sm font-black text-white uppercase tracking-wider flex items-center gap-1.5">
@@ -241,9 +235,7 @@
 
       <!-- Date Selection & Quick Date Range Filters -->
       <div class="bg-workshop-900 border border-workshop-700/80 rounded-2xl p-3 space-y-2.5 shadow">
-        <!-- Interactive Date Picker Bar with Prev/Next Day buttons & Custom Calendar Trigger -->
         <div class="flex items-center gap-1.5">
-          <!-- Previous Day Button -->
           <button 
             type="button" 
             onclick="shiftSelectedDay(-1)" 
@@ -252,7 +244,6 @@
             <i class="fa-solid fa-chevron-left text-xs"></i>
           </button>
 
-          <!-- Main Date Selector Pill with Prominent Calendar Icon -->
           <div class="flex-1 flex items-stretch bg-workshop-950 border border-workshop-700 hover:border-orange-500 rounded-xl overflow-hidden transition shadow-inner">
             <button 
               type="button" 
@@ -271,7 +262,6 @@
             </button>
           </div>
 
-          <!-- Next Day Button -->
           <button 
             type="button" 
             onclick="shiftSelectedDay(1)" 
@@ -281,7 +271,6 @@
             <i class="fa-solid fa-chevron-right text-xs"></i>
           </button>
 
-          <!-- Quick Today Action Button -->
           <button 
             onclick="setQuickDate('today')" 
             id="quickBtnToday"
@@ -290,7 +279,6 @@
           </button>
         </div>
 
-        <!-- Quick Filter Buttons -->
         <div class="flex items-center gap-1.5 overflow-x-auto pb-0.5 custom-scroll text-[11px]">
           <button type="button" onclick="setQuickDate('yesterday')" id="quickBtnYesterday" class="px-2.5 py-1 rounded-lg font-bold bg-workshop-800 text-slate-300 border border-slate-700 whitespace-nowrap hover:text-white transition">
             Yesterday
@@ -332,7 +320,6 @@
         </div>
       </div>
 
-      <!-- Action Type Filter Tabs: All, Sold Out, Inward Added -->
       <div class="flex items-center bg-workshop-900 p-1 rounded-xl border border-workshop-700/80 text-xs">
         <button 
           id="logTypeTab-all" 
@@ -354,9 +341,8 @@
         </button>
       </div>
 
-      <!-- Logs Item List -->
       <div id="logsContainer" class="space-y-2">
-        <!-- Rendered dynamically via JavaScript -->
+        <!-- Rendered dynamically -->
       </div>
     </section>
 
@@ -654,149 +640,13 @@
         <!-- Step-by-Step Instructions Toggle -->
         <details class="bg-workshop-950 border border-workshop-800 rounded-xl p-2.5">
           <summary class="font-bold text-[11px] text-orange-400 cursor-pointer flex items-center justify-between">
-            <span>Show Google Apps Script Code (Auto-Builds Blank Sheet)</span>
+            <span>Show Google Apps Script Code</span>
             <i class="fa-solid fa-code text-xs"></i>
           </summary>
           <div class="mt-2 text-[10px] text-slate-300 space-y-1.5 leading-relaxed">
-            <p>1. Open a blank tab in your Google Sheet.</p>
-            <p>2. Go to <b>Extensions &gt; Apps Script</b> and paste this code (it auto-populates everything):</p>
-            <textarea readonly onclick="this.select()" class="w-full h-44 bg-black text-emerald-400 font-mono text-[9px] p-2 rounded-lg border border-slate-800 select-all">
-function doPost(e) {
-  try {
-    var data = JSON.parse(e.postData.contents);
-    var ss = SpreadsheetApp.getActiveSpreadsheet();
-    var sheet = ss.getActiveSheet();
-    
-    // Quick test ping
-    if (data.action === "ping") {
-      return ContentService.createTextOutput(JSON.stringify({status: "ok", message: "Connected!"})).setMimeType(ContentService.MimeType.JSON);
-    }
-    
-    // ACTION 1: FULL AUTO-INITIALIZATION / EXPORT OF ALL DATA TO A BLANK SHEET
-    if (data.action === "full_snapshot" || data.action === "bulk_sync") {
-      var items = data.items || [];
-      sheet.clearContents();
-      
-      // Standard Auto Analyser headers
-      var defaultHeaders = ["Item Name", "Remaining stock", "Cost price", "Initial stock", "New Stock", "Total stock"];
-      sheet.getRange(1, 1, 1, defaultHeaders.length).setValues([defaultHeaders])
-        .setFontWeight("bold")
-        .setBackground("#1e293b")
-        .setFontColor("#ffffff")
-        .setHorizontalAlignment("center");
-      
-      if (items.length > 0) {
-        var rows = [];
-        for (var i = 0; i < items.length; i++) {
-          var itm = items[i];
-          rows.push([
-            itm.name,
-            Number(itm.remaining) || 0,
-            Number(itm.cost) || 0,
-            Number(itm.remaining) || 0, // initial
-            0,                          // new stock
-            Number(itm.remaining) || 0  // total
-          ]);
-        }
-        sheet.getRange(2, 1, rows.length, defaultHeaders.length).setValues(rows);
-        sheet.setFrozenRows(1);
-        sheet.autoResizeColumns(1, defaultHeaders.length);
-      }
-      return ContentService.createTextOutput(JSON.stringify({status: "success", count: items.length})).setMimeType(ContentService.MimeType.JSON);
-    }
-    
-    // ACTION 2: INDIVIDUAL ITEM REGISTRATION OR EDIT (NEW PART ADDED IN APP)
-    if (data.action === "upsert_item") {
-      var values = sheet.getDataRange().getValues();
-      var foundRow = -1;
-      for (var r = 1; r < values.length; r++) {
-        if (values[r][0] && values[r][0].toString().trim().toLowerCase() === data.name.trim().toLowerCase()) {
-          foundRow = r + 1;
-          break;
-        }
-      }
-      if (foundRow !== -1) {
-        sheet.getRange(foundRow, 2).setValue(Number(data.remaining));
-        sheet.getRange(foundRow, 3).setValue(Number(data.cost));
-      } else {
-        var newRow = sheet.getLastRow() + 1;
-        sheet.getRange(newRow, 1).setValue(data.name);
-        sheet.getRange(newRow, 2).setValue(Number(data.remaining));
-        sheet.getRange(newRow, 3).setValue(Number(data.cost));
-        sheet.getRange(newRow, 4).setValue(Number(data.remaining));
-        sheet.getRange(newRow, 5).setValue(0);
-        sheet.getRange(newRow, 6).setValue(Number(data.remaining));
-      }
-      return ContentService.createTextOutput(JSON.stringify({status: "success"})).setMimeType(ContentService.MimeType.JSON);
-    }
-
-    // ACTION 3: DAILY SALE (OUT) OR INWARD (IN)
-    var itemName = data.itemName;
-    var type = data.type;
-    var qty = Number(data.quantity);
-    var dateHeader = data.dateLabel;
-    
-    var values = sheet.getDataRange().getValues();
-    var headers = values[0];
-    var colDate = -1, colRemaining = -1, colNewStock = -1;
-    
-    for (var c = 0; c < headers.length; c++) {
-      var h = headers[c].toString().trim().toLowerCase();
-      if (h === dateHeader.toLowerCase()) colDate = c;
-      if (h.indexOf("remaining") !== -1) colRemaining = c;
-      if (h.indexOf("new stock") !== -1) colNewStock = c;
-    }
-    
-    // Auto-create date column if selling today
-    if (colDate === -1 && type === "OUT") {
-      colDate = headers.length;
-      sheet.getRange(1, colDate + 1).setValue(dateHeader)
-        .setFontWeight("bold")
-        .setHorizontalAlignment("center")
-        .setBackground("#fef3c7");
-    }
-    
-    // Find item row
-    var targetRow = -1;
-    for (var r = 1; r < values.length; r++) {
-      if (values[r][0] && values[r][0].toString().trim().toLowerCase() === itemName.trim().toLowerCase()) {
-        targetRow = r + 1;
-        break;
-      }
-    }
-    
-    // Auto-add item to bottom if not found
-    if (targetRow === -1) {
-      targetRow = sheet.getLastRow() + 1;
-      sheet.getRange(targetRow, 1).setValue(itemName);
-      if (data.unitCost) sheet.getRange(targetRow, 3).setValue(data.unitCost);
-    }
-    
-    if (type === "OUT") {
-      if (colDate !== -1) {
-        var curDay = Number(sheet.getRange(targetRow, colDate + 1).getValue()) || 0;
-        sheet.getRange(targetRow, colDate + 1).setValue(curDay + qty);
-      }
-      if (colRemaining !== -1) {
-        var curRem = Number(sheet.getRange(targetRow, colRemaining + 1).getValue()) || 0;
-        sheet.getRange(targetRow, colRemaining + 1).setValue(Math.max(0, curRem - qty));
-      }
-    } else if (type === "IN") {
-      if (colRemaining !== -1) {
-        var curRem = Number(sheet.getRange(targetRow, colRemaining + 1).getValue()) || 0;
-        sheet.getRange(targetRow, colRemaining + 1).setValue(curRem + qty);
-      }
-      if (colNewStock !== -1) {
-        var curNew = Number(sheet.getRange(targetRow, colNewStock + 1).getValue()) || 0;
-        sheet.getRange(targetRow, colNewStock + 1).setValue(curNew + qty);
-      }
-    }
-    return ContentService.createTextOutput(JSON.stringify({status: "success"})).setMimeType(ContentService.MimeType.JSON);
-  } catch (err) {
-    return ContentService.createTextOutput(JSON.stringify({status: "error", message: err.toString()})).setMimeType(ContentService.MimeType.JSON);
-  }
-}</textarea>
-            <p>3. Deploy as Web App (Who has access: <b>Anyone</b>) and paste the URL above.</p>
+            <p>1. Open your Google Sheet (e.g. <b>A.M Analyser</b>).</p>
+            <p>2. Go to <b>Extensions &gt; Apps Script</b> and paste the `Code.gs` script.</p>
+            <p>3. Click <b>Deploy &gt; New deployment &gt; Web app (Anyone)</b>, then copy the `/exec` URL and paste it above.</p>
           </div>
         </details>
 
@@ -807,7 +657,7 @@ function doPost(e) {
             <span>Add to Phone Home Screen (Use like an App)</span>
           </p>
           <p class="text-[10px] text-slate-400 leading-relaxed">
-            • <b>Chrome / Android:</b> Tap the 3 dots (⋮) in the top-right &gt; tap <b>"Add to Home screen"</b>.<br>
+            • <b>Chrome / Android:</b> Tap the 3 dots (⋮) in the top-right &gt; tap <b>"Add to Home screen"</b> (or Install app).<br>
             • <b>Safari / iPhone:</b> Tap the Share button (<i class="fa-solid fa-arrow-up-from-bracket"></i>) &gt; tap <b>"Add to Home Screen"</b>.
           </p>
         </div>
@@ -821,10 +671,9 @@ function doPost(e) {
     </div>
   </div>
 
-  <!-- MODAL: BUILT-IN CUSTOM CALENDAR PICKER (WORKS 100% IN IFRAMES / PREVIEWS) -->
+  <!-- MODAL: BUILT-IN CUSTOM CALENDAR PICKER -->
   <div id="calendarModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-workshop-900 border border-workshop-700 rounded-2xl w-full max-w-xs p-4 shadow-2xl space-y-3">
-      <!-- Calendar Header -->
       <div class="flex items-center justify-between border-b border-workshop-700/80 pb-2.5">
         <div class="flex items-center gap-2">
           <div class="w-8 h-8 rounded-lg bg-orange-500/20 text-orange-400 flex items-center justify-center">
@@ -840,7 +689,6 @@ function doPost(e) {
         </button>
       </div>
 
-      <!-- Month & Year Selector Controls -->
       <div class="flex items-center justify-between bg-workshop-950 p-1.5 rounded-xl border border-workshop-700/80">
         <button type="button" onclick="navigateCalMonth(-1)" class="w-7 h-7 flex items-center justify-center rounded-lg text-slate-300 hover:bg-workshop-800 text-xs font-bold">
           <i class="fa-solid fa-chevron-left"></i>
@@ -855,7 +703,6 @@ function doPost(e) {
         </button>
       </div>
 
-      <!-- Days of Week Header -->
       <div class="grid grid-cols-7 gap-1 text-center text-[10px] font-bold text-slate-500 uppercase tracking-wider">
         <span>Su</span>
         <span>Mo</span>
@@ -866,12 +713,10 @@ function doPost(e) {
         <span>Sa</span>
       </div>
 
-      <!-- Days Grid -->
       <div id="calDaysGrid" class="grid grid-cols-7 gap-1 text-xs">
         <!-- Rendered dynamically -->
       </div>
 
-      <!-- Calendar Bottom Action Buttons -->
       <div class="flex items-center justify-between pt-2 border-t border-workshop-700/80">
         <button onclick="pickCalendarDate(getTodayISO())" class="tap-active text-xs font-bold text-orange-400 hover:underline px-1">
           Jump to Today
@@ -913,7 +758,7 @@ function doPost(e) {
 
       <div class="pt-2 border-t border-workshop-700/80">
         <button onclick="resetToInitialData()" class="tap-active w-full text-rose-400 hover:text-rose-300 bg-rose-500/10 hover:bg-rose-500/20 py-2 rounded-xl text-[11px] font-bold transition border border-rose-500/30">
-          Reset to Original Google Sheet Stock
+          Reset to Original Stock
         </button>
       </div>
     </div>
@@ -929,28 +774,183 @@ function doPost(e) {
 
   <!-- JAVASCRIPT APPLICATION LOGIC -->
   <script>
-    // PRE-LOADED DATA FROM 'A.M Analyser' GOOGLE SHEET
+    // PRE-LOADED DATA FROM USER CATALOG (175 ITEMS TOTAL)
     const DEFAULT_STOCK = [
-      { id: 'itm_1', name: 'B 36AA4105 CYL BLOCK PIST', cost: 3250, remaining: 1 },
-      { id: 'itm_2', name: 'B AA101033 CRANK SHAFT', cost: 3200, remaining: 0 },
-      { id: 'itm_3', name: 'VARROC STATER MOTER ASSY', cost: 2700, remaining: 0 },
-      { id: 'itm_4', name: 'B AN101123 BORE KIT 205CC', cost: 2650, remaining: 3 },
-      { id: 'itm_5', name: 'B AF201036 REGULATOR', cost: 1460, remaining: 0 },
-      { id: 'itm_6', name: 'ISK REAR WHEEL BEARING KIT', cost: 1050, remaining: 8 },
-      { id: 'itm_7', name: 'B AA101666 CAM SHAFT ASSY', cost: 850, remaining: 19 },
-      { id: 'itm_8', name: 'B AA101864 ASSY CAM SHAFT', cost: 835, remaining: 13 },
-      { id: 'itm_9', name: 'B AB171044 FRONT SHOCKER', cost: 730, remaining: 0 },
-      { id: 'itm_10', name: 'B P-PLUS 2.1LTR', cost: 700, remaining: 35 },
-      { id: 'itm_11', name: 'VARROC HALF BENDEX PINIUM', cost: 660, remaining: 2 },
-      { id: 'itm_12', name: 'B 36RA0002CLUCH PLATE', cost: 500, remaining: 10 },
-      { id: 'itm_13', name: '4025 CLUTCH PLATE', cost: 480, remaining: 32 },
-      { id: 'itm_14', name: 'GTX 20W50 1LTR', cost: 390, remaining: 8 },
-      { id: 'itm_15', name: 'B AA191092 CLUTCH CABEL COM', cost: 380, remaining: 8 },
-      { id: 'itm_16', name: 'B AA101473 CLUTCH HUB 4/S', cost: 320, remaining: 32 },
-      { id: 'itm_17', name: 'MOTUL CNG POUCH 1LTR', cost: 265, remaining: 26 },
-      { id: 'itm_18', name: 'B AF121612 OIL FILTER', cost: 170, remaining: 25 },
-      { id: 'itm_19', name: 'MAHLE OIL FILTER COMP', cost: 85, remaining: 135 },
-      { id: 'itm_20', name: 'ST OIL FILTER COM', cost: 85, remaining: 60 }
+      { id: 'itm_1', name: 'B AF121612 OIL FILTER', cost: 180, remaining: 125 },
+      { id: 'itm_2', name: 'B 24151182 BRAKE SHOES SPRING', cost: 25, remaining: 100 },
+      { id: 'itm_3', name: 'B JH511207 RACKER ARM', cost: 320, remaining: 75 },
+      { id: 'itm_4', name: 'B AA101473 CLUTCH HUB 4/S', cost: 350, remaining: 80 },
+      { id: 'itm_5', name: 'MILEX CLUTCH CABLE COMP', cost: 65, remaining: 50 },
+      { id: 'itm_6', name: 'B 36AF0030 KIT PAPER FILT', cost: 75, remaining: 50 },
+      { id: 'itm_7', name: 'B AA101207 HOUSING CLUTCH', cost: 300, remaining: 55 },
+      { id: 'itm_8', name: 'SU 2003 BLADE FUSES 10AMPD', cost: 3.5, remaining: 0 },
+      { id: 'itm_9', name: 'B AA191092 CLUTCH CABEL COM', cost: 380, remaining: 45 },
+      { id: 'itm_10', name: 'B 24151268 BRAKE SHOES', cost: 285, remaining: 42 },
+      { id: 'itm_11', name: 'B 24151173 BRAKE SHOES SPRING', cost: 25, remaining: 40 },
+      { id: 'itm_12', name: 'GTX ESSENTIAL 20W50 500ML', cost: 190, remaining: 39 },
+      { id: 'itm_13', name: 'B P-PLUS 2.1LTR', cost: 820, remaining: 36 },
+      { id: 'itm_14', name: 'MAHLE OIL FILTER COMP', cost: 85, remaining: 35 },
+      { id: 'itm_15', name: 'B 24151171 BRAKE LINING', cost: 285, remaining: 32 },
+      { id: 'itm_16', name: 'MILEX GEAR CABLE COMPACT', cost: 40, remaining: 30 },
+      { id: 'itm_17', name: 'DOT.3 BREAK FLUID 100 ML', cost: 35, remaining: 30 },
+      { id: 'itm_18', name: 'PREMIUM LONG LIFE 200 G', cost: 100, remaining: 30 },
+      { id: 'itm_19', name: 'JL351218 PLUG BS6', cost: 170, remaining: 30 },
+      { id: 'itm_20', name: 'DOT. 3 BREAK FLUID 250 ML', cost: 80, remaining: 30 },
+      { id: 'itm_21', name: 'WAXPAL WHEEL BEARING GREASE 200 GMS', cost: 80, remaining: 30 },
+      { id: 'itm_22', name: 'B AM101174 TIMING CHAIN', cost: 315, remaining: 26 },
+      { id: 'itm_23', name: 'B 36AT0003 GAS GOLD FILTER', cost: 55, remaining: 25 },
+      { id: 'itm_24', name: 'B 31101020 ARM RACKER', cost: 160, remaining: 25 },
+      { id: 'itm_25', name: 'B 22151106 BRAKE DRUM', cost: 1230, remaining: 22 },
+      { id: 'itm_26', name: 'B 36RA0002 CLUCH PLATE', cost: 550, remaining: 22 },
+      { id: 'itm_27', name: 'B 24181153 LOCK SET', cost: 930, remaining: 21 },
+      { id: 'itm_28', name: 'B DF101055 TEPIT SCREW', cost: 14, remaining: 20 },
+      { id: 'itm_29', name: 'MILEX CLUTCH CABLE BS7', cost: 60, remaining: 20 },
+      { id: 'itm_30', name: 'B 36AA4007 CLUTCH RIVIT', cost: 90, remaining: 20 },
+      { id: 'itm_31', name: 'B AZ511010 PLUG SLEEVE', cost: 110, remaining: 20 },
+      { id: 'itm_32', name: 'B DK101064 CHAIN CAM 100', cost: 225, remaining: 20 },
+      { id: 'itm_33', name: 'B AA101471 CLUTCH WHEEL 4', cost: 210, remaining: 20 },
+      { id: 'itm_34', name: 'B 36AA4025 CLUTCH PLATE', cost: 520, remaining: 20 },
+      { id: 'itm_35', name: 'B AA101844 HEAD SEAL COMP', cost: 70, remaining: 20 },
+      { id: 'itm_36', name: 'B 36AA4050 ENG PAKIG KIT', cost: 480, remaining: 18 },
+      { id: 'itm_37', name: 'B AM121213 AIR FILTER BS', cost: 330, remaining: 17 },
+      { id: 'itm_38', name: 'B AA191093 GEAR CABEL COM', cost: 275, remaining: 16 },
+      { id: 'itm_39', name: 'MOTUL CNG POUCH 1LTR', cost: 345, remaining: 9 },
+      { id: 'itm_40', name: 'B AA191103 CLUCH CABLE', cost: 380, remaining: 12 },
+      { id: 'itm_41', name: 'GTX 20W50 1LTR', cost: 520, remaining: 10 },
+      { id: 'itm_42', name: 'B AP111023 NEUTRAL SWITCH', cost: 90, remaining: 10 },
+      { id: 'itm_43', name: 'RTV GASKET SEALANT CLR 25GMS', cost: 40, remaining: 10 },
+      { id: 'itm_44', name: 'B AA121336 OIL PUMP ASS', cost: 240, remaining: 10 },
+      { id: 'itm_45', name: 'GTX ESSENTIAL 20W50 1LTR', cost: 350, remaining: 10 },
+      { id: 'itm_46', name: 'B AA101481 CLUCH RELEASE', cost: 90, remaining: 10 },
+      { id: 'itm_47', name: 'B 36AA4105 CYL BLOCK PIST', cost: 3700, remaining: 9 },
+      { id: 'itm_48', name: 'ISK REAR WHEEL BEARING KIT', cost: 1150, remaining: 8 },
+      { id: 'itm_49', name: 'B AA111082 ARMATURE', cost: 990, remaining: 8 },
+      { id: 'itm_50', name: 'GU BT MRT', cost: 30, remaining: 6 },
+      { id: 'itm_51', name: 'SINGLE STEP COMPOUD', cost: 220, remaining: 6 },
+      { id: 'itm_52', name: 'B 24171094 REAR SHOKER', cost: 720, remaining: 6 },
+      { id: 'itm_53', name: 'PAVANA REAR DOOR LOCK R/E', cost: 115, remaining: 5 },
+      { id: 'itm_54', name: 'B DS101277 TENSIONER ASSY', cost: 165, remaining: 5 },
+      { id: 'itm_55', name: 'WAX PAL RUBBING 200GMD', cost: 120, remaining: 5 },
+      { id: 'itm_56', name: 'ANTI RUST LUBSPRAY', cost: 120, remaining: 5 },
+      { id: 'itm_57', name: 'B AF201262 RELAY STARTER', cost: 540, remaining: 5 },
+      { id: 'itm_58', name: 'B AA102166 CLUCH HUB', cost: 310, remaining: 4 },
+      { id: 'itm_59', name: 'VARROC STATER MOTER ASSY', cost: 2700, remaining: 3 },
+      { id: 'itm_60', name: 'GO GREEN ENERGY +20E50 2.1 L', cost: 710, remaining: 0 },
+      { id: 'itm_61', name: 'B JN351604 STARTER RELY', cost: 390, remaining: 0 },
+      { id: 'itm_62', name: 'B AN101123 BORE KIT 205CC', cost: 2850, remaining: 3 },
+      { id: 'itm_63', name: '3M PLW 100 ML', cost: 170, remaining: 0 },
+      { id: 'itm_64', name: 'B AA161337 CROSS BAR BS4', cost: 1050, remaining: 0 },
+      { id: 'itm_65', name: 'B 36AF0038 KIT SECONDERY', cost: 200, remaining: 0 },
+      { id: 'itm_66', name: 'VARROC ROTAT ASSY AN09', cost: 1150, remaining: 0 },
+      { id: 'itm_67', name: 'MILEX ACC CABLE COMPACT', cost: 40, remaining: 0 },
+      { id: 'itm_68', name: 'B AZ521003 HEAD GASKET BS', cost: 115, remaining: 0 },
+      { id: 'itm_69', name: 'B 24151175 STRUT LH COMP', cost: 106, remaining: 0 },
+      { id: 'itm_70', name: 'VARROC HALF BENDEX PINIUM', cost: 670, remaining: 0 },
+      { id: 'itm_71', name: 'ISK CONE SET ST006', cost: 510, remaining: 0 },
+      { id: 'itm_72', name: 'SPHEEROL CVPERF 80K 0.50KG', cost: 290, remaining: 0 },
+      { id: 'itm_73', name: 'B AT161215 ACC CABLE', cost: 210, remaining: 0 },
+      { id: 'itm_74', name: 'AT161222 CLUCH CABLE BS6', cost: 325, remaining: 0 },
+      { id: 'itm_75', name: 'B AA201012 RELAY STARTER', cost: 360, remaining: 0 },
+      { id: 'itm_76', name: 'B 24151179 STRUT LH COMP', cost: 105, remaining: 0 },
+      { id: 'itm_77', name: 'TRANS MAX AXLE 150 500ML', cost: 190, remaining: 0 },
+      { id: 'itm_78', name: 'SU 1633 MOBILE C ,3.4AMPS 12V', cost: 150, remaining: 0 },
+      { id: 'itm_79', name: 'B AN101257 CHAIN GIDE', cost: 110, remaining: 0 },
+      { id: 'itm_80', name: 'B AB171044 FRONT SHOCKER', cost: 750, remaining: 0 },
+      { id: 'itm_81', name: 'SU 4101 H4 LED HL BULB 12V', cost: 580, remaining: 0 },
+      { id: 'itm_82', name: 'B 24151164 WHEEL CYLENDER', cost: 380, remaining: 0 },
+      { id: 'itm_83', name: 'B 36AA4144 BRAKE SHOE SET', cost: 390, remaining: 0 },
+      { id: 'itm_84', name: 'B 36AA4042 ENG PAK KIT 20', cost: 480, remaining: 0 },
+      { id: 'itm_85', name: 'B 39218106 DOWEL PIN BUSH', cost: 11, remaining: 0 },
+      { id: 'itm_86', name: 'MOTOMAX BIKE POLISH LIQUID 50ML', cost: 35, remaining: 0 },
+      { id: 'itm_87', name: 'VARROC CLUCH LEVAR', cost: 70, remaining: 0 },
+      { id: 'itm_88', name: 'B 24151172 BRAKE SHOE PAT', cost: 20, remaining: 0 },
+      { id: 'itm_89', name: 'MOTOMAX BIKE LIQUID 100ML', cost: 60, remaining: 0 },
+      { id: 'itm_90', name: 'B AA101569 TIMING CHAIN', cost: 180, remaining: 0 },
+      { id: 'itm_91', name: 'POTP4360/55 12V', cost: 100, remaining: 0 },
+      { id: 'itm_92', name: 'PAVANA START BUTTON R/E', cost: 60, remaining: 0 },
+      { id: 'itm_93', name: 'B AA101472 CLUTCH STEEL PLATE', cost: 130, remaining: 0 },
+      { id: 'itm_94', name: 'PREMIUM LONGLIFE', cost: 225, remaining: 0 },
+      { id: 'itm_95', name: 'SPHEEROL ESSENTIAL GREASE 500G', cost: 195, remaining: 0 },
+      { id: 'itm_96', name: 'MOTO MAX INSTA SHINE', cost: 16, remaining: 0 },
+      { id: 'itm_97', name: 'MOTOMAX RAT REPALENT', cost: 150, remaining: 0 },
+      { id: 'itm_98', name: 'B JZ551417 CLUCH PLET 4S', cost: 65, remaining: 0 },
+      { id: 'itm_99', name: 'ISK CONE SET ST009', cost: 550, remaining: 0 },
+      { id: 'itm_100', name: 'VARROC WHEEL CUP SMALL', cost: 270, remaining: 0 },
+      { id: 'itm_101', name: 'B AF111049 HT COIL BS6', cost: 480, remaining: 0 },
+      { id: 'itm_102', name: 'VARROC ARMATUR ASSY W/COT', cost: 1050, remaining: 0 },
+      { id: 'itm_103', name: 'B DK101755 RACKER ARM', cost: 295, remaining: 0 },
+      { id: 'itm_104', name: 'B 24151266 FRONT WHEEL AXAL', cost: 710, remaining: 0 },
+      { id: 'itm_105', name: 'B AA101033 CRANK SHAFT', cost: 3200, remaining: 0 },
+      { id: 'itm_106', name: 'B 36AA4080 BORE KIT 175CC', cost: 2300, remaining: 0 },
+      { id: 'itm_107', name: 'B AA101864 ASSY CAM SHAFT', cost: 835, remaining: 0 },
+      { id: 'itm_108', name: 'B AA102003 CAM SHAFT', cost: 750, remaining: 0 },
+      { id: 'itm_109', name: 'B AA191094 GEAR CABEL COM', cost: 275, remaining: 0 },
+      { id: 'itm_110', name: 'B AB101067 CROSS', cost: 275, remaining: 0 },
+      { id: 'itm_111', name: 'B AL241023 WIPER SET LATE', cost: 250, remaining: 0 },
+      { id: 'itm_112', name: 'B 36AA4020 CHAIN TENSIONER', cost: 200, remaining: 0 },
+      { id: 'itm_113', name: 'B AA191091 ACC CABEL COM', cost: 190, remaining: 0 },
+      { id: 'itm_114', name: 'SPHEEROL CV PERF 40K GREASE 500G', cost: 190, remaining: 0 },
+      { id: 'itm_115', name: 'MILEX CLUTCH CABEL COM', cost: 180, remaining: 0 },
+      { id: 'itm_116', name: 'MILEX GEAR CABEL COM', cost: 135, remaining: 0 },
+      { id: 'itm_117', name: 'MILEX ACC CABEL COM', cost: 115, remaining: 0 },
+      { id: 'itm_118', name: '24151097 MC. KIT', cost: 270, remaining: 0 },
+      { id: 'itm_119', name: 'ST OIL FILTER COM', cost: 85, remaining: 0 },
+      { id: 'itm_120', name: 'POT HS145/40 2W12V 260', cost: 85, remaining: 0 },
+      { id: 'itm_121', name: 'B AA101210 CLUTCH PLATE', cost: 70, remaining: 0 },
+      { id: 'itm_122', name: 'MOTAMAX 2K RUBBING COMPUND 100GM', cost: 60, remaining: 0 },
+      { id: 'itm_123', name: 'BOSH HALOGEN BULB SXL(16)', cost: 50, remaining: 0 },
+      { id: 'itm_124', name: 'B AB171016 FRONT SHOCKER', cost: 40, remaining: 0 },
+      { id: 'itm_125', name: 'B AB181012 BALLS N/M BIG', cost: 40, remaining: 0 },
+      { id: 'itm_126', name: 'B 39100006 PIN HOLLOW DOW', cost: 3.5, remaining: 0 },
+      { id: 'itm_127', name: 'TW SHINER SPONGE', cost: 25, remaining: 0 },
+      { id: 'itm_128', name: 'TW 1STP POLISH COMPND', cost: 160, remaining: 0 },
+      { id: 'itm_129', name: 'SU 1302 3 PIN METAL HORN RELAY 12V', cost: 120, remaining: 0 },
+      { id: 'itm_130', name: 'SU 1304 DUAL RELAY 12V', cost: 160, remaining: 0 },
+      { id: 'itm_131', name: 'SU 1201 MELODY MAKER 4 WIRE 12 V', cost: 140, remaining: 0 },
+      { id: 'itm_132', name: 'SU 3947W PARKING LIGHT WHITE 12 V', cost: 55, remaining: 0 },
+      { id: 'itm_133', name: 'SH WIRE 4MM DXL', cost: 20, remaining: 0 },
+      { id: 'itm_134', name: 'B DK101237 WASHER COPPER', cost: 6.5, remaining: 0 },
+      { id: 'itm_135', name: 'B AA201239 HORN DC', cost: 200, remaining: 0 },
+      { id: 'itm_136', name: 'GABRIEL FRENT SHOKER N/M', cost: 560, remaining: 0 },
+      { id: 'itm_137', name: 'VARROC BENDEX ASSY', cost: 1150, remaining: 0 },
+      { id: 'itm_138', name: 'MK CLUTCH PLATE 4STOK 205', cost: 220, remaining: 0 },
+      { id: 'itm_139', name: 'B AF181010 LOCK SET RR 4S', cost: 950, remaining: 0 },
+      { id: 'itm_140', name: 'GTX 20W50 500ML', cost: 250, remaining: 0 },
+      { id: 'itm_141', name: 'POT H4 P43 100/90 12V', cost: 100, remaining: 0 },
+      { id: 'itm_142', name: 'B 36AA4119 HEAD ASSY', cost: 4125, remaining: 0 },
+      { id: 'itm_143', name: 'B 36 AA4116 HEAD ASSY', cost: 3600, remaining: 0 },
+      { id: 'itm_144', name: '2K2 RC 100 GMS', cost: 120, remaining: 0 },
+      { id: 'itm_145', name: 'WAXPAL LIQUID POLISH', cost: 145, remaining: 0 },
+      { id: 'itm_146', name: 'B AA101666 CAM SHAFT ASSY', cost: 850, remaining: 0 },
+      { id: 'itm_147', name: 'B AM110003 IGNITER DCSTAR', cost: 1400, remaining: 0 },
+      { id: 'itm_148', name: 'B JP591065 SENSOR OXYGEN', cost: 2170, remaining: 0 },
+      { id: 'itm_149', name: 'B 24151174 BRAKE TATA L /', cost: 275, remaining: 0 },
+      { id: 'itm_150', name: 'WAXPOL SCOOTET POLISH 50 GMS', cost: 65, remaining: 0 },
+      { id: 'itm_151', name: 'C CABLE USB TO C TYPE', cost: 150, remaining: 0 },
+      { id: 'itm_152', name: 'B AM101172 CHINE GUIDE BS', cost: 105, remaining: 0 },
+      { id: 'itm_153', name: 'B 36AA4118 HEAD ASSY', cost: 4200, remaining: 0 },
+      { id: 'itm_154', name: 'B AA151047 FR HUB', cost: 1250, remaining: 0 },
+      { id: 'itm_155', name: 'B AT161220 GEAR CABLE', cost: 235, remaining: 0 },
+      { id: 'itm_156', name: 'GEVO LUGS 780G', cost: 10, remaining: 0 },
+      { id: 'itm_157', name: 'ISK CONE SET-004', cost: 510, remaining: 0 },
+      { id: 'itm_158', name: 'MILEX GEAR CABLE O/M', cost: 26, remaining: 0 },
+      { id: 'itm_159', name: 'OSRAM HEADLIGHT BULB', cost: 95, remaining: 0 },
+      { id: 'itm_160', name: 'PAVANA OIL PUMP 3WH R/E', cost: 140, remaining: 0 },
+      { id: 'itm_161', name: 'ROOTS CHARGER 3PIN', cost: 150, remaining: 0 },
+      { id: 'itm_162', name: 'SH BT ACE', cost: 45, remaining: 0 },
+      { id: 'itm_163', name: 'SU 1705 H4 BULB HOLDER 5MM', cost: 60, remaining: 0 },
+      { id: 'itm_164', name: 'SU 1801 PP SWITCH', cost: 45, remaining: 0 },
+      { id: 'itm_165', name: 'SU 2007 BLADE FUSES 30AMPS', cost: 3.5, remaining: 0 },
+      { id: 'itm_166', name: 'B AF201036 REGULATOR', cost: 1460, remaining: 0 },
+      { id: 'itm_167', name: 'VARROC MGRT-RING', cost: 360, remaining: 0 },
+      { id: 'itm_168', name: 'SU 1630 MICRO CHARGER 12V 24V', cost: 140, remaining: 0 },
+      { id: 'itm_169', name: 'SU 7501 SPEAKER WIRE 91M', cost: 16, remaining: 0 },
+      { id: 'itm_170', name: 'FIVIQICK 0.45 GMS', cost: 4.75, remaining: 0 },
+      { id: 'itm_171', name: 'SU 2828 LED PARKING LIGHT WHITE 12V', cost: 60, remaining: 0 },
+      { id: 'itm_172', name: 'B AF121568 INJECTOR', cost: 2800, remaining: 0 },
+      { id: 'itm_173', name: 'B 24151163 CYL ASSY WHEEL', cost: 350, remaining: 0 },
+      { id: 'itm_174', name: 'B AA101210 CLUCH PLATE 1', cost: 45, remaining: -5 },
+      { id: 'itm_175', name: 'B 39193815 NUT HEXAGON', cost: 20, remaining: -10 }
     ];
 
     // STATE
@@ -959,20 +959,20 @@ function doPost(e) {
     let activeTab = 'counter';
     let searchQuery = '';
     let currentSort = 'name_asc';
-    let stockFilter = 'all'; // 'all', 'low', 'out', 'instock'
+    let stockFilter = 'all';
 
     // GOOGLE SHEETS SYNC STATE
     let appsScriptUrl = localStorage.getItem('am_apps_script_url') || '';
     let offlineSyncQueue = JSON.parse(localStorage.getItem('am_sync_queue_v1') || '[]');
 
-    // LOGS STATE & DATE FILTERING (365-DAY STORAGE)
-    let selectedDateFilterMode = 'today'; // 'today', 'yesterday', '7days', 'thisMonth', 'all', 'custom'
+    // LOGS STATE & DATE FILTERING
+    let selectedDateFilterMode = 'today';
     let selectedDateISO = getTodayISO();
-    let selectedLogType = 'all'; // 'all', 'OUT', 'IN'
+    let selectedLogType = 'all';
 
     // Calendar Modal State
     let calViewYear = new Date().getFullYear();
-    let calViewMonth = new Date().getMonth(); // 0 to 11
+    let calViewMonth = new Date().getMonth();
 
     function getTodayISO() {
       const d = new Date();
@@ -1017,7 +1017,7 @@ function doPost(e) {
       });
     }
 
-    // WEB AUDIO API SYNTHESIS (NO EXTERNAL AUDIO FILES)
+    // WEB AUDIO API
     let audioCtx = null;
     function getAudioContext() {
       if (!audioCtx) {
@@ -1039,8 +1039,8 @@ function doPost(e) {
         const now = ctx.currentTime;
         if (isSuccess) {
           osc.type = 'sine';
-          osc.frequency.setValueAtTime(587.33, now); // D5
-          osc.frequency.setValueAtTime(880, now + 0.08); // A5
+          osc.frequency.setValueAtTime(587.33, now);
+          osc.frequency.setValueAtTime(880, now + 0.08);
           gain.gain.setValueAtTime(0.12, now);
           gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
           osc.start(now);
@@ -1053,9 +1053,7 @@ function doPost(e) {
           osc.start(now);
           osc.stop(now + 0.25);
         }
-      } catch (e) {
-        // Audio may be restricted before user tap
-      }
+      } catch (e) {}
     }
 
     // INITIALIZATION
@@ -1068,18 +1066,12 @@ function doPost(e) {
       renderAll();
       processOfflineQueue();
 
-      // Bind direct click and touch listener fallbacks for the sync modal
       const badge = document.getElementById('headerSyncBadge');
       const iconBtn = document.getElementById('syncSetupBtn');
-      if (badge) {
-        badge.addEventListener('click', openSyncModal);
-      }
-      if (iconBtn) {
-        iconBtn.addEventListener('click', openSyncModal);
-      }
+      if (badge) badge.addEventListener('click', openSyncModal);
+      if (iconBtn) iconBtn.addEventListener('click', openSyncModal);
     };
 
-    // REGISTER INLINE SERVICE WORKER (Enables native Chrome PWA install & standalone mode)
     function registerPwaServiceWorker() {
       if ('serviceWorker' in navigator) {
         try {
@@ -1091,9 +1083,7 @@ function doPost(e) {
           const blob = new Blob([swCode], { type: 'application/javascript' });
           const swUrl = URL.createObjectURL(blob);
           navigator.serviceWorker.register(swUrl).catch(() => {});
-        } catch (e) {
-          // SW registration silent fallback
-        }
+        } catch (e) {}
       }
     }
 
@@ -1213,13 +1203,9 @@ function doPost(e) {
       }
     }
 
-    // DISPATCH BACKGROUND AUTO-SYNC TO GOOGLE SHEETS
     function syncTransactionToGoogleSheet(payload) {
-      if (!appsScriptUrl) {
-        return; // Local operation only if no webhook configured
-      }
+      if (!appsScriptUrl) return;
 
-      // Add to offline queue
       offlineSyncQueue.push(payload);
       localStorage.setItem('am_sync_queue_v1', JSON.stringify(offlineSyncQueue));
       updateSyncStatusUI();
@@ -1239,23 +1225,20 @@ function doPost(e) {
           body: JSON.stringify(itemToSync)
         });
 
-        // If fetch succeeds (or no-cors opaque response accepted)
         offlineSyncQueue.shift();
         localStorage.setItem('am_sync_queue_v1', JSON.stringify(offlineSyncQueue));
         updateSyncStatusUI();
 
-        showToast(`Synced "${itemToSync.itemName.slice(0, 15)}" with Google Sheet`, 'emerald');
+        showToast(`Synced "${(itemToSync.itemName || itemToSync.name || 'Stock').slice(0, 15)}" with Google Sheet`, 'emerald');
 
-        // Continue processing next item if queue has more
         if (offlineSyncQueue.length > 0) {
           setTimeout(processOfflineQueue, 500);
         }
       } catch (err) {
-        console.warn('Sync failed, kept in offline queue for next retry', err);
+        console.warn('Sync pending in offline queue', err);
       }
     }
 
-    // PUSH FULL INVENTORY VALUATION SYNC (POPULATES EVEN A COMPLETELY BLANK SHEET)
     async function pushFullSync() {
       if (!appsScriptUrl) {
         showToast('Configure Web App URL first', 'rose');
@@ -1308,7 +1291,6 @@ function doPost(e) {
       }
     }
 
-    // SHIFT DAY VIA PREV (<) / NEXT (>) ARROWS
     function shiftSelectedDay(offsetDays) {
       let baseDate;
       if (selectedDateISO) {
@@ -1328,7 +1310,6 @@ function doPost(e) {
       renderLogs();
     }
 
-    // CUSTOM IN-APP CALENDAR LOGIC
     function openCustomCalendar() {
       if (selectedDateISO) {
         const parts = selectedDateISO.split('-');
@@ -1366,20 +1347,15 @@ function doPost(e) {
 
       title.innerText = `${monthNames[calViewMonth]} ${calViewYear}`;
 
-      // First day of month (0 = Sun, 1 = Mon, ...)
       const firstDayIdx = new Date(calViewYear, calViewMonth, 1).getDay();
-      // Total days in month
       const daysInMonth = new Date(calViewYear, calViewMonth + 1, 0).getDate();
-
       const todayISO = getTodayISO();
       let html = '';
 
-      // Blank slots before first day
       for (let i = 0; i < firstDayIdx; i++) {
         html += `<div class="h-8"></div>`;
       }
 
-      // Day buttons
       for (let day = 1; day <= daysInMonth; day++) {
         const thisISO = `${calViewYear}-${String(calViewMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
         const isSelected = (thisISO === selectedDateISO);
@@ -1416,9 +1392,13 @@ function doPost(e) {
     async function loadStorage() {
       try {
         const savedInv = localStorage.getItem('am_inventory_v1');
-        inventory = savedInv ? JSON.parse(savedInv) : [...DEFAULT_STOCK];
+        if (savedInv) {
+          const parsed = JSON.parse(savedInv);
+          inventory = (parsed && parsed.length >= DEFAULT_STOCK.length) ? parsed : [...DEFAULT_STOCK];
+        } else {
+          inventory = [...DEFAULT_STOCK];
+        }
 
-        // Load logs from IndexedDB if available; fallback to localStorage
         if (dbInstance) {
           salesLogs = await getAllLogsFromDB();
         } else {
@@ -1426,7 +1406,6 @@ function doPost(e) {
           salesLogs = savedLogs ? JSON.parse(savedLogs) : [];
         }
 
-        // Migrate existing logs if missing dateISO
         let needsMigration = false;
         salesLogs.forEach(log => {
           if (!log.dateISO) {
@@ -1462,10 +1441,8 @@ function doPost(e) {
     function saveStorage() {
       try {
         localStorage.setItem('am_inventory_v1', JSON.stringify(inventory));
-        // Keep recent logs in localStorage as redundancy
         localStorage.setItem('am_sales_logs_v1', JSON.stringify(salesLogs.slice(0, 300)));
 
-        // Persist all 365-day records to IndexedDB
         if (dbInstance) {
           const tx = dbInstance.transaction('logs', 'readwrite');
           const store = tx.objectStore('logs');
@@ -1479,14 +1456,12 @@ function doPost(e) {
 
     function addLogRecord(record) {
       salesLogs.unshift(record);
-      // Prune records older than 365 days (1 year)
       const oneYearAgo = Date.now() - (365 * 24 * 60 * 60 * 1000);
       salesLogs = salesLogs.filter(l => (l.timestamp || Date.now()) >= oneYearAgo);
 
       saveStorage();
     }
 
-    // TAB SWITCHING
     function switchTab(tab) {
       activeTab = tab;
       
@@ -1521,7 +1496,6 @@ function doPost(e) {
       }
     }
 
-    // SEARCH & FILTER
     function handleSearch(val) {
       searchQuery = val.trim().toLowerCase();
       document.getElementById('clearSearchBtn').classList.toggle('hidden', searchQuery.length === 0);
@@ -1594,7 +1568,6 @@ function doPost(e) {
       else if (activeTab === 'logs') renderLogs();
     }
 
-    // RENDER COUNTER (SALES) ITEMS
     function renderCounter() {
       const container = document.getElementById('counterItemsList');
       const filtered = getProcessedItems();
@@ -1635,7 +1608,6 @@ function doPost(e) {
                 </div>
               </div>
 
-              <!-- Item Actions: Edit & Inward -->
               <div class="flex items-center gap-1.5 shrink-0">
                 <button 
                   onclick="openEditItemModal('${item.id}')" 
@@ -1652,7 +1624,6 @@ function doPost(e) {
               </div>
             </div>
 
-            <!-- Custom Qty Out Entry Row -->
             <div class="mt-3 pt-2.5 border-t border-workshop-700/60 flex items-center justify-between gap-2">
               <div class="flex items-center gap-1.5 flex-1 max-w-[160px]">
                 <button 
@@ -1694,7 +1665,6 @@ function doPost(e) {
       }).join('');
     }
 
-    // STEP SALE INPUT QUANTITY UP/DOWN
     function stepSaleInput(itemId, step) {
       const input = document.getElementById(`saleInput-${itemId}`);
       if (!input) return;
@@ -1711,7 +1681,6 @@ function doPost(e) {
       input.value = val;
     }
 
-    // RECORD CUSTOM QUANTITY SALE
     function recordCustomSale(itemId) {
       const input = document.getElementById(`saleInput-${itemId}`);
       const rawVal = input ? input.value.trim() : '';
@@ -1741,10 +1710,8 @@ function doPost(e) {
         return;
       }
 
-      // Deduct stock
       item.remaining -= qty;
 
-      // Log sale with ISO date for exact daily logs & 365-day tracking
       const now = new Date();
       const sheetDateLabel = getSheetDateLabel(now);
       const logEntry = {
@@ -1763,7 +1730,6 @@ function doPost(e) {
       
       addLogRecord(logEntry);
 
-      // Trigger automatic background Google Sheet Sync
       syncTransactionToGoogleSheet({
         action: 'transaction',
         itemName: item.name,
@@ -1783,7 +1749,6 @@ function doPost(e) {
       renderAll();
     }
 
-    // VISUAL FLASH EFFECT
     function flashCardSuccess(itemId) {
       const card = document.getElementById(`card-${itemId}`);
       if (card) {
@@ -1794,7 +1759,6 @@ function doPost(e) {
       }
     }
 
-    // INWARD STOCK MODAL LOGIC
     function openInwardModal(itemId) {
       const item = inventory.find(i => i.id === itemId);
       if (!item) return;
@@ -1840,7 +1804,6 @@ function doPost(e) {
         timestamp: now.getTime()
       });
 
-      // Trigger automatic background Google Sheet Sync
       syncTransactionToGoogleSheet({
         action: 'transaction',
         itemName: item.name,
@@ -1859,7 +1822,6 @@ function doPost(e) {
       renderAll();
     }
 
-    // OPEN & SAVE EDIT ITEM MODAL (NAME, PRICE, STOCK)
     function openEditItemModal(itemId) {
       const item = inventory.find(i => i.id === itemId);
       if (!item) return;
@@ -1890,7 +1852,7 @@ function doPost(e) {
         return;
       }
 
-      if (isNaN(stock) || stock < 0) {
+      if (isNaN(stock)) {
         playBeep(false);
         showToast('Please enter a valid stock count', 'rose');
         return;
@@ -1906,7 +1868,6 @@ function doPost(e) {
       saveStorage();
       closeModal('editItemModal');
 
-      // Auto-sync edited part details directly to Google Sheet
       syncTransactionToGoogleSheet({
         action: 'upsert_item',
         name: item.name,
@@ -1920,7 +1881,6 @@ function doPost(e) {
       renderAll();
     }
 
-    // ADD NEW CUSTOM PART
     function saveNewItem() {
       const name = document.getElementById('newItemName').value.trim().toUpperCase();
       const cost = parseFloat(document.getElementById('newItemCost').value) || 0;
@@ -1946,7 +1906,6 @@ function doPost(e) {
       document.getElementById('newItemStock').value = '5';
       closeModal('newItemModal');
 
-      // Auto-sync brand new part directly to Google Sheet
       syncTransactionToGoogleSheet({
         action: 'upsert_item',
         name: newItem.name,
@@ -1960,38 +1919,6 @@ function doPost(e) {
       renderAll();
     }
 
-    // ADD NEW CUSTOM PART
-    function saveNewItem() {
-      const name = document.getElementById('newItemName').value.trim().toUpperCase();
-      const cost = parseFloat(document.getElementById('newItemCost').value) || 0;
-      const stock = parseInt(document.getElementById('newItemStock').value) || 0;
-
-      if (!name) {
-        showToast('Please enter part name or code', 'rose');
-        return;
-      }
-
-      const newItem = {
-        id: 'itm_' + Date.now(),
-        name: name,
-        cost: cost,
-        remaining: stock
-      };
-
-      inventory.unshift(newItem);
-      saveStorage();
-
-      document.getElementById('newItemName').value = '';
-      document.getElementById('newItemCost').value = '';
-      document.getElementById('newItemStock').value = '5';
-      closeModal('newItemModal');
-
-      playBeep(true);
-      showToast('New part registered in inventory!', 'emerald');
-      renderAll();
-    }
-
-    // DAILY LOGS CONTROLLER & DATE FILTERS
     function setQuickDate(mode) {
       selectedDateFilterMode = mode;
 
@@ -2046,7 +1973,6 @@ function doPost(e) {
       const now = new Date();
 
       return salesLogs.filter(log => {
-        // Date match filter
         let dateMatches = false;
         const logDateISO = log.dateISO || getTodayISO();
 
@@ -2059,12 +1985,11 @@ function doPost(e) {
           const logDate = new Date(log.timestamp || Date.now());
           dateMatches = (logDate.getMonth() === now.getMonth() && logDate.getFullYear() === now.getFullYear());
         } else if (selectedDateFilterMode === 'all') {
-          dateMatches = true; // 365-day full archive
+          dateMatches = true;
         }
 
         if (!dateMatches) return false;
 
-        // Type filter match (All, Sold Out, Inward Added)
         if (selectedLogType !== 'all' && log.type !== selectedLogType) {
           return false;
         }
@@ -2073,12 +1998,10 @@ function doPost(e) {
       });
     }
 
-    // RENDER LOGS WITH METRICS & IMMEDIATE DAILY DETAILS
     function renderLogs() {
       const container = document.getElementById('logsContainer');
       const badge = document.getElementById('logsCountBadge');
 
-      // Update badge on footer tab
       if (salesLogs.length > 0) {
         badge.classList.remove('hidden');
         badge.innerText = salesLogs.length > 99 ? '99+' : salesLogs.length;
@@ -2086,7 +2009,6 @@ function doPost(e) {
         badge.classList.add('hidden');
       }
 
-      // Compute counts for the selected date context
       const filteredAllTypes = salesLogs.filter(log => {
         const logDateISO = log.dateISO || getTodayISO();
         if (selectedDateFilterMode === 'today' || selectedDateFilterMode === 'yesterday' || selectedDateFilterMode === 'custom') {
@@ -2109,13 +2031,11 @@ function doPost(e) {
       const addedUnits = inLogs.reduce((sum, l) => sum + (l.qty || 0), 0);
       const addedValue = inLogs.reduce((sum, l) => sum + (l.total || 0), 0);
 
-      // Update Daily Summary Box
       document.getElementById('logSummarySoldUnits').innerText = `${soldUnits} pcs`;
       document.getElementById('logSummarySoldRev').innerText = `₹${soldRevenue.toLocaleString('en-IN')}`;
       document.getElementById('logSummaryAddedUnits').innerText = `${addedUnits} pcs`;
       document.getElementById('logSummaryAddedVal').innerText = `₹${addedValue.toLocaleString('en-IN')}`;
 
-      // Update type sub-tabs counts
       document.getElementById('typeCountAll').innerText = filteredAllTypes.length;
       document.getElementById('typeCountOut').innerText = outLogs.length;
       document.getElementById('typeCountIn').innerText = inLogs.length;
@@ -2178,7 +2098,6 @@ function doPost(e) {
       }).join('');
     }
 
-    // REVERT A SPECIFIC LOG ENTRY BY ID
     function revertLogById(logId) {
       const idx = salesLogs.findIndex(l => l.id === logId);
       if (idx === -1) return;
@@ -2214,7 +2133,6 @@ function doPost(e) {
       renderAll();
     }
 
-    // EXPORT FILTERED LOGS TO CSV (DOWNLOAD)
     function exportLogsCSV() {
       const logsToExport = getFilteredLogs();
       if (logsToExport.length === 0) {
@@ -2241,13 +2159,11 @@ function doPost(e) {
       showToast(`Exported ${logsToExport.length} logs to CSV`, 'emerald');
     }
 
-    // RENDER INVENTORY TABLE VIEW
     function renderInventoryTable() {
       const tbody = document.getElementById('inventoryTableBody');
       const items = getProcessedItems();
       let totalStockValue = 0;
 
-      // Calculate total value across entire inventory
       inventory.forEach(item => {
         totalStockValue += ((item.cost || 0) * (item.remaining || 0));
       });
@@ -2299,7 +2215,6 @@ function doPost(e) {
       renderAll();
     }
 
-    // EXPORT TO GOOGLE SHEETS CLEAN CSV
     function exportToGoogleSheetCSV() {
       let csv = 'Item Name,Cost Price,Remaining Stock,Total Value (₹)\n';
       inventory.forEach(item => {
@@ -2337,19 +2252,16 @@ function doPost(e) {
       showToast('Copied to clipboard! Ready to paste into Sheets', 'emerald');
     }
 
-    // RESET TO INITIAL SHEET DATA
     function resetToInitialData() {
       inventory = JSON.parse(JSON.stringify(DEFAULT_STOCK));
       salesLogs = [];
       saveStorage();
       closeModal('exportModal');
-      showToast('Reset back to original A.M Analyser data', 'emerald');
+      showToast('Reset back to original stock', 'emerald');
       renderAll();
     }
 
-    // UPDATE STATS & COUNTERS
     function updateHeaderStats() {
-      // Stock breakdown counts for pill indicators
       const allCount = inventory.length;
       const lowCount = inventory.filter(i => i.remaining > 0 && i.remaining < 5).length;
       const outCount = inventory.filter(i => i.remaining === 0).length;
@@ -2362,7 +2274,6 @@ function doPost(e) {
 
       document.getElementById('lowStockBadge').innerText = lowCount + outCount;
 
-      // Today's counter summary
       const outLogs = salesLogs.filter(l => l.type === 'OUT');
       const totalRevenue = outLogs.reduce((sum, l) => sum + (l.total || 0), 0);
       const totalUnits = outLogs.reduce((sum, l) => sum + (l.qty || 0), 0);
@@ -2379,7 +2290,6 @@ function doPost(e) {
       else if (activeTab === 'inventory') renderInventoryTable();
     }
 
-    // MODAL CONTROLS
     function openModal(id) {
       document.getElementById(id).classList.remove('hidden');
     }
@@ -2387,7 +2297,6 @@ function doPost(e) {
       document.getElementById(id).classList.add('hidden');
     }
 
-    // TOAST NOTIFICATIONS
     let toastTimeout = null;
     function showToast(msg, type = 'emerald') {
       const toast = document.getElementById('toast');
@@ -2423,29 +2332,6 @@ function doPost(e) {
           '"': '&quot;'
         }[tag] || tag)
       );
-    }
-
-    // REGISTER INLINE SERVICE WORKER FOR NATIVE CHROME INSTALLATION
-    function registerInlineServiceWorker() {
-      if ('serviceWorker' in navigator) {
-        try {
-          const swCode = `
-            self.addEventListener('install', (e) => self.skipWaiting());
-            self.addEventListener('activate', (e) => self.clients.claim());
-            self.addEventListener('fetch', (e) => {
-              // Network fallback
-              e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
-            });
-          `;
-          const blob = new Blob([swCode], { type: 'text/javascript' });
-          const swUrl = URL.createObjectURL(blob);
-          navigator.serviceWorker.register(swUrl).catch(() => {
-            // Service worker registration optional in sandbox
-          });
-        } catch (err) {
-          // Fallback gracefully
-        }
-      }
     }
   </script>
 </body>
