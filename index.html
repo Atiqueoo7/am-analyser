@@ -3,2054 +3,747 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>A.M Analyser - Stock Manager</title>
-  <!-- Mobile & PWA meta tags -->
-  <meta name="mobile-web-app-capable" content="yes">
+  <title>A.M Analyser - Workshop & Parts Management</title>
+  
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#020617">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="theme-color" content="#090d16">
-  <link rel="apple-touch-icon" href="https://placehold.co/192x192/ea580c/ffffff?text=AM">
-
-  <!-- INLINE WEB APP MANIFEST -->
-  <link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22A.M%20Analyser%22%2C%22short_name%22%3A%22AM%20Analyser%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23090d16%22%2C%22theme_color%22%3A%22%23090d16%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22https%3A%2F%2Fplacehold.co%2F192x192%2Fea580c%2Fffffff%3Ftext%3DAM%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image%2Fpng%22%2C%22purpose%22%3A%22any%20maskable%22%7D%2C%7B%22src%22%3A%22https%3A%2F%2Fplacehold.co%2F512x512%2Fea580c%2Fffffff%3Ftext%3DAM%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fpng%22%2C%22purpose%22%3A%22any%20maskable%22%7D%5D%7D">
-
-  <!-- Tailwind CSS -->
+  
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Font Awesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
   <script>
     tailwind.config = {
-      darkMode: 'class',
       theme: {
         extend: {
           colors: {
             workshop: {
-              950: '#090d16',
-              900: '#0f172a',
-              800: '#1e293b',
               700: '#334155',
-              accent: '#f97316',
-              accentHover: '#ea580c'
+              800: '#1e293b',
+              900: '#0f172a',
+              950: '#020617'
             }
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['Roboto Mono', 'monospace'],
           }
         }
       }
     }
   </script>
+  
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
-    body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .tap-active:active {
-      transform: scale(0.97);
-    }
-    input[type=number]::-webkit-inner-spin-button, 
-    input[type=number]::-webkit-outer-spin-button { 
-      -webkit-appearance: none; 
-      margin: 0; 
-    }
-    input[type=number] {
-      -moz-appearance: textfield;
-    }
-    .custom-scroll::-webkit-scrollbar {
-      width: 4px;
-      height: 4px;
-    }
-    .custom-scroll::-webkit-scrollbar-thumb {
-      background: #334155;
-      border-radius: 4px;
-    }
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Roboto+Mono:wght@500;700&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+    .font-num { font-family: 'Roboto Mono', monospace; }
+    .scrollbar-none::-webkit-scrollbar { display: none; }
+    .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
 </head>
-<body class="bg-workshop-950 text-slate-100 min-h-screen flex flex-col justify-between antialiased">
+<body class="bg-slate-950 text-slate-100 min-h-screen flex justify-center selection:bg-orange-500 selection:text-white">
 
-  <!-- TOP APP HEADER -->
-  <header class="sticky top-0 z-30 bg-workshop-900/95 backdrop-blur-md border-b border-workshop-700/60 shadow-lg px-3 py-2.5">
-    <div class="max-w-3xl mx-auto flex items-center justify-between gap-2">
-      <div class="flex items-center gap-2.5">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg shadow-orange-950/50">
-          <i class="fa-solid fa-wrench text-white text-lg"></i>
+  <!-- Mobile Frame -->
+  <div class="w-full max-w-md bg-workshop-900 border-x border-workshop-800 min-h-screen flex flex-col shadow-2xl relative pb-16">
+    
+    <!-- Top Bar -->
+    <header class="bg-workshop-950 border-b border-workshop-800 p-3.5 space-y-3 sticky top-0 z-30">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-orange-600 flex items-center justify-center font-black text-white text-sm shadow-md shadow-orange-600/30">
+            AM
+          </div>
+          <div>
+            <h1 class="text-sm font-black text-white leading-tight">A.M ANALYSER</h1>
+            <p class="text-[10px] text-slate-400">Automobiles & Lubricants</p>
+          </div>
         </div>
-        <div>
-          <h1 class="text-sm font-black tracking-wide text-white flex items-center gap-1.5">
-            A.M ANALYSER
-            <span class="text-[9px] bg-orange-500/20 text-orange-400 border border-orange-500/30 px-1.5 py-0.5 rounded font-bold uppercase tracking-wider">Mobile</span>
-          </h1>
-          <p class="text-[11px] text-slate-400 font-medium">Auto Parts & Lubricants Stock</p>
+
+        <div class="flex items-center gap-2">
+          <!-- Sync Webhook Button -->
+          <button type="button" onclick="openSyncModal()" class="w-8 h-8 rounded-lg bg-workshop-800 hover:bg-workshop-700 border border-workshop-700 text-cyan-400 flex items-center justify-center text-xs active:scale-95 transition" title="Google Sheet Sync Settings">
+            <i class="fa-solid fa-cloud"></i>
+          </button>
         </div>
       </div>
 
-      <!-- Quick Summary Pills -->
-      <div class="flex items-center gap-1.5">
-        <!-- Live Google Sheets Sync Status Badge -->
-        <button 
-          type="button"
-          onclick="openSyncModal(event)" 
-          id="headerSyncBadge" 
-          class="tap-active bg-workshop-800 border border-slate-700 hover:border-orange-500/50 px-2 py-1 rounded-lg flex items-center gap-1.5 transition cursor-pointer relative z-40 select-none">
-          <span id="syncStatusDot" class="w-2 h-2 rounded-full bg-slate-500 pointer-events-none"></span>
-          <span id="syncStatusText" class="text-[9px] font-bold text-slate-400 uppercase tracking-wider pointer-events-none">No Sync</span>
-        </button>
-
-        <div class="bg-workshop-800 border border-slate-700 px-2 py-1 rounded-lg text-right">
-          <span class="block text-[9px] text-slate-400 uppercase font-semibold">Low Stock</span>
-          <span id="lowStockBadge" class="text-xs font-black text-amber-400">0</span>
-        </div>
-        <button 
-          type="button"
-          onclick="openSyncModal(event)" 
-          id="syncSetupBtn"
-          title="Google Sheets Sync Setup" 
-          class="tap-active bg-workshop-800 hover:bg-workshop-700 text-orange-400 border border-slate-700 p-2 rounded-xl flex items-center justify-center transition cursor-pointer relative z-40">
-          <i class="fa-solid fa-cloud-arrow-up text-sm pointer-events-none"></i>
-        </button>
-        <button onclick="openModal('exportModal')" class="tap-active bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 border border-emerald-500/40 p-2 rounded-xl flex items-center justify-center transition">
-          <i class="fa-solid fa-file-excel text-sm"></i>
-        </button>
-        <button onclick="openModal('newItemModal')" class="tap-active bg-orange-600 hover:bg-orange-500 text-white font-bold p-2 rounded-xl flex items-center justify-center shadow-md transition">
-          <i class="fa-solid fa-plus text-sm"></i>
-        </button>
-      </div>
-    </div>
-
-    <!-- Live Search & Filter Bar -->
-    <div class="max-w-3xl mx-auto mt-2">
-      <div class="relative">
-        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
-        <input 
-          type="text" 
-          id="searchInput" 
-          oninput="handleSearch(this.value)"
-          placeholder="Search by part name or code (e.g. 36AA, CLUTCH, MOTUL)..." 
-          class="w-full bg-workshop-800 text-xs text-white placeholder-slate-400 pl-8 pr-8 py-2 rounded-xl border border-workshop-700 focus:outline-none focus:border-orange-500 transition"
-        />
-        <button 
-          id="clearSearchBtn" 
-          onclick="clearSearch()" 
-          class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white p-1 text-xs">
-          <i class="fa-solid fa-circle-xmark"></i>
-        </button>
-      </div>
-
-      <!-- Sort & Filter Control Strip -->
-      <div class="mt-2.5 flex flex-col gap-2">
-        <div class="flex items-center gap-1.5 overflow-x-auto pb-0.5 custom-scroll text-[11px]">
-          <button 
-            type="button" 
-            onclick="setStockFilter('all')" 
-            id="filterPill-all" 
-            class="px-2.5 py-1 rounded-lg font-bold bg-orange-600 text-white whitespace-nowrap transition">
-            All (<span id="countPillAll">0</span>)
-          </button>
-          <button 
-            type="button" 
-            onclick="setStockFilter('low')" 
-            id="filterPill-low" 
-            class="px-2.5 py-1 rounded-lg font-bold bg-workshop-800 text-slate-300 border border-slate-700 whitespace-nowrap transition hover:text-amber-400">
-            Low Stock (&lt; 5) (<span id="countPillLow">0</span>)
-          </button>
-          <button 
-            type="button" 
-            onclick="setStockFilter('out')" 
-            id="filterPill-out" 
-            class="px-2.5 py-1 rounded-lg font-bold bg-workshop-800 text-slate-300 border border-slate-700 whitespace-nowrap transition hover:text-rose-400">
-            Out of Stock (0) (<span id="countPillOut">0</span>)
-          </button>
-          <button 
-            type="button" 
-            onclick="setStockFilter('instock')" 
-            id="filterPill-instock" 
-            class="px-2.5 py-1 rounded-lg font-bold bg-workshop-800 text-slate-300 border border-slate-700 whitespace-nowrap transition hover:text-emerald-400">
-            In Stock (&gt; 0) (<span id="countPillIn">0</span>)
-          </button>
-        </div>
-
-        <div class="flex items-center justify-between gap-2 bg-workshop-900 border border-workshop-700/80 px-2.5 py-1.5 rounded-xl">
-          <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-            <i class="fa-solid fa-arrow-down-short-wide text-orange-400"></i>
-            <span>Sort By</span>
-          </span>
-          <select 
-            id="sortSelector" 
-            onchange="handleSortChange(this.value)" 
-            class="bg-workshop-800 text-xs font-semibold text-slate-200 border border-slate-700 rounded-lg px-2 py-1 focus:outline-none focus:border-orange-500">
-            <option value="name_asc">Name: A to Z</option>
-            <option value="stock_asc">Stock: Low to High (Increasing)</option>
-            <option value="stock_desc">Stock: High to Low (Decreasing)</option>
-            <option value="price_asc">Price: Low to High (Increasing ₹)</option>
-            <option value="price_desc">Price: High to Low (Decreasing ₹)</option>
-          </select>
-        </div>
-      </div>
-    </div>
-  </header>
-
-  <!-- MAIN SCROLLABLE CONTENT AREA -->
-  <main class="flex-1 max-w-3xl w-full mx-auto p-3 mb-16 custom-scroll overflow-y-auto">
-
-    <!-- VIEW 1: COUNTER (SALES / FAST OUT) -->
-    <section id="viewCounter" class="space-y-3">
-      <!-- Working Date Selector & Backdated Mode Indicator -->
-      <div class="bg-workshop-900 border border-workshop-700/80 rounded-2xl p-2.5 flex items-center justify-between gap-2 shadow">
+      <!-- Working Date Selector Bar (Always Visible Calendar) -->
+      <div class="flex items-center justify-between bg-workshop-900/90 p-2 rounded-xl border border-workshop-700 shadow-inner">
         <div class="flex items-center gap-2 min-w-0">
-          <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider shrink-0 flex items-center gap-1">
-            <i class="fa-solid fa-clock text-orange-400"></i>
-            <span>Log Date:</span>
-          </span>
-          <div class="flex items-stretch bg-workshop-950 border border-workshop-700 hover:border-orange-500 rounded-xl overflow-hidden transition shadow-inner">
-            <button 
-              type="button" 
-              onclick="openCounterCalendar()" 
-              title="Pick Any Date from Calendar"
-              class="tap-active px-2.5 bg-orange-500/15 hover:bg-orange-500/25 border-r border-workshop-700 flex items-center justify-center text-orange-400 hover:text-orange-300 transition cursor-pointer">
-              <i class="fa-solid fa-calendar-days text-sm"></i>
-            </button>
-            <button 
-              type="button" 
-              onclick="openCounterCalendar()"
-              id="workingDateBtn" 
-              class="tap-active text-xs font-bold text-white px-2.5 py-1.5 flex items-center gap-1.5 hover:text-orange-200 transition truncate cursor-pointer">
-              <span id="workingDateLabel">Today</span>
-              <i class="fa-solid fa-chevron-down text-[10px] text-slate-400"></i>
-            </button>
-          </div>
-        </div>
-        <div id="backdatedNoticeBadge" class="hidden flex items-center gap-1.5 bg-amber-500/20 border border-amber-500/40 text-amber-300 px-2.5 py-1 rounded-xl text-[10px] font-bold shrink-0">
-          <i class="fa-solid fa-calendar-check text-amber-400"></i>
-          <span>Custom Date</span>
-          <button onclick="resetWorkingDateToToday()" class="tap-active underline ml-1 text-white hover:text-amber-200">Reset</button>
-        </div>
-      </div>
-
-      <div class="bg-gradient-to-r from-workshop-900 to-workshop-800 border border-workshop-700/80 rounded-xl p-3 flex items-center justify-between">
-        <div>
-          <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Today's Counter Sales</span>
-          <span id="todaySalesTotal" class="text-lg font-black text-white">₹0</span>
-        </div>
-        <div class="text-right">
-          <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Total Items Sold</span>
-          <span id="todayItemsCount" class="text-lg font-black text-orange-400">0 pcs</span>
-        </div>
-      </div>
-
-      <div id="counterItemsList" class="space-y-2.5">
-        <!-- Rendered dynamically -->
-      </div>
-    </section>
-
-    <!-- VIEW 2: DAILY LOGS -->
-    <section id="viewLogs" class="hidden space-y-3">
-      <div class="flex items-center justify-between px-1">
-        <div>
-          <h2 class="text-sm font-black text-white uppercase tracking-wider flex items-center gap-1.5">
-            <i class="fa-solid fa-clock-rotate-left text-orange-400"></i>
-            <span>Daily Stock Logs</span>
-          </h2>
-          <p class="text-[11px] text-slate-400">Full 365-day tracking of sales & inwards</p>
-        </div>
-        <div class="flex items-center gap-1.5">
-          <button onclick="openModal('backdateModal')" class="tap-active text-xs bg-orange-600 hover:bg-orange-500 text-white font-bold px-2.5 py-1.5 rounded-lg flex items-center gap-1 shadow">
-            <i class="fa-solid fa-plus text-xs"></i>
-            <span>Add Past Entry</span>
+          <button type="button" onclick="openCalendarModal()" 
+            class="w-8 h-8 rounded-lg bg-orange-600/20 hover:bg-orange-600 text-orange-400 hover:text-white flex items-center justify-center border border-orange-500/40 shadow-sm transition active:scale-95 shrink-0" 
+            title="Pick Any Date">
+            <i class="fa-solid fa-calendar-days text-xs"></i>
           </button>
-          <button onclick="exportLogsCSV()" class="tap-active text-xs bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 border border-emerald-500/40 px-2.5 py-1.5 rounded-lg flex items-center gap-1 font-bold transition">
-            <i class="fa-solid fa-file-csv text-xs"></i>
-            <span>Export</span>
-          </button>
-          <button onclick="clearFilteredLogs()" class="tap-active text-xs text-rose-400 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 px-2.5 py-1.5 rounded-lg">
-            Clear
+          
+          <button type="button" onclick="openCalendarModal()" class="text-left truncate">
+            <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Operating Date</span>
+            <span id="currentDateBadge" class="text-xs font-bold text-amber-300 font-num tracking-tight">
+              Loading...
+            </span>
           </button>
         </div>
-      </div>
 
-      <!-- Date Selection & Quick Date Range Filters -->
-      <div class="bg-workshop-900 border border-workshop-700/80 rounded-2xl p-3 space-y-2.5 shadow">
-        <div class="flex items-center gap-1.5">
-          <button 
-            type="button" 
-            onclick="shiftSelectedDay(-1)" 
-            title="Previous Day"
-            class="tap-active w-10 h-10 rounded-xl bg-workshop-950 border border-workshop-700 text-slate-300 hover:text-white flex items-center justify-center font-bold text-sm">
-            <i class="fa-solid fa-chevron-left text-xs"></i>
+        <div class="flex items-center gap-1 shrink-0">
+          <button type="button" onclick="setQuickDate('yesterday')" id="quickYestBtn" class="text-[10px] bg-workshop-800 hover:bg-workshop-700 active:scale-95 px-2 py-1 rounded-md text-slate-300 font-semibold border border-workshop-700 transition">
+            Yesterday
           </button>
-
-          <div class="flex-1 flex items-stretch bg-workshop-950 border border-workshop-700 hover:border-orange-500 rounded-xl overflow-hidden transition shadow-inner">
-            <button 
-              type="button" 
-              onclick="openCustomCalendar()" 
-              title="Open Calendar"
-              class="tap-active px-3 bg-orange-500/15 hover:bg-orange-500/25 border-r border-workshop-700 flex items-center justify-center text-orange-400 hover:text-orange-300 transition">
-              <i class="fa-solid fa-calendar-days text-base"></i>
-            </button>
-            <button 
-              type="button" 
-              onclick="openCustomCalendar()" 
-              id="datePickerTriggerBtn"
-              class="tap-active flex-1 flex items-center justify-between px-3 py-2 text-xs font-bold text-white hover:text-orange-200 transition text-left">
-              <span id="selectedDateDisplayLabel" class="tracking-wide truncate">Select Date</span>
-              <i class="fa-solid fa-calendar text-[11px] text-slate-400"></i>
-            </button>
-          </div>
-
-          <button 
-            type="button" 
-            onclick="shiftSelectedDay(1)" 
-            title="Next Day"
-            id="nextDayBtn"
-            class="tap-active w-10 h-10 rounded-xl bg-workshop-950 border border-workshop-700 text-slate-300 hover:text-white flex items-center justify-center font-bold text-sm">
-            <i class="fa-solid fa-chevron-right text-xs"></i>
-          </button>
-
-          <button 
-            onclick="setQuickDate('today')" 
-            id="quickBtnToday"
-            class="tap-active px-3 h-10 rounded-xl text-xs font-bold bg-orange-600 text-white transition shadow flex items-center justify-center">
+          <button type="button" onclick="setQuickDate('today')" id="quickTodayBtn" class="text-[10px] bg-orange-600 hover:bg-orange-500 active:scale-95 px-2.5 py-1 rounded-md text-white font-bold transition shadow-sm shadow-orange-600/30">
             Today
           </button>
         </div>
-
-        <div class="flex items-center gap-1.5 overflow-x-auto pb-0.5 custom-scroll text-[11px]">
-          <button type="button" onclick="setQuickDate('yesterday')" id="quickBtnYesterday" class="px-2.5 py-1 rounded-lg font-bold bg-workshop-800 text-slate-300 border border-slate-700 whitespace-nowrap hover:text-white transition">
-            Yesterday
-          </button>
-          <button type="button" onclick="setQuickDate('7days')" id="quickBtn7days" class="px-2.5 py-1 rounded-lg font-bold bg-workshop-800 text-slate-300 border border-slate-700 whitespace-nowrap hover:text-white transition">
-            Last 7 Days
-          </button>
-          <button type="button" onclick="setQuickDate('thisMonth')" id="quickBtnThisMonth" class="px-2.5 py-1 rounded-lg font-bold bg-workshop-800 text-slate-300 border border-slate-700 whitespace-nowrap hover:text-white transition">
-            This Month
-          </button>
-          <button type="button" onclick="setQuickDate('all')" id="quickBtnAll" class="px-2.5 py-1 rounded-lg font-bold bg-workshop-800 text-slate-300 border border-slate-700 whitespace-nowrap hover:text-white transition">
-            All Year (365d)
-          </button>
-        </div>
       </div>
 
-      <!-- Selected Date Metrics Summary Card -->
-      <div class="bg-gradient-to-r from-workshop-900 to-workshop-800 border border-workshop-700/80 rounded-2xl p-3 shadow-md grid grid-cols-2 gap-2 text-xs">
-        <div class="bg-workshop-950/70 border border-workshop-700/60 rounded-xl p-2.5">
-          <div class="flex items-center justify-between text-orange-400 font-bold mb-1">
-            <span class="text-[10px] uppercase tracking-wider flex items-center gap-1">
-              <i class="fa-solid fa-cart-shopping"></i> Stocks Sold
-            </span>
-            <span id="logSummarySoldUnits" class="font-black text-white">0 pcs</span>
-          </div>
-          <div class="text-[10px] text-slate-400">Total Revenue:</div>
-          <div id="logSummarySoldRev" class="text-sm font-black text-orange-400">₹0</div>
+      <!-- Stats Cards (Auto-Resets per Operating Date) -->
+      <div class="grid grid-cols-2 gap-2 pt-0.5">
+        <div class="bg-workshop-900/60 border border-workshop-800 p-2 rounded-xl">
+          <span id="labelSalesTitle" class="text-[9px] font-bold text-slate-400 uppercase tracking-wide block truncate">Today's Sales</span>
+          <span id="statSalesAmount" class="text-sm font-black text-emerald-400 font-num">₹0</span>
         </div>
-
-        <div class="bg-workshop-950/70 border border-workshop-700/60 rounded-xl p-2.5">
-          <div class="flex items-center justify-between text-emerald-400 font-bold mb-1">
-            <span class="text-[10px] uppercase tracking-wider flex items-center gap-1">
-              <i class="fa-solid fa-truck-ramp-box"></i> Stocks Added
-            </span>
-            <span id="logSummaryAddedUnits" class="font-black text-white">0 pcs</span>
-          </div>
-          <div class="text-[10px] text-slate-400">Inward Value:</div>
-          <div id="logSummaryAddedVal" class="text-sm font-black text-emerald-400">₹0</div>
+        <div class="bg-workshop-900/60 border border-workshop-800 p-2 rounded-xl">
+          <span id="labelItemsTitle" class="text-[9px] font-bold text-slate-400 uppercase tracking-wide block truncate">Items Sold</span>
+          <span id="statItemsSold" class="text-sm font-black text-amber-400 font-num">0 pcs</span>
         </div>
       </div>
+    </header>
 
-      <div class="flex items-center bg-workshop-900 p-1 rounded-xl border border-workshop-700/80 text-xs">
-        <button 
-          id="logTypeTab-all" 
-          onclick="setLogTypeFilter('all')" 
-          class="flex-1 py-1.5 rounded-lg font-bold text-center bg-orange-600 text-white transition">
-          All Activity (<span id="typeCountAll">0</span>)
-        </button>
-        <button 
-          id="logTypeTab-OUT" 
-          onclick="setLogTypeFilter('OUT')" 
-          class="flex-1 py-1.5 rounded-lg font-semibold text-center text-slate-400 hover:text-white transition">
-          Sold Out (<span id="typeCountOut">0</span>)
-        </button>
-        <button 
-          id="logTypeTab-IN" 
-          onclick="setLogTypeFilter('IN')" 
-          class="flex-1 py-1.5 rounded-lg font-semibold text-center text-slate-400 hover:text-white transition">
-          Added In (<span id="typeCountIn">0</span>)
-        </button>
-      </div>
-
-      <div id="logsContainer" class="space-y-2">
-        <!-- Rendered dynamically -->
-      </div>
-    </section>
-
-    <!-- VIEW 3: INVENTORY MASTER & SHEET SYNC -->
-    <section id="viewInventory" class="hidden space-y-3">
-      <div class="flex items-center justify-between px-1">
-        <div>
-          <h2 class="text-sm font-black text-white uppercase tracking-wider">Stock Valuation Master</h2>
-          <p class="text-[11px] text-slate-400" id="inventoryStats">Total Capital: ₹0</p>
-        </div>
-        <div class="flex items-center gap-2">
-          <button onclick="openSyncModal(event)" class="tap-active text-xs bg-orange-600 hover:bg-orange-500 text-white font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5 shadow">
-            <i class="fa-solid fa-cloud-bolt text-xs"></i> Sheet Sync
-          </button>
-          <button onclick="exportToGoogleSheetCSV()" class="tap-active text-xs bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5 shadow">
-            <i class="fa-solid fa-download text-xs"></i> CSV
-          </button>
-        </div>
-      </div>
-
-      <div class="bg-workshop-900 border border-workshop-700 rounded-xl overflow-hidden shadow">
-        <div class="overflow-x-auto">
-          <table class="w-full text-left text-xs">
-            <thead class="bg-workshop-800 text-slate-400 uppercase text-[10px] tracking-wider border-b border-workshop-700">
-              <tr>
-                <th class="p-2.5">Part Details</th>
-                <th class="p-2.5 text-right">Cost</th>
-                <th class="p-2.5 text-center">Remaining</th>
-                <th class="p-2.5 text-right">Value</th>
-                <th class="p-2.5 text-center">Action</th>
-              </tr>
-            </thead>
-            <tbody id="inventoryTableBody" class="divide-y divide-workshop-800 text-slate-300">
-              <!-- Rendered via JS -->
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <!-- BOTTOM MOBILE NAVIGATION TABS -->
-  <nav class="fixed bottom-0 left-0 right-0 z-40 bg-workshop-900/95 backdrop-blur-md border-t border-workshop-700/80 px-4 py-2">
-    <div class="max-w-md mx-auto grid grid-cols-3 gap-2 text-center">
-      <button 
-        id="tabBtnCounter" 
-        onclick="switchTab('counter')" 
-        class="tap-active flex flex-col items-center justify-center py-1 rounded-xl text-orange-400 font-bold transition">
-        <i class="fa-solid fa-calculator text-base"></i>
-        <span class="text-[10px] mt-0.5">Counter Out</span>
-      </button>
-
-      <button 
-        id="tabBtnLogs" 
-        onclick="switchTab('logs')" 
-        class="tap-active flex flex-col items-center justify-center py-1 rounded-xl text-slate-400 font-semibold transition">
+    <!-- TAB 1: COUNTER OUT SCREEN -->
+    <main id="tabCounter" class="flex-1 p-3 space-y-3">
+      <!-- Search & Filters -->
+      <div class="space-y-2">
         <div class="relative">
-          <i class="fa-solid fa-list-check text-base"></i>
-          <span id="logsCountBadge" class="hidden absolute -top-1 -right-2 bg-orange-500 text-white text-[9px] w-3.5 h-3.5 rounded-full flex items-center justify-center font-black">0</span>
-        </div>
-        <span class="text-[10px] mt-0.5">Daily Logs</span>
-      </button>
-
-      <button 
-        id="tabBtnInventory" 
-        onclick="switchTab('inventory')" 
-        class="tap-active flex flex-col items-center justify-center py-1 rounded-xl text-slate-400 font-semibold transition">
-        <i class="fa-solid fa-boxes-stacked text-base"></i>
-        <span class="text-[10px] mt-0.5">Master Sheet</span>
-      </button>
-    </div>
-  </nav>
-
-  <!-- MODAL: ADD / INWARD STOCK -->
-  <div id="inwardModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-workshop-900 border border-workshop-700 rounded-2xl w-full max-w-sm p-4 shadow-2xl space-y-4">
-      <div class="flex items-center justify-between border-b border-workshop-700/70 pb-2.5">
-        <div class="flex items-center gap-2">
-          <div class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
-            <i class="fa-solid fa-truck-ramp-box text-sm"></i>
-          </div>
-          <div>
-            <h3 class="text-sm font-bold text-white">Stock Inward</h3>
-            <p class="text-[10px] text-slate-400" id="inwardItemSubtext">Add incoming parts</p>
-          </div>
-        </div>
-        <button onclick="closeModal('inwardModal')" class="text-slate-400 hover:text-white text-base p-1">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
-      </div>
-
-      <input type="hidden" id="inwardItemId" />
-      
-      <div>
-        <label class="block text-xs font-semibold text-slate-300 mb-1">Quantity Received</label>
-        <div class="flex items-center gap-2">
-          <button type="button" onclick="adjustInwardStep(-1)" class="w-10 h-10 bg-workshop-800 rounded-xl text-lg font-bold border border-slate-700 text-slate-300">-</button>
-          <input 
-            type="number" 
-            id="inwardQtyInput" 
-            value="5" 
-            min="1" 
-            class="flex-1 text-center bg-workshop-950 border border-workshop-700 rounded-xl py-2 text-base font-bold text-white focus:outline-none focus:border-emerald-500"
-          />
-          <button type="button" onclick="adjustInwardStep(1)" class="w-10 h-10 bg-workshop-800 rounded-xl text-lg font-bold border border-slate-700 text-slate-300">+</button>
-        </div>
-      </div>
-
-      <div class="flex gap-2 pt-1">
-        <button onclick="closeModal('inwardModal')" class="tap-active flex-1 bg-workshop-800 hover:bg-workshop-700 text-slate-300 text-xs py-2.5 rounded-xl font-bold">Cancel</button>
-        <button onclick="confirmInwardStock()" class="tap-active flex-1 bg-emerald-600 hover:bg-emerald-500 text-white text-xs py-2.5 rounded-xl font-bold shadow-lg shadow-emerald-900/30">Add to Stock</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL: EDIT ITEM DETAILS (NAME, PRICE, STOCK) -->
-  <div id="editItemModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-workshop-900 border border-workshop-700 rounded-2xl w-full max-w-sm p-4 shadow-2xl space-y-3">
-      <div class="flex items-center justify-between border-b border-workshop-700/70 pb-2">
-        <h3 class="text-sm font-bold text-white flex items-center gap-2">
-          <i class="fa-solid fa-pen-to-square text-orange-400"></i>
-          <span>Edit Part & Price</span>
-        </h3>
-        <button onclick="closeModal('editItemModal')" class="text-slate-400 hover:text-white p-1">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
-      </div>
-
-      <input type="hidden" id="editItemId" />
-
-      <div class="space-y-2.5">
-        <div>
-          <label class="block text-[11px] font-semibold text-slate-300 mb-1">Part Name & Code</label>
-          <input 
-            type="text" 
-            id="editItemName" 
-            placeholder="e.g. B 36AA4105 CYL BLOCK PIST" 
-            class="w-full bg-workshop-950 border border-workshop-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-orange-500"
-          />
-        </div>
-
-        <div class="grid grid-cols-2 gap-2">
-          <div>
-            <label class="block text-[11px] font-semibold text-slate-300 mb-1">Cost Price (₹)</label>
-            <input 
-              type="number" 
-              id="editItemCost" 
-              step="any"
-              placeholder="0" 
-              class="w-full bg-workshop-950 border border-workshop-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-orange-500"
-            />
-          </div>
-          <div>
-            <label class="block text-[11px] font-semibold text-slate-300 mb-1">Remaining Stock</label>
-            <input 
-              type="number" 
-              id="editItemStock" 
-              min="0"
-              placeholder="0" 
-              class="w-full bg-workshop-950 border border-workshop-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-orange-500"
-            />
-          </div>
-        </div>
-      </div>
-
-      <div class="flex gap-2 pt-2">
-        <button onclick="closeModal('editItemModal')" class="tap-active flex-1 bg-workshop-800 text-slate-300 text-xs py-2.5 rounded-xl font-bold">Cancel</button>
-        <button onclick="saveEditItem()" class="tap-active flex-1 bg-orange-600 hover:bg-orange-500 text-white text-xs py-2.5 rounded-xl font-bold shadow-lg shadow-orange-950/40">Save Changes</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL: ADD BRAND NEW PART -->
-  <div id="newItemModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-workshop-900 border border-workshop-700 rounded-2xl w-full max-w-sm p-4 shadow-2xl space-y-3">
-      <div class="flex items-center justify-between border-b border-workshop-700/70 pb-2">
-        <h3 class="text-sm font-bold text-white flex items-center gap-2">
-          <i class="fa-solid fa-plus-circle text-orange-400"></i>
-          <span>Add New Item / Part</span>
-        </h3>
-        <button onclick="closeModal('newItemModal')" class="text-slate-400 hover:text-white p-1">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
-      </div>
-      <div class="space-y-2.5">
-        <div>
-          <label class="block text-[11px] font-semibold text-slate-300 mb-1">Part Name & Code</label>
-          <input 
-            type="text" 
-            id="newItemName" 
-            placeholder="e.g. B 36AA4105 CYL BLOCK PIST" 
-            class="w-full bg-workshop-950 border border-workshop-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-orange-500 uppercase"
-          />
-        </div>
-        <div class="grid grid-cols-2 gap-2">
-          <div>
-            <label class="block text-[11px] font-semibold text-slate-300 mb-1">Cost Price (₹)</label>
-            <input 
-              type="number" 
-              id="newItemCost" 
-              step="any"
-              placeholder="0" 
-              class="w-full bg-workshop-950 border border-workshop-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-orange-500"
-            />
-          </div>
-          <div>
-            <label class="block text-[11px] font-semibold text-slate-300 mb-1">Stock Quantity</label>
-            <input 
-              type="number" 
-              id="newItemStock" 
-              min="0"
-              value="5" 
-              class="w-full bg-workshop-950 border border-workshop-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-orange-500"
-            />
-          </div>
-        </div>
-      </div>
-      <div class="flex gap-2 pt-2">
-        <button onclick="closeModal('newItemModal')" class="tap-active flex-1 bg-workshop-800 text-slate-300 text-xs py-2.5 rounded-xl font-bold">Cancel</button>
-        <button onclick="saveNewItem()" class="tap-active flex-1 bg-orange-600 hover:bg-orange-500 text-white text-xs py-2.5 rounded-xl font-bold shadow-lg shadow-orange-950/40">Register Part</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL: ADD BACKDATED TRANSACTION (MISSED YESTERDAY / PAST DATE) -->
-  <div id="backdateModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-workshop-900 border border-workshop-700 rounded-2xl w-full max-w-sm p-4 shadow-2xl space-y-3">
-      <div class="flex items-center justify-between border-b border-workshop-700/70 pb-2">
-        <h3 class="text-sm font-bold text-white flex items-center gap-2">
-          <i class="fa-solid fa-calendar-plus text-orange-400"></i>
-          <span>Record Missed / Past Entry</span>
-        </h3>
-        <button onclick="closeModal('backdateModal')" class="text-slate-400 hover:text-white p-1">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
-      </div>
-
-      <div class="space-y-2.5">
-        <div>
-          <label class="block text-[11px] font-semibold text-slate-300 mb-1">Select Missed Date</label>
-          <input 
-            type="date" 
-            id="backdateInputDate" 
-            class="w-full bg-workshop-950 border border-workshop-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-orange-500"
-          />
-        </div>
-
-        <div>
-          <label class="block text-[11px] font-semibold text-slate-300 mb-1">Select Part</label>
-          <select 
-            id="backdateItemSelect" 
-            class="w-full bg-workshop-950 border border-workshop-700 rounded-xl px-2.5 py-2 text-xs text-white focus:outline-none focus:border-orange-500">
-            <!-- Populated dynamically via JS -->
-          </select>
-        </div>
-
-        <div>
-          <label class="block text-[11px] font-semibold text-slate-300 mb-1">Transaction Type</label>
-          <div class="grid grid-cols-2 gap-2">
-            <button 
-              type="button" 
-              onclick="setBackdateType('OUT')" 
-              id="backdateTypeBtnOut" 
-              class="py-2 rounded-xl text-xs font-bold bg-orange-600 text-white flex items-center justify-center gap-1.5 transition">
-              <i class="fa-solid fa-cart-shopping"></i> Sold (OUT)
-            </button>
-            <button 
-              type="button" 
-              onclick="setBackdateType('IN')" 
-              id="backdateTypeBtnIn" 
-              class="py-2 rounded-xl text-xs font-bold bg-workshop-800 text-slate-400 border border-slate-700 flex items-center justify-center gap-1.5 transition">
-              <i class="fa-solid fa-truck-ramp-box"></i> Inward (IN)
-            </button>
-          </div>
-        </div>
-
-        <div>
-          <label class="block text-[11px] font-semibold text-slate-300 mb-1">Quantity</label>
-          <input 
-            type="number" 
-            id="backdateQtyInput" 
-            value="1" 
-            min="1" 
-            class="w-full bg-workshop-950 border border-workshop-700 rounded-xl px-3 py-2 text-xs text-white font-bold text-center focus:outline-none focus:border-orange-500"
-          />
-        </div>
-      </div>
-
-      <div class="flex gap-2 pt-2">
-        <button onclick="closeModal('backdateModal')" class="tap-active flex-1 bg-workshop-800 text-slate-300 text-xs py-2.5 rounded-xl font-bold">Cancel</button>
-        <button onclick="confirmBackdatedEntry()" class="tap-active flex-1 bg-orange-600 hover:bg-orange-500 text-white text-xs py-2.5 rounded-xl font-bold shadow-lg shadow-orange-950/40">Save & Sync</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL: GOOGLE SHEETS LIVE AUTO-SYNC & PHONE INSTALL SETUP -->
-  <div 
-    id="syncModal" 
-    onclick="handleModalBackdropClick(event, 'syncModal')"
-    class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4" 
-    style="z-index: 99999;">
-    <div 
-      onclick="event.stopPropagation()" 
-      class="bg-workshop-900 border border-workshop-700 rounded-2xl w-full max-w-md max-h-[90vh] flex flex-col p-4 shadow-2xl space-y-3.5 relative z-10">
-      <div class="flex items-center justify-between border-b border-workshop-700/80 pb-2.5 shrink-0">
-        <div class="flex items-center gap-2">
-          <div class="w-8 h-8 rounded-lg bg-orange-500/20 text-orange-400 flex items-center justify-center">
-            <i class="fa-solid fa-cloud-bolt text-sm"></i>
-          </div>
-          <div>
-            <h3 class="text-xs font-black text-white uppercase tracking-wider">Google Sheets Auto-Sync</h3>
-            <p class="text-[10px] text-slate-400">Direct real-time link to A.M Analyser</p>
-          </div>
-        </div>
-        <button type="button" onclick="closeModal('syncModal')" class="text-slate-400 hover:text-white text-sm p-1 cursor-pointer">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
-      </div>
-
-      <div class="flex-1 overflow-y-auto custom-scroll space-y-3.5 text-xs text-slate-300 pr-1">
-        <!-- Status Banner -->
-        <div id="syncStatusBanner" class="p-2.5 rounded-xl border bg-workshop-950 flex items-center justify-between">
-          <div class="flex items-center gap-2">
-            <span id="syncBannerDot" class="w-2.5 h-2.5 rounded-full bg-slate-500"></span>
-            <div>
-              <p id="syncBannerStatus" class="font-bold text-white text-xs">Sync Not Configured</p>
-              <p id="syncBannerSub" class="text-[10px] text-slate-400">Add your Apps Script Web App URL below</p>
-            </div>
-          </div>
-          <button onclick="testConnection()" class="tap-active text-[10px] font-bold px-2.5 py-1 bg-workshop-800 hover:bg-workshop-700 border border-slate-700 rounded-lg text-slate-200">
-            Test Link
+          <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-xs"></i>
+          <input type="text" id="searchInput" oninput="handleSearch(this.value)" placeholder="Search 176 parts (name, code)..." 
+            class="w-full bg-workshop-950 border border-workshop-700 rounded-xl pl-9 pr-8 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-orange-500 font-sans">
+          <button onclick="clearSearch()" id="clearSearchBtn" class="hidden absolute right-2.5 top-2 text-slate-400 hover:text-white text-xs">
+            <i class="fa-solid fa-xmark"></i>
           </button>
         </div>
 
-        <!-- Webhook URL input -->
+        <!-- Stock Status Filters -->
+        <div class="flex items-center gap-1.5 text-[10px] overflow-x-auto pb-1 scrollbar-none">
+          <button onclick="setFilter('all')" id="fltAll" class="px-2.5 py-1 rounded-lg bg-orange-600 text-white font-bold shrink-0">All (176)</button>
+          <button onclick="setFilter('in_stock')" id="fltIn" class="px-2.5 py-1 rounded-lg bg-workshop-800 text-slate-300 font-semibold border border-workshop-700 shrink-0">In Stock</button>
+          <button onclick="setFilter('low_stock')" id="fltLow" class="px-2.5 py-1 rounded-lg bg-workshop-800 text-slate-300 font-semibold border border-workshop-700 shrink-0">Low (&le;5)</button>
+          <button onclick="setFilter('out')" id="fltOut" class="px-2.5 py-1 rounded-lg bg-workshop-800 text-slate-300 font-semibold border border-workshop-700 shrink-0">Out of Stock</button>
+        </div>
+      </div>
+
+      <!-- Counter Items List -->
+      <div id="itemsContainer" class="space-y-2.5">
+        <!-- Rendered by JS -->
+      </div>
+    </main>
+
+    <!-- TAB 2: DAILY LOGS SCREEN -->
+    <section id="tabLogs" class="hidden flex-1 p-3 space-y-3">
+      <div class="flex items-center justify-between bg-workshop-950/80 p-2.5 rounded-2xl border border-workshop-700/80">
         <div>
-          <label class="block text-[11px] font-bold text-slate-300 mb-1">
-            Google Apps Script Web App URL:
-          </label>
-          <input 
-            type="url" 
-            id="appsScriptUrlInput" 
-            placeholder="https://script.google.com/macros/s/.../exec"
-            class="w-full bg-workshop-950 border border-workshop-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-orange-500"
-          />
-          <p class="text-[10px] text-slate-400 mt-1">Every stock deduction or inward entry is automatically submitted to this URL.</p>
+          <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Activity Log</span>
+          <h3 id="dailyLogsDateTitle" class="text-xs font-bold text-amber-300 font-mono">Today's Sales</h3>
+        </div>
+        <button onclick="openCalendarModal()" class="px-2.5 py-1.5 rounded-lg bg-workshop-800 hover:bg-workshop-700 border border-workshop-700 text-orange-400 text-xs font-semibold flex items-center gap-1.5 transition active:scale-95">
+          <i class="fa-solid fa-calendar-days text-[11px]"></i>
+          <span>Change Date</span>
+        </button>
+      </div>
+
+      <!-- Summary -->
+      <div class="grid grid-cols-2 gap-2 text-center text-xs">
+        <div class="bg-workshop-950/60 border border-workshop-800 p-2.5 rounded-xl">
+          <span class="text-[10px] text-slate-400 block font-semibold">Total Revenue</span>
+          <span id="logSummaryRevenue" class="text-sm font-black text-emerald-400 font-mono">₹0</span>
+        </div>
+        <div class="bg-workshop-950/60 border border-workshop-800 p-2.5 rounded-xl">
+          <span class="text-[10px] text-slate-400 block font-semibold">Pieces Handled</span>
+          <span id="logSummaryPcs" class="text-sm font-black text-amber-400 font-mono">0 pcs</span>
+        </div>
+      </div>
+
+      <!-- Entries Container -->
+      <div id="logsContainer" class="space-y-2">
+        <!-- Rendered by JS -->
+      </div>
+    </section>
+
+    <!-- TAB 3: INVENTORY MASTER SCREEN -->
+    <section id="tabInventory" class="hidden flex-1 p-3 space-y-3">
+      <div class="flex items-center justify-between bg-workshop-950/80 p-2.5 rounded-2xl border border-workshop-700/80">
+        <div>
+          <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Master Catalog</span>
+          <h3 class="text-xs font-bold text-white">Full Inventory (176 Parts)</h3>
+        </div>
+        <button onclick="openSyncModal()" class="px-2.5 py-1.5 rounded-lg bg-orange-600 hover:bg-orange-500 text-white text-xs font-bold flex items-center gap-1 shadow-sm transition active:scale-95">
+          <i class="fa-solid fa-cloud-arrow-up text-[10px]"></i>
+          <span>Push to Sheet</span>
+        </button>
+      </div>
+
+      <!-- Master Inventory List -->
+      <div id="masterInventoryContainer" class="space-y-2">
+        <!-- Rendered by JS -->
+      </div>
+    </section>
+
+    <!-- Bottom Navigation Bar -->
+    <nav class="fixed bottom-0 max-w-md w-full bg-workshop-950/95 backdrop-blur-md border-t border-workshop-800 px-4 py-2 flex items-center justify-around text-xs select-none z-40">
+      <button type="button" onclick="switchTab('counter')" id="navBtnCounter" class="flex flex-col items-center gap-0.5 text-orange-400 font-bold transition active:scale-95">
+        <i class="fa-solid fa-cart-shopping text-sm"></i>
+        <span class="text-[10px]">Counter</span>
+      </button>
+      <button type="button" onclick="switchTab('logs')" id="navBtnLogs" class="flex flex-col items-center gap-0.5 text-slate-400 hover:text-slate-200 font-medium transition active:scale-95">
+        <i class="fa-solid fa-list-check text-sm"></i>
+        <span class="text-[10px]">Daily Logs</span>
+      </button>
+      <button type="button" onclick="switchTab('inventory')" id="navBtnInventory" class="flex flex-col items-center gap-0.5 text-slate-400 hover:text-slate-200 font-medium transition active:scale-95">
+        <i class="fa-solid fa-boxes-stacked text-sm"></i>
+        <span class="text-[10px]">Inventory</span>
+      </button>
+    </nav>
+
+    <!-- CALENDAR PICKER MODAL -->
+    <div id="calendarModal" class="hidden fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div class="bg-workshop-900 border border-workshop-700 rounded-3xl w-full max-w-xs p-4 space-y-3.5 shadow-2xl">
+        <div class="flex items-center justify-between border-b border-workshop-700 pb-2.5">
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-calendar-days text-orange-400 text-sm"></i>
+            <h3 class="font-bold text-xs uppercase tracking-wider text-white">Select Operating Date</h3>
+          </div>
+          <button onclick="closeCalendarModal()" class="text-slate-400 hover:text-white text-sm">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
         </div>
 
-        <!-- Action Buttons -->
+        <div class="flex items-center justify-between px-1">
+          <button onclick="navCalMonth(-1)" class="w-8 h-8 rounded-lg bg-workshop-800 hover:bg-workshop-700 text-slate-300 font-bold flex items-center justify-center text-xs">
+            <i class="fa-solid fa-chevron-left"></i>
+          </button>
+          <span id="calMonthYearLabel" class="text-xs font-bold text-amber-300 font-num">November 2026</span>
+          <button onclick="navCalMonth(1)" class="w-8 h-8 rounded-lg bg-workshop-800 hover:bg-workshop-700 text-slate-300 font-bold flex items-center justify-center text-xs">
+            <i class="fa-solid fa-chevron-right"></i>
+          </button>
+        </div>
+
+        <div class="grid grid-cols-7 gap-1 text-center text-[10px] font-bold text-slate-500 uppercase">
+          <span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span>
+        </div>
+
+        <div id="calDaysGrid" class="grid grid-cols-7 gap-1 text-xs">
+          <!-- Calendar Days Injected -->
+        </div>
+
+        <div class="pt-2 border-t border-workshop-800">
+          <button onclick="setQuickDate('today'); closeCalendarModal();" 
+            class="w-full bg-workshop-800 hover:bg-orange-600 text-slate-200 hover:text-white py-2 rounded-xl text-xs font-bold transition">
+            Jump to Today
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- INWARD STOCK MODAL -->
+    <div id="inwardModal" class="hidden fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div class="bg-workshop-900 border border-workshop-700 rounded-3xl w-full max-w-xs p-4 space-y-4 shadow-2xl">
+        <div class="flex items-center justify-between border-b border-workshop-700 pb-2">
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-box-open text-cyan-400"></i>
+            <h3 class="font-bold text-xs uppercase tracking-wider text-white">Inward Stock (+)</h3>
+          </div>
+          <button onclick="closeInwardModal()" class="text-slate-400 hover:text-white text-sm">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <div>
+          <span id="inwardItemName" class="text-xs font-bold text-slate-200 block truncate">Part Name</span>
+          <span id="inwardItemStock" class="text-[11px] text-slate-400 font-num">Current Stock: 0 pcs</span>
+        </div>
+
+        <div class="flex items-center justify-center gap-3">
+          <button onclick="adjustInwardQty(-1)" class="w-10 h-10 rounded-xl bg-workshop-800 hover:bg-workshop-700 text-slate-200 text-lg font-bold border border-workshop-700">-</button>
+          <input type="number" id="inwardQtyInput" value="5" min="1" class="w-20 text-center bg-workshop-950 border border-workshop-700 text-white font-num font-bold text-lg rounded-xl py-1.5 focus:outline-none">
+          <button onclick="adjustInwardQty(1)" class="w-10 h-10 rounded-xl bg-workshop-800 hover:bg-workshop-700 text-slate-200 text-lg font-bold border border-workshop-700">+</button>
+        </div>
+
+        <div class="grid grid-cols-3 gap-2 text-xs">
+          <button onclick="setInwardQuick(5)" class="py-1.5 bg-workshop-800 hover:bg-workshop-700 rounded-lg text-slate-300 font-bold">+5</button>
+          <button onclick="setInwardQuick(10)" class="py-1.5 bg-workshop-800 hover:bg-workshop-700 rounded-lg text-slate-300 font-bold">+10</button>
+          <button onclick="setInwardQuick(25)" class="py-1.5 bg-workshop-800 hover:bg-workshop-700 rounded-lg text-slate-300 font-bold">+25</button>
+        </div>
+
+        <button onclick="confirmInward()" class="w-full bg-cyan-600 hover:bg-cyan-500 py-2.5 rounded-xl text-white font-bold text-xs transition active:scale-95">
+          Confirm Inward & Sync
+        </button>
+      </div>
+    </div>
+
+    <!-- GOOGLE SHEET SYNC MODAL -->
+    <div id="syncModal" class="hidden fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div class="bg-workshop-900 border border-workshop-700 rounded-3xl w-full max-w-sm p-4 space-y-3.5 shadow-2xl">
+        <div class="flex items-center justify-between border-b border-workshop-700 pb-2.5">
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-cloud text-cyan-400 text-sm"></i>
+            <h3 class="font-bold text-xs uppercase tracking-wider text-white">Google Sheet Sync</h3>
+          </div>
+          <button onclick="closeSyncModal()" class="text-slate-400 hover:text-white text-sm">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <div class="space-y-1.5">
+          <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Web App URL (/exec)</label>
+          <input type="text" id="syncUrlInput" placeholder="https://script.google.com/macros/s/.../exec"
+            class="w-full bg-workshop-950 border border-workshop-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500 font-mono">
+        </div>
+
+        <div class="space-y-1.5">
+          <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Sheet Tab Name (Optional)</label>
+          <input type="text" id="syncTabInput" placeholder="e.g. dec"
+            class="w-full bg-workshop-950 border border-workshop-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500 font-mono">
+        </div>
+
         <div class="flex gap-2">
-          <button onclick="saveSyncUrl()" class="tap-active flex-1 bg-orange-600 hover:bg-orange-500 text-white font-bold py-2 rounded-xl text-xs shadow-md">
+          <button onclick="saveSyncSettings()" class="flex-1 bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-2 rounded-xl text-xs transition active:scale-95">
             Save & Connect
           </button>
-          <button onclick="pushFullSync()" class="tap-active flex-1 bg-workshop-800 hover:bg-workshop-700 border border-slate-700 text-slate-200 font-bold py-2 rounded-xl text-xs flex items-center justify-center gap-1.5">
-            <i class="fa-solid fa-cloud-arrow-up text-[11px] text-orange-400"></i>
-            <span>Push All Items to Sheet</span>
+          <button onclick="testConnection()" class="px-3 bg-workshop-800 hover:bg-workshop-700 text-slate-200 border border-workshop-700 font-bold py-2 rounded-xl text-xs transition active:scale-95">
+            Test
           </button>
         </div>
 
-        <!-- Offline Queue Status -->
-        <div class="p-2 bg-workshop-950/70 border border-workshop-800 rounded-xl flex items-center justify-between text-[11px]">
-          <span class="text-slate-400">Pending offline entries:</span>
-          <span id="offlineQueueCount" class="font-black text-amber-400">0 queued</span>
-        </div>
-
-        <!-- Step-by-Step Instructions Toggle -->
-        <details class="bg-workshop-950 border border-workshop-800 rounded-xl p-2.5">
-          <summary class="font-bold text-[11px] text-orange-400 cursor-pointer flex items-center justify-between">
-            <span>Show Google Apps Script Code</span>
-            <i class="fa-solid fa-code text-xs"></i>
-          </summary>
-          <div class="mt-2 text-[10px] text-slate-300 space-y-1.5 leading-relaxed">
-            <p>1. Open your Google Sheet (e.g. <b>A.M Analyser</b>).</p>
-            <p>2. Go to <b>Extensions &gt; Apps Script</b> and paste the `Code.gs` script.</p>
-            <p>3. Click <b>Deploy &gt; New deployment &gt; Web app (Anyone)</b>, then copy the `/exec` URL and paste it above.</p>
-          </div>
-        </details>
-
-        <!-- Phone Installation Helper -->
-        <div class="p-2.5 bg-workshop-950 border border-workshop-800 rounded-xl space-y-1">
-          <p class="font-bold text-white text-[11px] flex items-center gap-1.5">
-            <i class="fa-solid fa-mobile-screen-button text-orange-400"></i>
-            <span>Add to Phone Home Screen (Use like an App)</span>
-          </p>
-          <p class="text-[10px] text-slate-400 leading-relaxed">
-            • <b>Chrome / Android:</b> Tap the 3 dots (⋮) in the top-right &gt; tap <b>"Add to Home screen"</b> (or Install app).<br>
-            • <b>Safari / iPhone:</b> Tap the Share button (<i class="fa-solid fa-arrow-up-from-bracket"></i>) &gt; tap <b>"Add to Home Screen"</b>.
-          </p>
+        <div class="pt-2 border-t border-workshop-800">
+          <button onclick="pushFullSync()" class="w-full bg-orange-600 hover:bg-orange-500 text-white font-bold py-2 rounded-xl text-xs transition active:scale-95 flex items-center justify-center gap-1.5">
+            <i class="fa-solid fa-cloud-arrow-up"></i>
+            <span>Push All 176 Items to Sheet</span>
+          </button>
+          <p class="text-[10px] text-slate-500 text-center mt-1">Use this to auto-populate a blank Google Sheet.</p>
         </div>
       </div>
+    </div>
 
-      <div class="pt-2 border-t border-workshop-700/80 shrink-0">
-        <button onclick="closeModal('syncModal')" class="tap-active w-full bg-workshop-800 hover:bg-workshop-700 text-slate-300 text-xs py-2 rounded-xl font-bold">
-          Close
-        </button>
+    <!-- Toast Notification -->
+    <div id="toastBox" class="fixed bottom-16 left-1/2 -translate-x-1/2 z-50 pointer-events-none transition-all duration-300 opacity-0 translate-y-3">
+      <div id="toastText" class="bg-slate-900 border border-slate-700 text-white px-4 py-2 rounded-xl text-xs font-semibold shadow-2xl flex items-center gap-2">
+        <i class="fa-solid fa-circle-check text-emerald-400"></i>
+        <span>Message</span>
       </div>
     </div>
+
   </div>
 
-  <!-- MODAL: BUILT-IN CUSTOM CALENDAR PICKER -->
-  <div id="calendarModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-workshop-900 border border-workshop-700 rounded-2xl w-full max-w-xs p-4 shadow-2xl space-y-3">
-      <div class="flex items-center justify-between border-b border-workshop-700/80 pb-2.5">
-        <div class="flex items-center gap-2">
-          <div class="w-8 h-8 rounded-lg bg-orange-500/20 text-orange-400 flex items-center justify-center">
-            <i class="fa-solid fa-calendar-days text-sm"></i>
-          </div>
-          <div>
-            <h3 class="text-xs font-black text-white uppercase tracking-wider">Select Date</h3>
-            <p class="text-[10px] text-slate-400">View stock logs by day</p>
-          </div>
-        </div>
-        <button onclick="closeModal('calendarModal')" class="text-slate-400 hover:text-white text-sm p-1">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
-      </div>
-
-      <div class="flex items-center justify-between bg-workshop-950 p-1.5 rounded-xl border border-workshop-700/80">
-        <button type="button" onclick="navigateCalMonth(-1)" class="w-7 h-7 flex items-center justify-center rounded-lg text-slate-300 hover:bg-workshop-800 text-xs font-bold">
-          <i class="fa-solid fa-chevron-left"></i>
-        </button>
-
-        <div class="flex items-center gap-1">
-          <span id="calMonthYearTitle" class="text-xs font-bold text-white tracking-wide">Month Year</span>
-        </div>
-
-        <button type="button" onclick="navigateCalMonth(1)" class="w-7 h-7 flex items-center justify-center rounded-lg text-slate-300 hover:bg-workshop-800 text-xs font-bold">
-          <i class="fa-solid fa-chevron-right"></i>
-        </button>
-      </div>
-
-      <div class="grid grid-cols-7 gap-1 text-center text-[10px] font-bold text-slate-500 uppercase tracking-wider">
-        <span>Su</span>
-        <span>Mo</span>
-        <span>Tu</span>
-        <span>We</span>
-        <span>Th</span>
-        <span>Fr</span>
-        <span>Sa</span>
-      </div>
-
-      <div id="calDaysGrid" class="grid grid-cols-7 gap-1 text-xs">
-        <!-- Rendered dynamically -->
-      </div>
-
-      <div class="flex items-center justify-between pt-2 border-t border-workshop-700/80">
-        <button onclick="pickCalendarDate(getTodayISO())" class="tap-active text-xs font-bold text-orange-400 hover:underline px-1">
-          Jump to Today
-        </button>
-        <button onclick="closeModal('calendarModal')" class="tap-active bg-workshop-800 hover:bg-workshop-700 text-slate-300 text-xs px-3 py-1.5 rounded-lg font-bold">
-          Close
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL: EXPORT & GOOGLE SHEETS HELPER -->
-  <div id="exportModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-workshop-900 border border-workshop-700 rounded-2xl w-full max-w-sm p-4 shadow-2xl space-y-3">
-      <div class="flex items-center justify-between border-b border-workshop-700/70 pb-2">
-        <h3 class="text-sm font-bold text-emerald-400 flex items-center gap-2">
-          <i class="fa-solid fa-file-excel"></i>
-          <span>Google Sheets Export</span>
-        </h3>
-        <button onclick="closeModal('exportModal')" class="text-slate-400 hover:text-white p-1">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
-      </div>
-
-      <p class="text-xs text-slate-300 leading-relaxed">
-        Export your updated inventory valuation data into clean CSV or copy it directly for your Google Sheet.
-      </p>
-
-      <div class="space-y-2 pt-1">
-        <button onclick="exportToGoogleSheetCSV()" class="tap-active w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-2 shadow">
-          <i class="fa-solid fa-file-arrow-down"></i>
-          <span>Download Stock CSV</span>
-        </button>
-        <button onclick="copyInventoryToClipboard()" class="tap-active w-full bg-workshop-800 hover:bg-workshop-700 text-slate-200 font-semibold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-2 border border-slate-700">
-          <i class="fa-solid fa-copy"></i>
-          <span>Copy Clean Table for Google Sheets</span>
-        </button>
-      </div>
-
-      <div class="pt-2 border-t border-workshop-700/80">
-        <button onclick="resetToInitialData()" class="tap-active w-full text-rose-400 hover:text-rose-300 bg-rose-500/10 hover:bg-rose-500/20 py-2 rounded-xl text-[11px] font-bold transition border border-rose-500/30">
-          Reset to Original Stock
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- TOAST NOTIFICATION CONTAINER -->
-  <div id="toast" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 transition-all duration-300 opacity-0 pointer-events-none transform -translate-y-2">
-    <div id="toastInner" class="bg-slate-900 border border-slate-700 text-white text-xs px-4 py-2.5 rounded-xl shadow-2xl flex items-center gap-2">
-      <i id="toastIcon" class="fa-solid fa-circle-check text-emerald-400"></i>
-      <span id="toastMsg" class="font-medium">Notification</span>
-    </div>
-  </div>
-
-  <!-- JAVASCRIPT APPLICATION LOGIC -->
   <script>
-    // PRE-LOADED DATA FROM USER CATALOG (172 ITEMS CLEANED & NORMALIZED)
-    const DEFAULT_STOCK = [
-      { id: 'itm_1', name: 'B AF121612 OIL FILTER', cost: 180, remaining: 125 },
-      { id: 'itm_2', name: 'B 24151182 BRAKE SHOES SPRING', cost: 25, remaining: 100 },
-      { id: 'itm_3', name: 'B JH511207 RACKER ARM', cost: 320, remaining: 75 },
-      { id: 'itm_4', name: 'B AA101473 CLUTCH HUB 4/S', cost: 350, remaining: 80 },
-      { id: 'itm_5', name: 'MILEX CLUTCH CABLE COMP', cost: 65, remaining: 50 },
-      { id: 'itm_6', name: 'B 36AF0030 KIT PAPER FILT', cost: 75, remaining: 50 },
-      { id: 'itm_7', name: 'B AA101207 HOUSING CLUTCH', cost: 300, remaining: 55 },
-      { id: 'itm_8', name: 'SU 2003 BLADE FUSES 10AMPD', cost: 3.5, remaining: 0 },
-      { id: 'itm_9', name: 'B AA191092 CLUTCH CABEL COM', cost: 380, remaining: 45 },
-      { id: 'itm_10', name: 'B 24151268 BRAKE SHOES', cost: 285, remaining: 42 },
-      { id: 'itm_11', name: 'B 24151173 BRAKE SHOES SPRING', cost: 25, remaining: 40 },
-      { id: 'itm_12', name: 'GTX ESSENTIAL 20W50 500ML', cost: 190, remaining: 39 },
-      { id: 'itm_13', name: 'B P-PLUS 2.1LTR', cost: 820, remaining: 36 },
-      { id: 'itm_14', name: 'MAHLE OIL FILTER COMP', cost: 85, remaining: 35 },
-      { id: 'itm_15', name: 'B 24151171 BRAKE LINING', cost: 285, remaining: 32 },
-      { id: 'itm_16', name: 'MILEX GEAR CABLE COMPACT', cost: 40, remaining: 30 },
-      { id: 'itm_17', name: 'DOT.3 BREAK FLUID 100 ML', cost: 35, remaining: 30 },
-      { id: 'itm_18', name: 'PREMIUM LONG LIFE 200 G', cost: 100, remaining: 30 },
-      { id: 'itm_19', name: 'JL351218 PLUG BS6', cost: 170, remaining: 30 },
-      { id: 'itm_20', name: 'DOT. 3 BREAK FLUID 250 ML', cost: 80, remaining: 30 },
-      { id: 'itm_21', name: 'WAXPAL WHEEL BEARING GREASE 200 GMS', cost: 80, remaining: 30 },
-      { id: 'itm_22', name: 'B AM101174 TIMING CHAIN', cost: 315, remaining: 26 },
-      { id: 'itm_23', name: 'B 36AT0003 GAS GOLD FILTER', cost: 55, remaining: 25 },
-      { id: 'itm_24', name: 'B 31101020 ARM RACKER', cost: 160, remaining: 25 },
-      { id: 'itm_25', name: 'B 22151106 BRAKE DRUM', cost: 1230, remaining: 22 },
-      { id: 'itm_26', name: 'B 36RA0002 CLUCH PLATE', cost: 550, remaining: 22 },
-      { id: 'itm_27', name: 'B 24181153 LOCK SET', cost: 930, remaining: 21 },
-      { id: 'itm_28', name: 'B DF101055 TEPIT SCREW', cost: 14, remaining: 20 },
-      { id: 'itm_29', name: 'MILEX CLUTCH CABLE BS7', cost: 60, remaining: 20 },
-      { id: 'itm_30', name: 'B 36AA4007 CLUTCH RIVIT', cost: 90, remaining: 20 },
-      { id: 'itm_31', name: 'B AZ511010 PLUG SLEEVE', cost: 110, remaining: 20 },
-      { id: 'itm_32', name: 'B DK101064 CHAIN CAM 100', cost: 225, remaining: 20 },
-      { id: 'itm_33', name: 'B AA101471 CLUTCH WHEEL 4', cost: 210, remaining: 20 },
-      { id: 'itm_34', name: 'B 36AA4025 CLUTCH PLATE', cost: 520, remaining: 20 },
-      { id: 'itm_35', name: 'B AA101844 HEAD SEAL COMP', cost: 70, remaining: 20 },
-      { id: 'itm_36', name: 'B 36AA4050 ENG PAKIG KIT', cost: 480, remaining: 18 },
-      { id: 'itm_37', name: 'B AM121213 AIR FILTER BS', cost: 330, remaining: 17 },
-      { id: 'itm_38', name: 'B AA191093 GEAR CABEL COM', cost: 275, remaining: 16 },
-      { id: 'itm_39', name: 'MOTUL CNG POUCH 1LTR', cost: 345, remaining: 9 },
-      { id: 'itm_40', name: 'B AA191103 CLUCH CABLE', cost: 380, remaining: 12 },
-      { id: 'itm_41', name: 'GTX 20W50 1LTR', cost: 520, remaining: 10 },
-      { id: 'itm_42', name: 'B AP111023 NEUTRAL SWITCH', cost: 90, remaining: 10 },
-      { id: 'itm_43', name: 'RTV GASKET SEALANT CLR 25GMS', cost: 40, remaining: 10 },
-      { id: 'itm_44', name: 'B AA121336 OIL PUMP ASS', cost: 240, remaining: 10 },
-      { id: 'itm_45', name: 'GTX ESSENTIAL 20W50 1LTR', cost: 350, remaining: 10 },
-      { id: 'itm_46', name: 'B AA101481 CLUCH RELEASE', cost: 90, remaining: 10 },
-      { id: 'itm_47', name: 'B 36AA4105 CYL BLOCK PIST', cost: 3700, remaining: 9 },
-      { id: 'itm_48', name: 'ISK REAR WHEEL BEARING KIT', cost: 1150, remaining: 8 },
-      { id: 'itm_49', name: 'B AA111082 ARMATURE', cost: 990, remaining: 8 },
-      { id: 'itm_50', name: 'GU BT MRT', cost: 30, remaining: 6 },
-      { id: 'itm_51', name: 'SINGLE STEP COMPOUD', cost: 220, remaining: 6 },
-      { id: 'itm_52', name: 'B 24171094 REAR SHOKER', cost: 720, remaining: 6 },
-      { id: 'itm_53', name: 'PAVANA REAR DOOR LOCK R/E', cost: 115, remaining: 5 },
-      { id: 'itm_54', name: 'B DS101277 TENSIONER ASSY', cost: 165, remaining: 5 },
-      { id: 'itm_55', name: 'WAX PAL RUBBING 200GMD', cost: 120, remaining: 5 },
-      { id: 'itm_56', name: 'ANTI RUST LUBSPRAY', cost: 120, remaining: 5 },
-      { id: 'itm_57', name: 'B AF201262 RELAY STARTER', cost: 540, remaining: 5 },
-      { id: 'itm_58', name: 'B AA102166 CLUCH HUB', cost: 310, remaining: 4 },
-      { id: 'itm_59', name: 'VARROC STATER MOTER ASSY', cost: 2700, remaining: 3 },
-      { id: 'itm_60', name: 'GO GREEN ENERGY +20E50 2.1 L', cost: 710, remaining: 0 },
-      { id: 'itm_61', name: 'B JN351604 STARTER RELY', cost: 390, remaining: 0 },
-      { id: 'itm_62', name: 'B AN101123 BORE KIT 205CC', cost: 2850, remaining: 3 },
-      { id: 'itm_63', name: '3M PLW 100 ML', cost: 170, remaining: 0 },
-      { id: 'itm_64', name: 'B AA161337 CROSS BAR BS4', cost: 1050, remaining: 0 },
-      { id: 'itm_65', name: 'B 36AF0038 KIT SECONDERY', cost: 200, remaining: 0 },
-      { id: 'itm_66', name: 'VARROC ROTAT ASSY AN09', cost: 1150, remaining: 0 },
-      { id: 'itm_67', name: 'MILEX ACC CABLE COMPACT', cost: 40, remaining: 0 },
-      { id: 'itm_68', name: 'B AZ521003 HEAD GASKET BS', cost: 115, remaining: 0 },
-      { id: 'itm_69', name: 'B 24151175 STRUT LH COMP', cost: 106, remaining: 0 },
-      { id: 'itm_70', name: 'VARROC HALF BENDEX PINIUM', cost: 670, remaining: 0 },
-      { id: 'itm_71', name: 'ISK CONE SET ST006', cost: 510, remaining: 0 },
-      { id: 'itm_72', name: 'SPHEEROL CVPERF 80K 0.50KG', cost: 290, remaining: 0 },
-      { id: 'itm_73', name: 'B AT161215 ACC CABLE', cost: 210, remaining: 0 },
-      { id: 'itm_74', name: 'AT161222 CLUCH CABLE BS6', cost: 325, remaining: 0 },
-      { id: 'itm_75', name: 'B AA201012 RELAY STARTER', cost: 360, remaining: 0 },
-      { id: 'itm_76', name: 'B 24151179 STRUT LH COMP', cost: 105, remaining: 0 },
-      { id: 'itm_77', name: 'TRANS MAX AXLE 150 500ML', cost: 190, remaining: 0 },
-      { id: 'itm_78', name: 'SU 1633 MOBILE C ,3.4AMPS 12V', cost: 150, remaining: 0 },
-      { id: 'itm_79', name: 'B AN101257 CHAIN GIDE', cost: 110, remaining: 0 },
-      { id: 'itm_80', name: 'B AB171044 FRONT SHOCKER', cost: 750, remaining: 0 },
-      { id: 'itm_81', name: 'SU 4101 H4 LED HL BULB 12V', cost: 580, remaining: 0 },
-      { id: 'itm_82', name: 'B 24151164 WHEEL CYLENDER', cost: 380, remaining: 0 },
-      { id: 'itm_83', name: 'B 36AA4144 BRAKE SHOE SET', cost: 390, remaining: 0 },
-      { id: 'itm_84', name: 'B 36AA4042 ENG PAK KIT 20', cost: 480, remaining: 0 },
-      { id: 'itm_85', name: 'B 39218106 DOWEL PIN BUSH', cost: 11, remaining: 0 },
-      { id: 'itm_86', name: 'MOTOMAX BIKE POLISH LIQUID 50ML', cost: 35, remaining: 0 },
-      { id: 'itm_87', name: 'VARROC CLUCH LEVAR', cost: 70, remaining: 0 },
-      { id: 'itm_88', name: 'B 24151172 BRAKE SHOE PAT', cost: 20, remaining: 0 },
-      { id: 'itm_89', name: 'MOTOMAX BIKE LIQUID 100ML', cost: 60, remaining: 0 },
-      { id: 'itm_90', name: 'B AA101569 TIMING CHAIN', cost: 180, remaining: 0 },
-      { id: 'itm_91', name: 'POTP4360/55 12V', cost: 100, remaining: 0 },
-      { id: 'itm_92', name: 'PAVANA START BUTTON R/E', cost: 60, remaining: 0 },
-      { id: 'itm_93', name: 'B AA101472 CLUTCH STEEL PLATE', cost: 130, remaining: 0 },
-      { id: 'itm_94', name: 'PREMIUM LONGLIFE', cost: 225, remaining: 0 },
-      { id: 'itm_95', name: 'SPHEEROL ESSENTIAL GREASE 500G', cost: 195, remaining: 0 },
-      { id: 'itm_96', name: 'MOTO MAX INSTA SHINE', cost: 16, remaining: 0 },
-      { id: 'itm_97', name: 'MOTOMAX RAT REPALENT', cost: 150, remaining: 0 },
-      { id: 'itm_98', name: 'B JZ551417 CLUCH PLET 4S', cost: 65, remaining: 0 },
-      { id: 'itm_99', name: 'ISK CONE SET ST009', cost: 550, remaining: 0 },
-      { id: 'itm_100', name: 'VARROC WHEEL CUP SMALL', cost: 270, remaining: 0 },
-      { id: 'itm_101', name: 'B AF111049 HT COIL BS6', cost: 480, remaining: 0 },
-      { id: 'itm_102', name: 'VARROC ARMATUR ASSY W/COT', cost: 1050, remaining: 0 },
-      { id: 'itm_103', name: 'B DK101755 RACKER ARM', cost: 295, remaining: 0 },
-      { id: 'itm_104', name: 'B 24151266 FRONT WHEEL AXAL', cost: 710, remaining: 0 },
-      { id: 'itm_105', name: 'B AA101033 CRANK SHAFT', cost: 3200, remaining: 0 },
-      { id: 'itm_106', name: 'B 36AA4080 BORE KIT 175CC', cost: 2300, remaining: 0 },
-      { id: 'itm_107', name: 'B AA101864 ASSY CAM SHAFT', cost: 835, remaining: 0 },
-      { id: 'itm_108', name: 'B AA102003 CAM SHAFT', cost: 750, remaining: 0 },
-      { id: 'itm_109', name: 'B AA191094 GEAR CABEL COM', cost: 275, remaining: 0 },
-      { id: 'itm_110', name: 'B AB101067 CROSS', cost: 275, remaining: 0 },
-      { id: 'itm_111', name: 'B AL241023 WIPER SET LATE', cost: 250, remaining: 0 },
-      { id: 'itm_112', name: 'B 36AA4020 CHAIN TENSIONER', cost: 200, remaining: 0 },
-      { id: 'itm_113', name: 'B AA191091 ACC CABEL COM', cost: 190, remaining: 0 },
-      { id: 'itm_114', name: 'SPHEEROL CV PERF 40K GREASE 500G', cost: 190, remaining: 0 },
-      { id: 'itm_115', name: 'MILEX CLUTCH CABEL COM', cost: 180, remaining: 0 },
-      { id: 'itm_116', name: 'MILEX GEAR CABEL COM', cost: 135, remaining: 0 },
-      { id: 'itm_117', name: 'MILEX ACC CABEL COM', cost: 115, remaining: 0 },
-      { id: 'itm_118', name: '24151097 MC. KIT', cost: 270, remaining: 0 },
-      { id: 'itm_119', name: 'ST OIL FILTER COM', cost: 85, remaining: 0 },
-      { id: 'itm_120', name: 'POT HS145/40 2W12V 260', cost: 85, remaining: 0 },
-      { id: 'itm_121', name: 'B AA101210 CLUTCH PLATE', cost: 70, remaining: 0 },
-      { id: 'itm_122', name: 'MOTAMAX 2K RUBBING COMPUND 100GM', cost: 60, remaining: 0 },
-      { id: 'itm_123', name: 'BOSH HALOGEN BULB SXL(16)', cost: 50, remaining: 0 },
-      { id: 'itm_124', name: 'B AB171016 FRONT SHOCKER', cost: 40, remaining: 0 },
-      { id: 'itm_125', name: 'B AB181012 BALLS N/M BIG', cost: 40, remaining: 0 },
-      { id: 'itm_126', name: 'B 39100006 PIN HOLLOW DOW', cost: 3.5, remaining: 0 },
-      { id: 'itm_127', name: 'TW SHINER SPONGE', cost: 25, remaining: 0 },
-      { id: 'itm_128', name: 'TW 1STP POLISH COMPND', cost: 160, remaining: 0 },
-      { id: 'itm_129', name: 'SU 1302 3 PIN METAL HORN RELAY 12V', cost: 120, remaining: 0 },
-      { id: 'itm_130', name: 'SU 1304 DUAL RELAY 12V', cost: 160, remaining: 0 },
-      { id: 'itm_131', name: 'SU 1201 MELODY MAKER 4 WIRE 12 V', cost: 140, remaining: 0 },
-      { id: 'itm_132', name: 'SU 3947W PARKING LIGHT WHITE 12 V', cost: 55, remaining: 0 },
-      { id: 'itm_133', name: 'SH WIRE 4MM DXL', cost: 20, remaining: 0 },
-      { id: 'itm_134', name: 'B DK101237 WASHER COPPER', cost: 6.5, remaining: 0 },
-      { id: 'itm_135', name: 'B AA201239 HORN DC', cost: 200, remaining: 0 },
-      { id: 'itm_136', name: 'GABRIEL FRENT SHOKER N/M', cost: 560, remaining: 0 },
-      { id: 'itm_137', name: 'VARROC BENDEX ASSY', cost: 1150, remaining: 0 },
-      { id: 'itm_138', name: 'MK CLUTCH PLATE 4STOK 205', cost: 220, remaining: 0 },
-      { id: 'itm_139', name: 'B AF181010 LOCK SET RR 4S', cost: 950, remaining: 0 },
-      { id: 'itm_140', name: 'GTX 20W50 500ML', cost: 250, remaining: 0 },
-      { id: 'itm_141', name: 'POT H4 P43 100/90 12V', cost: 100, remaining: 0 },
-      { id: 'itm_142', name: 'B 36AA4119 HEAD ASSY', cost: 4125, remaining: 0 },
-      { id: 'itm_143', name: 'B 36 AA4116 HEAD ASSY', cost: 3600, remaining: 0 },
-      { id: 'itm_144', name: '2K2 RC 100 GMS', cost: 120, remaining: 0 },
-      { id: 'itm_145', name: 'WAXPAL LIQUID POLISH', cost: 145, remaining: 0 },
-      { id: 'itm_146', name: 'B AA101666 CAM SHAFT ASSY', cost: 850, remaining: 0 },
-      { id: 'itm_147', name: 'B AM110003 IGNITER DCSTAR', cost: 1400, remaining: 0 },
-      { id: 'itm_148', name: 'B JP591065 SENSOR OXYGEN', cost: 2170, remaining: 0 },
-      { id: 'itm_149', name: 'B 24151174 BRAKE TATA L /', cost: 275, remaining: 0 },
-      { id: 'itm_150', name: 'WAXPOL SCOOTET POLISH 50 GMS', cost: 65, remaining: 0 },
-      { id: 'itm_151', name: 'C CABLE USB TO C TYPE', cost: 150, remaining: 0 },
-      { id: 'itm_152', name: 'B AM101172 CHINE GUIDE BS', cost: 105, remaining: 0 },
-      { id: 'itm_153', name: 'B 36AA4118 HEAD ASSY', cost: 4200, remaining: 0 },
-      { id: 'itm_154', name: 'B AA151047 FR HUB', cost: 1250, remaining: 0 },
-      { id: 'itm_155', name: 'B AT161220 GEAR CABLE', cost: 235, remaining: 0 },
-      { id: 'itm_156', name: 'GEVO LUGS 780G', cost: 10, remaining: 0 },
-      { id: 'itm_157', name: 'ISK CONE SET-004', cost: 510, remaining: 0 },
-      { id: 'itm_158', name: 'MILEX GEAR CABLE O/M', cost: 26, remaining: 0 },
-      { id: 'itm_159', name: 'OSRAM HEADLIGHT BULB', cost: 95, remaining: 0 },
-      { id: 'itm_160', name: 'PAVANA OIL PUMP 3WH R/E', cost: 140, remaining: 0 },
-      { id: 'itm_161', name: 'ROOTS CHARGER 3PIN', cost: 150, remaining: 0 },
-      { id: 'itm_162', name: 'SH BT ACE', cost: 45, remaining: 0 },
-      { id: 'itm_163', name: 'SU 1705 H4 BULB HOLDER 5MM', cost: 60, remaining: 0 },
-      { id: 'itm_164', name: 'SU 1801 PP SWITCH', cost: 45, remaining: 0 },
-      { id: 'itm_165', name: 'SU 2007 BLADE FUSES 30AMPS', cost: 3.5, remaining: 0 },
-      { id: 'itm_166', name: 'B AF201036 REGULATOR', cost: 1460, remaining: 0 },
-      { id: 'itm_167', name: 'VARROC MGRT-RING', cost: 360, remaining: 0 },
-      { id: 'itm_168', name: 'SU 1630 MICRO CHARGER 12V 24V', cost: 140, remaining: 0 },
-      { id: 'itm_169', name: 'SU 7501 SPEAKER WIRE 91M', cost: 16, remaining: 0 },
-      { id: 'itm_170', name: 'SU 1630 MICRO CHARGER 12V-24V', cost: 140, remaining: 0 },
-      { id: 'itm_171', name: 'FIVIQICK 0.45 GMS', cost: 4.75, remaining: 0 },
-      { id: 'itm_172', name: 'SU 2828 LED PARKING LIGHT WHITE 12V', cost: 60, remaining: 0 },
-      { id: 'itm_173', name: 'B AF121568 INJECTOR', cost: 2800, remaining: 0 },
-      { id: 'itm_174', name: 'B 24151163 CYL ASSY WHEEL', cost: 350, remaining: 0 },
-      { id: 'itm_175', name: 'B AA101210 CLUCH PLATE 1', cost: 45, remaining: -5 },
-      { id: 'itm_176', name: 'B 39193815 NUT HEXAGON', cost: 20, remaining: -10 }
+    // EXACT 176-ITEM MASTER CATALOG
+    const RAW_CATALOG = [
+      { id: "itm_1", name: "B AF121612 OIL FILTER", remaining: 125, cost: 180 },
+      { id: "itm_2", name: "B 24151182 BRAKE SHOES SPRING", remaining: 100, cost: 25 },
+      { id: "itm_3", name: "B JH511207 RACKER ARM", remaining: 75, cost: 320 },
+      { id: "itm_4", name: "B AA101473 CLUTCH HUB 4/S", remaining: 80, cost: 350 },
+      { id: "itm_5", name: "MILEX CLUTCH CABLE COMP", remaining: 50, cost: 65 },
+      { id: "itm_6", name: "B 36AF0030 KIT PAPER FILT", remaining: 50, cost: 75 },
+      { id: "itm_7", name: "B AA101207 HOUSING CLUTCH", remaining: 55, cost: 300 },
+      { id: "itm_8", name: "SU 2003 BLADE FUSES 10AMPD", remaining: 0, cost: 3.5 },
+      { id: "itm_9", name: "B AA191092 CLUTCH CABEL COM", remaining: 45, cost: 380 },
+      { id: "itm_10", name: "B 24151268 BRAKE SHOES", remaining: 42, cost: 285 },
+      { id: "itm_11", name: "B 24151173 BRAKE SHOES SPRING", remaining: 40, cost: 25 },
+      { id: "itm_12", name: "GTX ESSENTIAL 20W50 500ML", remaining: 39, cost: 190 },
+      { id: "itm_13", name: "B P-PLUS 2.1LTR", remaining: 36, cost: 820 },
+      { id: "itm_14", name: "MAHLE OIL FILTER COMP", remaining: 35, cost: 85 },
+      { id: "itm_15", name: "B 24151171 BRAKE LINING", remaining: 32, cost: 285 },
+      { id: "itm_16", name: "MILEX GEAR CABLE COMPACT", remaining: 30, cost: 40 },
+      { id: "itm_17", name: "DOT.3 BREAK FLUID 100 ML", remaining: 30, cost: 35 },
+      { id: "itm_18", name: "PREMIUM LONG LIFE 200 G", remaining: 30, cost: 100 },
+      { id: "itm_19", name: "JL351218 PLUG BS6", remaining: 30, cost: 170 },
+      { id: "itm_20", name: "DOT. 3 BREAK FLUID 250 ML", remaining: 30, cost: 80 },
+      { id: "itm_21", name: "WAXPAL WHEEL BEARING GREASE 200 GMS", remaining: 30, cost: 80 },
+      { id: "itm_22", name: "B AM101174 TIMING CHAIN", remaining: 26, cost: 315 },
+      { id: "itm_23", name: "B 36AT0003 GAS GOLD FILTER", remaining: 25, cost: 55 },
+      { id: "itm_24", name: "B 31101020 ARM RACKER", remaining: 25, cost: 160 },
+      { id: "itm_25", name: "B 22151106 BRAKE DRUM", remaining: 22, cost: 1230 },
+      { id: "itm_26", name: "B 36RA0002 CLUCH PLATE", remaining: 22, cost: 550 },
+      { id: "itm_27", name: "B 24181153 LOCK SET", remaining: 21, cost: 930 },
+      { id: "itm_28", name: "B DF101055 TEPIT SCREW", remaining: 20, cost: 14 },
+      { id: "itm_29", name: "MILEX CLUTCH CABLE BS7", remaining: 20, cost: 60 },
+      { id: "itm_30", name: "B 36AA4007 CLUTCH RIVIT", remaining: 20, cost: 90 },
+      { id: "itm_31", name: "B AZ511010 PLUG SLEEVE", remaining: 20, cost: 110 },
+      { id: "itm_32", name: "B DK101064 CHAIN CAM 100", remaining: 20, cost: 225 },
+      { id: "itm_33", name: "B AA101471 CLUTCH WHEEL 4", remaining: 20, cost: 210 },
+      { id: "itm_34", name: "B 36AA4025 CLUTCH PLATE", remaining: 20, cost: 520 },
+      { id: "itm_35", name: "B AA101844 HEAD SEAL COMP", remaining: 20, cost: 70 },
+      { id: "itm_36", name: "B 36AA4050 ENG PAKIG KIT", remaining: 18, cost: 480 },
+      { id: "itm_37", name: "B AM121213 AIR FILTER BS", remaining: 17, cost: 330 },
+      { id: "itm_38", name: "B AA191093 GEAR CABEL COM", remaining: 16, cost: 275 },
+      { id: "itm_39", name: "MOTUL CNG POUCH 1LTR", remaining: 9, cost: 345 },
+      { id: "itm_40", name: "B AA191103 CLUCH CABLE", remaining: 12, cost: 380 },
+      { id: "itm_41", name: "GTX 20W50 1LTR", remaining: 10, cost: 520 },
+      { id: "itm_42", name: "B AP111023 NEUTRAL SWITCH", remaining: 10, cost: 90 },
+      { id: "itm_43", name: "RTV GASKET SEALANT CLR 25GMS", remaining: 10, cost: 40 },
+      { id: "itm_44", name: "B AA121336 OIL PUMP ASS", remaining: 10, cost: 240 },
+      { id: "itm_45", name: "GTX ESSENTIAL 20W50 1LTR", remaining: 10, cost: 350 },
+      { id: "itm_46", name: "B AA101481 CLUCH RELEASE", remaining: 10, cost: 90 },
+      { id: "itm_47", name: "B 36AA4105 CYL BLOCK PIST", remaining: 9, cost: 3700 },
+      { id: "itm_48", name: "ISK REAR WHEEL BEARING KIT", remaining: 8, cost: 1150 },
+      { id: "itm_49", name: "B AA111082 ARMATURE", remaining: 8, cost: 990 },
+      { id: "itm_50", name: "GU BT MRT", remaining: 6, cost: 30 },
+      { id: "itm_51", name: "SINGLE STEP COMPOUD", remaining: 6, cost: 220 },
+      { id: "itm_52", name: "B 24171094 REAR SHOKER", remaining: 6, cost: 720 },
+      { id: "itm_53", name: "PAVANA REAR DOOR LOCK R/E", remaining: 5, cost: 115 },
+      { id: "itm_54", name: "B DS101277 TENSIONER ASSY", remaining: 5, cost: 165 },
+      { id: "itm_55", name: "WAX PAL RUBBING 200GMD", remaining: 5, cost: 120 },
+      { id: "itm_56", name: "ANTI RUST LUBSPRAY", remaining: 5, cost: 120 },
+      { id: "itm_57", name: "B AF201262 RELAY STARTER", remaining: 5, cost: 540 },
+      { id: "itm_58", name: "B AA102166 CLUCH HUB", remaining: 4, cost: 310 },
+      { id: "itm_59", name: "VARROC STATER MOTER ASSY", remaining: 3, cost: 2700 },
+      { id: "itm_60", name: "GO GREEN ENERGY +20E50 2.1 L", remaining: 0, cost: 710 },
+      { id: "itm_61", name: "B JN351604 STARTER RELY", remaining: 0, cost: 390 },
+      { id: "itm_62", name: "B AN101123 BORE KIT 205CC", remaining: 3, cost: 2850 },
+      { id: "itm_63", name: "3M PLW 100 ML", remaining: 0, cost: 170 },
+      { id: "itm_64", name: "B AA161337 CROSS BAR BS4", remaining: 0, cost: 1050 },
+      { id: "itm_65", name: "B 36AF0038 KIT SECONDERY", remaining: 0, cost: 200 },
+      { id: "itm_66", name: "VARROC ROTAT ASSY AN09", remaining: 0, cost: 1150 },
+      { id: "itm_67", name: "MILEX ACC CABLE COMPACT", remaining: 0, cost: 40 },
+      { id: "itm_68", name: "B AZ521003 HEAD GASKET BS", remaining: 0, cost: 115 },
+      { id: "itm_69", name: "B 24151175 STRUT LH COMP", remaining: 0, cost: 106 },
+      { id: "itm_70", name: "VARROC HALF BENDEX PINIUM", remaining: 0, cost: 670 },
+      { id: "itm_71", name: "ISK CONE SET ST006", remaining: 0, cost: 510 },
+      { id: "itm_72", name: "SPHEEROL CVPERF 80K 0.50KG", remaining: 0, cost: 290 },
+      { id: "itm_73", name: "B AT161215 ACC CABLE", remaining: 0, cost: 210 },
+      { id: "itm_74", name: "AT161222 CLUCH CABLE BS6", remaining: 0, cost: 325 },
+      { id: "itm_75", name: "B AA201012 RELAY STARTER", remaining: 0, cost: 360 },
+      { id: "itm_76", name: "B 24151179 STRUT LH COMP", remaining: 0, cost: 105 },
+      { id: "itm_77", name: "TRANS MAX AXLE 150 500ML", remaining: 0, cost: 190 },
+      { id: "itm_78", name: "SU 1633 MOBILE C ,3.4AMPS 12V", remaining: 0, cost: 150 },
+      { id: "itm_79", name: "B AN101257 CHAIN GIDE", remaining: 0, cost: 110 },
+      { id: "itm_80", name: "B AB171044 FRONT SHOCKER", remaining: 0, cost: 750 },
+      { id: "itm_81", name: "SU 4101 H4 LED HL BULB 12V", remaining: 0, cost: 580 },
+      { id: "itm_82", name: "B 24151164 WHEEL CYLENDER", remaining: 0, cost: 380 },
+      { id: "itm_83", name: "B 36AA4144 BRAKE SHOE SET", remaining: 0, cost: 390 },
+      { id: "itm_84", name: "B 36AA4042 ENG PAK KIT 20", remaining: 0, cost: 480 },
+      { id: "itm_85", name: "B 39218106 DOWEL PIN BUSH", remaining: 0, cost: 11 },
+      { id: "itm_86", name: "MOTOMAX BIKE POLISH LIQUID 50ML", remaining: 0, cost: 35 },
+      { id: "itm_87", name: "VARROC CLUCH LEVAR", remaining: 0, cost: 70 },
+      { id: "itm_88", name: "B 24151172 BRAKE SHOE PAT", remaining: 0, cost: 20 },
+      { id: "itm_89", name: "MOTOMAX BIKE LIQUID 100ML", remaining: 0, cost: 60 },
+      { id: "itm_90", name: "B AA101569 TIMING CHAIN", remaining: 0, cost: 180 },
+      { id: "itm_91", name: "POTP4360/55 12V", remaining: 0, cost: 100 },
+      { id: "itm_92", name: "PAVANA START BUTTON R/E", remaining: 0, cost: 60 },
+      { id: "itm_93", name: "B AA101472 CLUTCH STEEL PLATE", remaining: 0, cost: 130 },
+      { id: "itm_94", name: "PREMIUM LONGLIFE", remaining: 0, cost: 225 },
+      { id: "itm_95", name: "SPHEEROL ESSENTIAL GREASE 500G", remaining: 0, cost: 195 },
+      { id: "itm_96", name: "MOTO MAX INSTA SHINE", remaining: 0, cost: 16 },
+      { id: "itm_97", name: "MOTOMAX RAT REPALENT", remaining: 0, cost: 150 },
+      { id: "itm_98", name: "B JZ551417 CLUCH PLET 4S", remaining: 0, cost: 65 },
+      { id: "itm_99", name: "ISK CONE SET ST009", remaining: 0, cost: 550 },
+      { id: "itm_100", name: "VARROC WHEEL CUP SMALL", remaining: 0, cost: 270 },
+      { id: "itm_101", name: "B AF111049 HT COIL BS6", remaining: 0, cost: 480 },
+      { id: "itm_102", name: "VARROC ARMATUR ASSY W/COT", remaining: 0, cost: 1050 },
+      { id: "itm_103", name: "B DK101755 RACKER ARM", remaining: 0, cost: 295 },
+      { id: "itm_104", name: "B 24151266 FRONT WHEEL AXAL", remaining: 0, cost: 710 },
+      { id: "itm_105", name: "B AA101033 CRANK SHAFT", remaining: 0, cost: 3200 },
+      { id: "itm_106", name: "B 36AA4080 BORE KIT 175CC", remaining: 0, cost: 2300 },
+      { id: "itm_107", name: "B AA101864 ASSY CAM SHAFT", remaining: 0, cost: 835 },
+      { id: "itm_108", name: "B AA102003 CAM SHAFT", remaining: 0, cost: 750 },
+      { id: "itm_109", name: "B AA191094 GEAR CABEL COM", remaining: 0, cost: 275 },
+      { id: "itm_110", name: "B AB101067 CROSS", remaining: 0, cost: 275 },
+      { id: "itm_111", name: "B AL241023 WIPER SET LATE", remaining: 0, cost: 250 },
+      { id: "itm_112", name: "B 36AA4020 CHAIN TENSIONER", remaining: 0, cost: 200 },
+      { id: "itm_113", name: "B AA191091 ACC CABEL COM", remaining: 0, cost: 190 },
+      { id: "itm_114", name: "SPHEEROL CV PERF 40K GREASE 500G", remaining: 0, cost: 190 },
+      { id: "itm_115", name: "MILEX CLUTCH CABEL COM", remaining: 0, cost: 180 },
+      { id: "itm_116", name: "MILEX GEAR CABEL COM", remaining: 0, cost: 135 },
+      { id: "itm_117", name: "MILEX ACC CABEL COM", remaining: 0, cost: 115 },
+      { id: "itm_118", name: "24151097 MC. KIT", remaining: 0, cost: 270 },
+      { id: "itm_119", name: "ST OIL FILTER COM", remaining: 0, cost: 85 },
+      { id: "itm_120", name: "POT HS145/40 2W12V 260", remaining: 0, cost: 85 },
+      { id: "itm_121", name: "B AA101210 CLUTCH PLATE", remaining: 0, cost: 70 },
+      { id: "itm_122", name: "MOTAMAX 2K RUBBING COMPUND 100GM", remaining: 0, cost: 60 },
+      { id: "itm_123", name: "BOSH HALOGEN BULB SXL(16)", remaining: 0, cost: 50 },
+      { id: "itm_124", name: "B AB171016 FRONT SHOCKER", remaining: 0, cost: 40 },
+      { id: "itm_125", name: "B AB181012 BALLS N/M BIG", remaining: 0, cost: 40 },
+      { id: "itm_126", name: "B 39100006 PIN HOLLOW DOW", remaining: 0, cost: 3.5 },
+      { id: "itm_127", name: "TW SHINER SPONGE", remaining: 0, cost: 25 },
+      { id: "itm_128", name: "TW 1STP POLISH COMPND", remaining: 0, cost: 160 },
+      { id: "itm_129", name: "SU 1302 3 PIN METAL HORN RELAY 12V", remaining: 0, cost: 120 },
+      { id: "itm_130", name: "SU 1304 DUAL RELAY 12V", remaining: 0, cost: 160 },
+      { id: "itm_131", name: "SU 1201 MELODY MAKER 4 WIRE 12 V", remaining: 0, cost: 140 },
+      { id: "itm_132", name: "SU 3947W PARKING LIGHT WHITE 12 V", remaining: 0, cost: 55 },
+      { id: "itm_133", name: "SH WIRE 4MM DXL", remaining: 0, cost: 20 },
+      { id: "itm_134", name: "B DK101237 WASHER COPPER", remaining: 0, cost: 6.5 },
+      { id: "itm_135", name: "B AA201239 HORN DC", remaining: 0, cost: 200 },
+      { id: "itm_136", name: "GABRIEL FRONT SHOKER N/M", remaining: 0, cost: 560 },
+      { id: "itm_137", name: "VARROC BENDEX ASSY", remaining: 0, cost: 1150 },
+      { id: "itm_138", name: "MK CLUTCH PLATE 4STOK 205", remaining: 0, cost: 220 },
+      { id: "itm_139", name: "B AF181010 LOCK SET RR 4S", remaining: 0, cost: 950 },
+      { id: "itm_140", name: "GTX 20W50 500ML", remaining: 0, cost: 250 },
+      { id: "itm_141", name: "POT H4 P43 100/90 12V", remaining: 0, cost: 100 },
+      { id: "itm_142", name: "B 36AA4119 HEAD ASSY", remaining: 0, cost: 4125 },
+      { id: "itm_143", name: "B 36AA4116 HEAD ASSY", remaining: 0, cost: 3600 },
+      { id: "itm_144", name: "2K2 RC 100 GMS", remaining: 0, cost: 120 },
+      { id: "itm_145", name: "WAXPAL LIQUID POLISH", remaining: 0, cost: 145 },
+      { id: "itm_146", name: "B AA101666 CAM SHAFT ASSY", remaining: 0, cost: 850 },
+      { id: "itm_147", name: "B AM110003 IGNITER DCSTAR", remaining: 0, cost: 1400 },
+      { id: "itm_148", name: "B JP591065 SENSOR OXYGEN", remaining: 0, cost: 2170 },
+      { id: "itm_149", name: "B 24151174 BRAKE TATA L /", remaining: 0, cost: 275 },
+      { id: "itm_150", name: "WAXPOL SCOOTET POLISH 50 GMS", remaining: 0, cost: 65 },
+      { id: "itm_151", name: "C CABLE USB TO C TYPE", remaining: 0, cost: 150 },
+      { id: "itm_152", name: "B AM101172 CHINE GUIDE BS", remaining: 0, cost: 105 },
+      { id: "itm_153", name: "B 36AA4118 HEAD ASSY", remaining: 0, cost: 4200 },
+      { id: "itm_154", name: "B AA151047 FR HUB", remaining: 0, cost: 1250 },
+      { id: "itm_155", name: "B AT161220 GEAR CABLE", remaining: 0, cost: 235 },
+      { id: "itm_156", name: "GEVO LUGS 780G", remaining: 0, cost: 10 },
+      { id: "itm_157", name: "ISK CONE SET-004", remaining: 0, cost: 510 },
+      { id: "itm_158", name: "MILEX GEAR CABLE O/M", remaining: 0, cost: 26 },
+      { id: "itm_159", name: "OSRAM HEADLIGHT BULB", remaining: 0, cost: 95 },
+      { id: "itm_160", name: "PAVANA OIL PUMP 3WH R/E", remaining: 0, cost: 140 },
+      { id: "itm_161", name: "ROOTS CHARGER 3PIN", remaining: 0, cost: 150 },
+      { id: "itm_162", name: "SH BT ACE", remaining: 0, cost: 45 },
+      { id: "itm_163", name: "SU 1705 H4 BULB HOLDER 5MM", remaining: 0, cost: 60 },
+      { id: "itm_164", name: "SU 1801 PP SWITCH", remaining: 0, cost: 45 },
+      { id: "itm_165", name: "SU 2007 BLADE FUSES 30AMPS", remaining: 0, cost: 3.5 },
+      { id: "itm_166", name: "B AF201036 REGULATOR", remaining: 0, cost: 1460 },
+      { id: "itm_167", name: "VARROC MGRT-RING", remaining: 0, cost: 360 },
+      { id: "itm_168", name: "SU 1630 MICRO CHARGER 12V 24V", remaining: 0, cost: 140 },
+      { id: "itm_169", name: "SU 7501 SPEAKER WIRE 91M", remaining: 0, cost: 16 },
+      { id: "itm_170", name: "SU 1630 MICRO CHARGER 12V-24V", remaining: 0, cost: 140 },
+      { id: "itm_171", name: "FIVIQICK 0.45 GMS", remaining: 0, cost: 4.75 },
+      { id: "itm_172", name: "SU 2828 LED PARKING LIGHT WHITE 12V", remaining: 0, cost: 60 },
+      { id: "itm_173", name: "B AF121568 INJECTOR", remaining: 0, cost: 2800 },
+      { id: "itm_174", name: "B 24151163 CYL ASSY WHEEL", remaining: 0, cost: 350 },
+      { id: "itm_175", name: "B AA101210 CLUCH PLATE 1", remaining: -5, cost: 45 },
+      { id: "itm_176", name: "B 39193815 NUT HEXAGON", remaining: -10, cost: 20 }
     ];
 
-    // STATE
+    const STORAGE_KEY_INVENTORY = 'am_stock_v5';
+    const STORAGE_KEY_SALES = 'am_sales_v5';
+    const STORAGE_KEY_INWARD = 'am_inward_v5';
+    const STORAGE_KEY_CONFIG = 'am_config_v5';
+
+    const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    const MONTHS_SHORT = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+    // App State
     let inventory = [];
-    let salesLogs = [];
-    let activeTab = 'counter';
+    let salesHistory = {};
+    let inwardHistory = {};
+    let syncConfig = { url: '', tab: 'dec' };
+
+    let activeFilter = 'all';
     let searchQuery = '';
-    let currentSort = 'name_asc';
-    let stockFilter = 'all';
+    let selectedInwardId = null;
+    let currentTab = 'counter';
 
-    // GOOGLE SHEETS SYNC STATE
-    let appsScriptUrl = localStorage.getItem('am_apps_script_url') || '';
-    let offlineSyncQueue = JSON.parse(localStorage.getItem('am_sync_queue_v1') || '[]');
+    // Calendar state
+    let operatingDate = new Date(); // Actual JS Date object
+    let activeDateStr = "";         // e.g. "07-Nov"
+    let activeDateFullLabel = "";   // e.g. "Today (07-Nov-2026)"
+    let calViewYear = 2026;
+    let calViewMonth = 10;
 
-    // ACTIVE WORKING DATE FOR SALES (Allows selling in yesterday or past dates)
-    let currentWorkingDateISO = getTodayISO();
-    let backdateEntryType = 'OUT';
-    let calendarTargetMode = 'logs'; // 'logs' or 'counter'
-
-    // LOGS STATE & DATE FILTERING
-    let selectedDateFilterMode = 'today';
-    let selectedDateISO = getTodayISO();
-    let selectedLogType = 'all';
-
-    // Calendar Modal State
-    let calViewYear = new Date().getFullYear();
-    let calViewMonth = new Date().getMonth();
-
-    function getTodayISO() {
-      const d = new Date();
-      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    // Helper: format Date to "DD-Mon"
+    function formatDateToKey(d) {
+      const day = d.getDate();
+      const dd = day < 10 ? '0' + day : day;
+      const mon = MONTHS_SHORT[d.getMonth()];
+      return `${dd}-${mon}`;
     }
 
-    function formatISODateLabel(isoStr) {
-      if (!isoStr) return '';
-      const parts = isoStr.split('-');
-      if (parts.length !== 3) return isoStr;
-      const d = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
-      return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+    // Helper: is same calendar day
+    function isSameDay(d1, d2) {
+      return d1.getFullYear() === d2.getFullYear() &&
+             d1.getMonth() === d2.getMonth() &&
+             d1.getDate() === d2.getDate();
     }
 
-    // INDEXEDDB DATABASE FOR 1-YEAR HIGH-CAPACITY LOG PERSISTENCE
-    const DB_NAME = 'AM_Analyser_DB';
-    const DB_VERSION = 1;
-    let dbInstance = null;
+    // Initialize Operating Date
+    function setOperatingDate(d) {
+      operatingDate = new Date(d);
+      activeDateStr = formatDateToKey(operatingDate);
 
-    function openDatabase() {
-      return new Promise((resolve) => {
-        if (!window.indexedDB) {
-          resolve(null);
-          return;
-        }
-        const req = indexedDB.open(DB_NAME, DB_VERSION);
-        req.onupgradeneeded = function(e) {
-          const db = e.target.result;
-          if (!db.objectStoreNames.contains('logs')) {
-            const store = db.createObjectStore('logs', { keyPath: 'id' });
-            store.createIndex('dateISO', 'dateISO', { unique: false });
-            store.createIndex('timestamp', 'timestamp', { unique: false });
-          }
-        };
-        req.onsuccess = function(e) {
-          dbInstance = e.target.result;
-          resolve(dbInstance);
-        };
-        req.onerror = function() {
-          resolve(null);
-        };
-      });
-    }
+      const today = new Date();
+      const yesterday = new Date();
+      yesterday.setDate(today.getDate() - 1);
 
-    // WEB AUDIO API
-    let audioCtx = null;
-    function getAudioContext() {
-      if (!audioCtx) {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      }
-      return audioCtx;
-    }
-
-    function playBeep(isSuccess = true) {
-      try {
-        const ctx = getAudioContext();
-        if (ctx.state === 'suspended') ctx.resume();
-
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-
-        const now = ctx.currentTime;
-        if (isSuccess) {
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(587.33, now);
-          osc.frequency.setValueAtTime(880, now + 0.08);
-          gain.gain.setValueAtTime(0.12, now);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
-          osc.start(now);
-          osc.stop(now + 0.22);
-        } else {
-          osc.type = 'sawtooth';
-          osc.frequency.setValueAtTime(180, now);
-          gain.gain.setValueAtTime(0.15, now);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
-          osc.start(now);
-          osc.stop(now + 0.25);
-        }
-      } catch (e) {}
-    }
-
-    // INITIALIZATION
-    window.onload = async function() {
-      registerPwaServiceWorker();
-      await openDatabase();
-      await loadStorage();
-      initSyncSettings();
-      initWorkingDateUI();
-      updateDateLabelUI();
-      populateBackdateDropdown();
-      renderAll();
-      processOfflineQueue();
-
-      const badge = document.getElementById('headerSyncBadge');
-      const iconBtn = document.getElementById('syncSetupBtn');
-      if (badge) badge.addEventListener('click', openSyncModal);
-      if (iconBtn) iconBtn.addEventListener('click', openSyncModal);
-    };
-
-    function initWorkingDateUI() {
-      currentWorkingDateISO = getTodayISO();
-      updateWorkingDateBanner();
-      const backdateDateEl = document.getElementById('backdateInputDate');
-      if (backdateDateEl) {
-        const y = new Date();
-        y.setDate(y.getDate() - 1);
-        backdateDateEl.value = `${y.getFullYear()}-${String(y.getMonth() + 1).padStart(2, '0')}-${String(y.getDate()).padStart(2, '0')}`;
-      }
-    }
-
-    function updateWorkingDateBanner() {
-      const label = document.getElementById('workingDateLabel');
-      const notice = document.getElementById('backdatedNoticeBadge');
-      const isToday = (currentWorkingDateISO === getTodayISO());
-
-      if (label) {
-        label.innerText = isToday ? `Today (${formatISODateLabel(currentWorkingDateISO)})` : formatISODateLabel(currentWorkingDateISO);
-      }
-      if (notice) {
-        notice.classList.toggle('hidden', isToday);
-      }
-    }
-
-    function openCounterCalendar() {
-      calendarTargetMode = 'counter';
-      const parts = currentWorkingDateISO.split('-');
-      calViewYear = parseInt(parts[0], 10);
-      calViewMonth = parseInt(parts[1], 10) - 1;
-      renderCalendarDays();
-      openModal('calendarModal');
-    }
-
-    function resetWorkingDateToToday() {
-      currentWorkingDateISO = getTodayISO();
-      updateWorkingDateBanner();
-      showToast('Log date reset to Today', 'emerald');
-    }
-
-    function populateBackdateDropdown() {
-      const select = document.getElementById('backdateItemSelect');
-      if (!select) return;
-      select.innerHTML = inventory.map(item => `
-        <option value="${item.id}">${item.name} (₹${item.cost})</option>
-      `).join('');
-    }
-
-    function setBackdateType(type) {
-      backdateEntryType = type;
-      const btnOut = document.getElementById('backdateTypeBtnOut');
-      const btnIn = document.getElementById('backdateTypeBtnIn');
-      if (type === 'OUT') {
-        btnOut.className = 'py-2 rounded-xl text-xs font-bold bg-orange-600 text-white flex items-center justify-center gap-1.5 transition';
-        btnIn.className = 'py-2 rounded-xl text-xs font-bold bg-workshop-800 text-slate-400 border border-slate-700 flex items-center justify-center gap-1.5 transition';
+      if (isSameDay(operatingDate, today)) {
+        activeDateFullLabel = `Today (${activeDateStr}-${operatingDate.getFullYear()})`;
+        document.getElementById('quickTodayBtn').className = "text-[10px] bg-orange-600 hover:bg-orange-500 active:scale-95 px-2.5 py-1 rounded-md text-white font-bold transition shadow-sm shadow-orange-600/30";
+        document.getElementById('quickYestBtn').className = "text-[10px] bg-workshop-800 hover:bg-workshop-700 active:scale-95 px-2 py-1 rounded-md text-slate-300 font-semibold border border-workshop-700 transition";
+      } else if (isSameDay(operatingDate, yesterday)) {
+        activeDateFullLabel = `Yesterday (${activeDateStr}-${operatingDate.getFullYear()})`;
+        document.getElementById('quickYestBtn').className = "text-[10px] bg-orange-600 hover:bg-orange-500 active:scale-95 px-2.5 py-1 rounded-md text-white font-bold transition shadow-sm shadow-orange-600/30";
+        document.getElementById('quickTodayBtn').className = "text-[10px] bg-workshop-800 hover:bg-workshop-700 active:scale-95 px-2 py-1 rounded-md text-slate-300 font-semibold border border-workshop-700 transition";
       } else {
-        btnOut.className = 'py-2 rounded-xl text-xs font-bold bg-workshop-800 text-slate-400 border border-slate-700 flex items-center justify-center gap-1.5 transition';
-        btnIn.className = 'py-2 rounded-xl text-xs font-bold bg-emerald-600 text-white flex items-center justify-center gap-1.5 transition';
-      }
-    }
-
-    function confirmBackdatedEntry() {
-      const dateVal = document.getElementById('backdateInputDate').value;
-      const itemId = document.getElementById('backdateItemSelect').value;
-      const qty = parseInt(document.getElementById('backdateQtyInput').value, 10);
-
-      if (!dateVal) {
-        showToast('Please select a date', 'rose');
-        return;
-      }
-      if (isNaN(qty) || qty <= 0) {
-        showToast('Please enter a valid quantity', 'rose');
-        return;
+        activeDateFullLabel = `${activeDateStr}-${operatingDate.getFullYear()} (Custom)`;
+        document.getElementById('quickTodayBtn').className = "text-[10px] bg-workshop-800 hover:bg-workshop-700 active:scale-95 px-2.5 py-1 rounded-md text-slate-300 font-semibold border border-workshop-700 transition";
+        document.getElementById('quickYestBtn').className = "text-[10px] bg-workshop-800 hover:bg-workshop-700 active:scale-95 px-2 py-1 rounded-md text-slate-300 font-semibold border border-workshop-700 transition";
       }
 
-      const item = inventory.find(i => i.id === itemId);
-      if (!item) return;
-
-      if (backdateEntryType === 'OUT') {
-        item.remaining -= qty;
-      } else {
-        item.remaining += qty;
-      }
-
-      const parts = dateVal.split('-');
-      const entryDate = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
-      const sheetDateLabel = getSheetDateLabel(entryDate);
-
-      const logEntry = {
-        id: 'tx_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
-        type: backdateEntryType,
-        itemId: item.id,
-        name: item.name,
-        qty: qty,
-        unitCost: item.cost,
-        total: item.cost * qty,
-        time: '12:00 PM',
-        date: entryDate.toLocaleDateString(),
-        dateISO: dateVal,
-        timestamp: entryDate.getTime()
-      };
-
-      addLogRecord(logEntry);
-
-      syncTransactionToGoogleSheet({
-        action: 'transaction',
-        itemName: item.name,
-        type: backdateEntryType,
-        quantity: qty,
-        unitCost: item.cost,
-        remainingStock: item.remaining,
-        dateLabel: sheetDateLabel,
-        isoDate: dateVal,
-        timestamp: entryDate.getTime()
-      });
-
-      playBeep(true);
-      closeModal('backdateModal');
-      showToast(`Recorded ${qty}x ${item.name.slice(0, 15)} on ${sheetDateLabel}`, 'emerald');
-      renderAll();
-    }
-
-    function flashCardSuccess(itemId) {
-      const card = document.getElementById(`itemCard-${itemId}`);
-      if (!card) return;
-      card.classList.add('border-emerald-500', 'bg-emerald-950/20');
-      setTimeout(() => {
-        card.classList.remove('border-emerald-500', 'bg-emerald-950/20');
-      }, 700);
-    }
-
-    function getSheetDateLabel(dateObj) {
-      const d = dateObj || new Date();
-      const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-      return `${d.getDate()}-${months[d.getMonth()]}`;
-    }
-
-    function recordCustomSale(itemId) {
-      const input = document.getElementById(`saleInput-${itemId}`);
-      const rawVal = input ? input.value.trim() : '';
-
-      // Default to 1 if user left box blank, or read entered number
-      const qty = (rawVal === '' || isNaN(parseInt(rawVal, 10))) ? 1 : parseInt(rawVal, 10);
-      const item = inventory.find(i => i.id === itemId);
-
-      if (!item) return;
-
-      if (qty <= 0) {
-        playBeep(false);
-        showToast('Please enter 1 or more quantity', 'rose');
-        if (input) {
-          input.value = '1';
-          input.focus();
-        }
-        return;
-      }
-
-      if (item.remaining < qty) {
-        playBeep(false);
-        showToast(`Only ${item.remaining} pcs left in stock!`, 'rose');
-        return;
-      }
-
-      item.remaining -= qty;
-
-      const now = new Date();
-      // Derive target logging date from currentWorkingDateISO
-      const targetDate = (currentWorkingDateISO === getTodayISO()) 
-        ? now 
-        : new Date(parseInt(currentWorkingDateISO.split('-')[0], 10), parseInt(currentWorkingDateISO.split('-')[1], 10) - 1, parseInt(currentWorkingDateISO.split('-')[2], 10));
-
-      const sheetDateLabel = getSheetDateLabel(targetDate);
-      const logEntry = {
-        id: 'tx_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
-        type: 'OUT',
-        itemId: item.id,
-        name: item.name,
-        qty: qty,
-        unitCost: item.cost,
-        total: item.cost * qty,
-        time: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        date: targetDate.toLocaleDateString(),
-        dateISO: currentWorkingDateISO,
-        timestamp: targetDate.getTime()
-      };
+      document.getElementById('currentDateBadge').innerText = activeDateFullLabel;
+      updateHeaderStats();
       
-      addLogRecord(logEntry);
-
-      syncTransactionToGoogleSheet({
-        action: 'transaction',
-        itemName: item.name,
-        type: 'OUT',
-        quantity: qty,
-        unitCost: item.cost,
-        remainingStock: item.remaining,
-        dateLabel: sheetDateLabel,
-        isoDate: currentWorkingDateISO,
-        timestamp: targetDate.getTime()
-      });
-
-      playBeep(true);
-      flashCardSuccess(itemId);
-      showToast(`Sold ${qty}x ${item.name.slice(0, 16)}... (${sheetDateLabel})`, 'emerald');
-
-      // Reset input back to 1
-      if (input) input.value = '1';
-
-      renderAll();
+      // If we are on logs screen, re-render logs
+      if (currentTab === 'logs') {
+        renderDailyLogs();
+      }
     }
 
-    function openEditItemModal(itemId) {
-      const item = inventory.find(i => i.id === itemId);
-      if (!item) return;
-
-      document.getElementById('editItemId').value = item.id;
-      document.getElementById('editItemName').value = item.name;
-      document.getElementById('editItemCost').value = item.cost;
-      document.getElementById('editItemStock').value = item.remaining;
-
-      openModal('editItemModal');
+    // Set Quick Date (Today / Yesterday)
+    function setQuickDate(type) {
+      const d = new Date();
+      if (type === 'yesterday') {
+        d.setDate(d.getDate() - 1);
+      }
+      setOperatingDate(d);
+      showToast(`Operating date: ${activeDateStr}`);
     }
 
-    function saveEditItem() {
-      const itemId = document.getElementById('editItemId').value;
-      const name = document.getElementById('editItemName').value.trim().toUpperCase();
-      const cost = parseFloat(document.getElementById('editItemCost').value);
-      const stock = parseInt(document.getElementById('editItemStock').value);
-
-      if (!name) {
-        playBeep(false);
-        showToast('Part name cannot be empty', 'rose');
-        return;
-      }
-
-      if (isNaN(cost) || cost < 0) {
-        playBeep(false);
-        showToast('Please enter a valid cost price', 'rose');
-        return;
-      }
-
-      if (isNaN(stock)) {
-        playBeep(false);
-        showToast('Please enter a valid stock count', 'rose');
-        return;
-      }
-
-      const item = inventory.find(i => i.id === itemId);
-      if (!item) return;
-
-      item.name = name;
-      item.cost = cost;
-      item.remaining = stock;
-
-      saveStorage();
-      closeModal('editItemModal');
-
-      syncTransactionToGoogleSheet({
-        action: 'upsert_item',
-        name: item.name,
-        cost: item.cost,
-        remaining: item.remaining,
-        timestamp: Date.now()
-      });
-
-      playBeep(true);
-      showToast('Item updated & synced to Sheet!', 'emerald');
-      renderAll();
-    }
-
-    function saveNewItem() {
-      const name = document.getElementById('newItemName').value.trim().toUpperCase();
-      const cost = parseFloat(document.getElementById('newItemCost').value) || 0;
-      const stock = parseInt(document.getElementById('newItemStock').value) || 0;
-
-      if (!name) {
-        showToast('Please enter part name or code', 'rose');
-        return;
-      }
-
-      const newItem = {
-        id: 'itm_' + Date.now(),
-        name: name,
-        cost: cost,
-        remaining: stock
-      };
-
-      inventory.unshift(newItem);
-      saveStorage();
-
-      document.getElementById('newItemName').value = '';
-      document.getElementById('newItemCost').value = '';
-      document.getElementById('newItemStock').value = '5';
-      closeModal('newItemModal');
-      populateBackdateDropdown();
-
-      syncTransactionToGoogleSheet({
-        action: 'upsert_item',
-        name: newItem.name,
-        cost: newItem.cost,
-        remaining: newItem.remaining,
-        timestamp: Date.now()
-      });
-
-      playBeep(true);
-      showToast('New part registered & added to Sheet!', 'emerald');
-      renderAll();
-    }
-
-    function setQuickDate(mode) {
-      selectedDateFilterMode = mode;
-
-      if (mode === 'today') {
-        selectedDateISO = getTodayISO();
-      } else if (mode === 'yesterday') {
-        const y = new Date();
-        y.setDate(y.getDate() - 1);
-        selectedDateISO = `${y.getFullYear()}-${String(y.getMonth() + 1).padStart(2, '0')}-${String(y.getDate()).padStart(2, '0')}`;
-      }
-
-      updateDateLabelUI();
-      updateQuickDateButtonsUI();
-      renderLogs();
-    }
-
-    function setLogTypeFilter(type) {
-      selectedLogType = type;
-      ['all', 'OUT', 'IN'].forEach(t => {
-        const btn = document.getElementById(`logTypeTab-${t}`);
-        if (!btn) return;
-        if (t === type) {
-          btn.className = "flex-1 py-1.5 rounded-lg font-bold text-center bg-orange-600 text-white transition shadow";
+    // Load Data from LocalStorage
+    function loadAppState() {
+      try {
+        const savedInv = localStorage.getItem(STORAGE_KEY_INVENTORY);
+        if (savedInv) {
+          inventory = JSON.parse(savedInv);
         } else {
-          btn.className = "flex-1 py-1.5 rounded-lg font-semibold text-center text-slate-400 hover:text-white transition";
-        }
-      });
-      renderLogs();
-    }
-
-    function updateQuickDateButtonsUI() {
-      const quickBtns = [
-        { id: 'quickBtnToday', mode: 'today' },
-        { id: 'quickBtnYesterday', mode: 'yesterday' },
-        { id: 'quickBtn7days', mode: '7days' },
-        { id: 'quickBtnThisMonth', mode: 'thisMonth' },
-        { id: 'quickBtnAll', mode: 'all' }
-      ];
-
-      quickBtns.forEach(b => {
-        const el = document.getElementById(b.id);
-        if (!el) return;
-        if (selectedDateFilterMode === b.mode) {
-          el.className = "px-2.5 py-1 rounded-lg font-bold bg-orange-600 text-white whitespace-nowrap transition shadow";
-        } else {
-          el.className = "px-2.5 py-1 rounded-lg font-bold bg-workshop-800 text-slate-300 border border-slate-700 whitespace-nowrap hover:text-white transition";
-        }
-      });
-    }
-
-    function getFilteredLogs() {
-      const now = new Date();
-
-      return salesLogs.filter(log => {
-        let dateMatches = false;
-        const logDateISO = log.dateISO || getTodayISO();
-
-        if (selectedDateFilterMode === 'today' || selectedDateFilterMode === 'yesterday' || selectedDateFilterMode === 'custom') {
-          dateMatches = (logDateISO === selectedDateISO);
-        } else if (selectedDateFilterMode === '7days') {
-          const sevenDaysAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
-          dateMatches = ((log.timestamp || Date.now()) >= sevenDaysAgo);
-        } else if (selectedDateFilterMode === 'thisMonth') {
-          const logDate = new Date(log.timestamp || Date.now());
-          dateMatches = (logDate.getMonth() === now.getMonth() && logDate.getFullYear() === now.getFullYear());
-        } else if (selectedDateFilterMode === 'all') {
-          dateMatches = true;
+          inventory = JSON.parse(JSON.stringify(RAW_CATALOG));
+          saveInventory();
         }
 
-        if (!dateMatches) return false;
+        const savedSales = localStorage.getItem(STORAGE_KEY_SALES);
+        if (savedSales) salesHistory = JSON.parse(savedSales);
 
-        if (selectedLogType !== 'all' && log.type !== selectedLogType) {
-          return false;
-        }
+        const savedInward = localStorage.getItem(STORAGE_KEY_INWARD);
+        if (savedInward) inwardHistory = JSON.parse(savedInward);
 
-        return true;
-      });
-    }
-
-    function renderLogs() {
-      const container = document.getElementById('logsContainer');
-      const badge = document.getElementById('logsCountBadge');
-
-      if (salesLogs.length > 0) {
-        badge.classList.remove('hidden');
-        badge.innerText = salesLogs.length > 99 ? '99+' : salesLogs.length;
-      } else {
-        badge.classList.add('hidden');
+        const savedConfig = localStorage.getItem(STORAGE_KEY_CONFIG);
+        if (savedConfig) syncConfig = JSON.parse(savedConfig);
+      } catch (err) {
+        inventory = JSON.parse(JSON.stringify(RAW_CATALOG));
       }
+    }
 
-      const filteredAllTypes = salesLogs.filter(log => {
-        const logDateISO = log.dateISO || getTodayISO();
-        if (selectedDateFilterMode === 'today' || selectedDateFilterMode === 'yesterday' || selectedDateFilterMode === 'custom') {
-          return (logDateISO === selectedDateISO);
-        } else if (selectedDateFilterMode === '7days') {
-          return ((log.timestamp || Date.now()) >= (Date.now() - 7 * 86400000));
-        } else if (selectedDateFilterMode === 'thisMonth') {
-          const d = new Date(log.timestamp || Date.now());
-          const n = new Date();
-          return (d.getMonth() === n.getMonth() && d.getFullYear() === n.getFullYear());
+    function saveInventory() {
+      localStorage.setItem(STORAGE_KEY_INVENTORY, JSON.stringify(inventory));
+    }
+    function saveSales() {
+      localStorage.setItem(STORAGE_KEY_SALES, JSON.stringify(salesHistory));
+    }
+    function saveInward() {
+      localStorage.setItem(STORAGE_KEY_INWARD, JSON.stringify(inwardHistory));
+    }
+
+    // TAB NAVIGATION SWITCHER (Tested & Bulletproof)
+    function switchTab(tabId) {
+      currentTab = tabId;
+
+      const tabCounter = document.getElementById('tabCounter');
+      const tabLogs = document.getElementById('tabLogs');
+      const tabInventory = document.getElementById('tabInventory');
+
+      const btnCounter = document.getElementById('navBtnCounter');
+      const btnLogs = document.getElementById('navBtnLogs');
+      const btnInventory = document.getElementById('navBtnInventory');
+
+      // Hide all containers
+      tabCounter.classList.add('hidden');
+      tabLogs.classList.add('hidden');
+      tabInventory.classList.add('hidden');
+
+      // Inactive button styling
+      const inactiveClass = "flex flex-col items-center gap-0.5 text-slate-400 hover:text-slate-200 font-medium transition active:scale-95";
+      btnCounter.className = inactiveClass;
+      btnLogs.className = inactiveClass;
+      btnInventory.className = inactiveClass;
+
+      // Active styling
+      const activeClass = "flex flex-col items-center gap-0.5 text-orange-400 font-bold transition active:scale-95";
+
+      if (tabId === 'counter') {
+        tabCounter.classList.remove('hidden');
+        btnCounter.className = activeClass;
+        renderCounterList();
+      } else if (tabId === 'logs') {
+        tabLogs.classList.remove('hidden');
+        btnLogs.className = activeClass;
+        renderDailyLogs();
+      } else if (tabId === 'inventory') {
+        tabInventory.classList.remove('hidden');
+        btnInventory.className = activeClass;
+        renderMasterInventory();
+      }
+    }
+
+    // Render Counter View
+    function renderCounterList() {
+      const container = document.getElementById('itemsContainer');
+      const filtered = inventory.filter(item => {
+        if (searchQuery) {
+          const match = item.name.toLowerCase().includes(searchQuery.toLowerCase());
+          if (!match) return false;
         }
+        if (activeFilter === 'in_stock') return item.remaining > 0;
+        if (activeFilter === 'low_stock') return item.remaining > 0 && item.remaining <= 5;
+        if (activeFilter === 'out') return item.remaining <= 0;
         return true;
       });
 
-      const outLogs = filteredAllTypes.filter(l => l.type === 'OUT');
-      const inLogs = filteredAllTypes.filter(l => l.type === 'IN');
-
-      const soldUnits = outLogs.reduce((sum, l) => sum + (l.qty || 0), 0);
-      const soldRevenue = outLogs.reduce((sum, l) => sum + (l.total || 0), 0);
-      const addedUnits = inLogs.reduce((sum, l) => sum + (l.qty || 0), 0);
-      const addedValue = inLogs.reduce((sum, l) => sum + (l.total || 0), 0);
-
-      document.getElementById('logSummarySoldUnits').innerText = `${soldUnits} pcs`;
-      document.getElementById('logSummarySoldRev').innerText = `₹${soldRevenue.toLocaleString('en-IN')}`;
-      document.getElementById('logSummaryAddedUnits').innerText = `${addedUnits} pcs`;
-      document.getElementById('logSummaryAddedVal').innerText = `₹${addedValue.toLocaleString('en-IN')}`;
-
-      document.getElementById('typeCountAll').innerText = filteredAllTypes.length;
-      document.getElementById('typeCountOut').innerText = outLogs.length;
-      document.getElementById('typeCountIn').innerText = inLogs.length;
-
-      const visibleLogs = getFilteredLogs();
-
-      if (visibleLogs.length === 0) {
-        const dateDesc = (selectedDateFilterMode === 'today') ? 'today' : (selectedDateFilterMode === 'yesterday') ? 'yesterday' : `on ${selectedDateISO}`;
+      if (filtered.length === 0) {
         container.innerHTML = `
-          <div class="text-center py-12 bg-workshop-900/60 rounded-2xl border border-workshop-700/60">
-            <i class="fa-solid fa-calendar-xmark text-3xl text-slate-600 mb-2"></i>
-            <p class="text-xs font-semibold text-slate-400">No stock sales or inward items recorded ${dateDesc}.</p>
-            <button onclick="setQuickDate('today'); setLogTypeFilter('all');" class="mt-2.5 text-xs text-orange-400 underline font-semibold">
-              Return to Today's Logs
-            </button>
+          <div class="p-8 text-center text-slate-500 text-xs">
+            <i class="fa-solid fa-magnifying-glass text-2xl mb-2 block"></i>
+            No parts match the selected filter.
           </div>
         `;
         return;
       }
 
-      // GROUP REPEATED TRANSACTIONS OF THE SAME ITEM ON THE SAME DATE
-      // (e.g. 2 pcs first + 5 pcs later = 7 pcs total)
-      const groupedMap = new Map();
-
-      visibleLogs.forEach(log => {
-        const key = `${log.dateISO || log.date}_${log.itemId}_${log.type}`;
-        if (!groupedMap.has(key)) {
-          groupedMap.set(key, {
-            key: key,
-            dateISO: log.dateISO || log.date,
-            date: log.date,
-            itemId: log.itemId,
-            name: log.name,
-            type: log.type,
-            unitCost: log.unitCost,
-            totalQty: 0,
-            totalAmount: 0,
-            rawLogs: []
-          });
-        }
-        const group = groupedMap.get(key);
-        group.totalQty += log.qty;
-        group.totalAmount += (log.total || (log.qty * log.unitCost));
-        group.rawLogs.push(log);
-      });
-
-      const aggregatedList = Array.from(groupedMap.values());
-
-      container.innerHTML = aggregatedList.map(group => {
-        const isOut = group.type === 'OUT';
-        const typeBadge = isOut 
-          ? `<span class="bg-orange-500/15 text-orange-400 border border-orange-500/30 text-[9px] font-black px-1.5 py-0.5 rounded uppercase flex items-center gap-1"><i class="fa-solid fa-arrow-down text-[8px]"></i> SOLD OUT</span>`
-          : `<span class="bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 text-[9px] font-black px-1.5 py-0.5 rounded uppercase flex items-center gap-1"><i class="fa-solid fa-arrow-up text-[8px]"></i> INWARD ADD</span>`;
-
-        const occurrences = group.rawLogs.length;
-        const occurrenceBadge = occurrences > 1 
-          ? `<span class="text-[9px] bg-slate-800 text-amber-400 border border-amber-500/30 px-1.5 py-0.5 rounded font-black">${occurrences} entries summed</span>` 
-          : '';
-
-        const timeBreakdown = occurrences > 1
-          ? `<div class="mt-1.5 pt-1.5 border-t border-workshop-800/80 flex flex-wrap gap-1 text-[9px] text-slate-400">
-               <span class="text-slate-500">Breakdown:</span>
-               ${group.rawLogs.map(rl => `<span class="bg-workshop-950 px-1.5 py-0.5 rounded border border-workshop-700 font-mono text-slate-300">${rl.qty} pcs @ ${rl.time}</span>`).join('')}
-             </div>`
-          : `<p class="text-[10px] text-slate-400 mt-0.5 flex items-center gap-1.5 flex-wrap">
-               <span class="font-semibold text-slate-300">${group.dateISO}</span>
-               <span>•</span>
-               <span>${group.rawLogs[0]?.time || ''}</span>
-               <span>•</span>
-               <span class="font-bold ${isOut ? 'text-orange-400' : 'text-emerald-400'}">${isOut ? '-' : '+'}${group.totalQty} pcs</span>
-               <span>@ ₹${Number(group.unitCost).toLocaleString('en-IN')}</span>
-             </p>`;
-
-        // IDs of all sub-logs in this group for deletion/reversal
-        const logIdsStr = group.rawLogs.map(l => l.id).join(',');
-
-        return `
-          <div class="bg-workshop-900/90 border border-workshop-700 rounded-xl p-3 shadow hover:border-slate-600 transition space-y-1">
-            <div class="flex items-center justify-between gap-3">
-              <div class="flex items-center gap-2.5 flex-1 min-w-0">
-                <div class="w-9 h-9 rounded-xl ${isOut ? 'bg-orange-600/20 text-orange-400 border border-orange-500/30' : 'bg-emerald-600/20 text-emerald-400 border border-emerald-500/30'} flex items-center justify-center shrink-0">
-                  <i class="fa-solid ${isOut ? 'fa-cart-shopping' : 'fa-truck-ramp-box'} text-xs"></i>
-                </div>
-                <div class="min-w-0">
-                  <div class="flex items-center gap-1.5 flex-wrap">
-                    ${typeBadge}
-                    <span class="text-xs font-bold text-white truncate">${escapeHtml(group.name)}</span>
-                    ${occurrenceBadge}
-                  </div>
-                  ${timeBreakdown}
-                </div>
-              </div>
-
-              <div class="flex items-center gap-2 shrink-0">
-                <div class="text-right">
-                  <span class="text-xs font-black block ${isOut ? 'text-white' : 'text-emerald-400'}">₹${Number(group.totalAmount).toLocaleString('en-IN')}</span>
-                  <span class="text-[9px] font-bold ${isOut ? 'text-orange-400' : 'text-emerald-400'}">${group.totalQty} pcs total</span>
-                </div>
-                <button onclick="revertGroupLogs('${logIdsStr}')" title="Revert all sales of this item for this day" class="tap-active text-slate-500 hover:text-rose-400 p-1.5 rounded-lg hover:bg-workshop-800 transition text-xs">
-                  <i class="fa-solid fa-trash"></i>
-                </button>
-              </div>
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
-
-    function revertGroupLogs(idsCommaSeparated) {
-      const ids = idsCommaSeparated.split(',').filter(Boolean);
-      if (ids.length === 0) return;
-
-      ids.forEach(logId => {
-        const idx = salesLogs.findIndex(l => l.id === logId);
-        if (idx !== -1) {
-          const log = salesLogs[idx];
-          const item = inventory.find(i => i.id === log.itemId);
-          if (item) {
-            if (log.type === 'OUT') {
-              item.remaining += log.qty;
-            } else {
-              item.remaining = Math.max(0, item.remaining - log.qty);
-            }
-          }
-          salesLogs.splice(idx, 1);
-        }
-      });
-
-      saveStorage();
-      playBeep(true);
-      showToast('Transaction(s) reverted & stock restored', 'emerald');
-      renderAll();
-    }
-
-    function revertLogById(logId) {
-      const idx = salesLogs.findIndex(l => l.id === logId);
-      if (idx === -1) return;
-
-      const log = salesLogs[idx];
-      const item = inventory.find(i => i.id === log.itemId);
-      if (item) {
-        if (log.type === 'OUT') {
-          item.remaining += log.qty;
-        } else {
-          item.remaining = Math.max(0, item.remaining - log.qty);
-        }
-      }
-
-      salesLogs.splice(idx, 1);
-      saveStorage();
-      playBeep(true);
-      showToast('Transaction reverted & stock adjusted', 'emerald');
-      renderAll();
-    }
-
-    function clearFilteredLogs() {
-      const visible = getFilteredLogs();
-      if (visible.length === 0) {
-        showToast('No logs to clear for this filter', 'rose');
-        return;
-      }
-
-      const visibleIds = new Set(visible.map(l => l.id));
-      salesLogs = salesLogs.filter(l => !visibleIds.has(l.id));
-      saveStorage();
-      showToast(`Cleared ${visible.length} log records`, 'emerald');
-      renderAll();
-    }
-
-    function exportLogsCSV() {
-      const logsToExport = getFilteredLogs();
-      if (logsToExport.length === 0) {
-        showToast('No log records found to export', 'rose');
-        return;
-      }
-
-      let csv = 'Log ID,Date,Time,Type,Part Name,Quantity,Unit Cost (INR),Total Value (INR)\n';
-      logsToExport.forEach(l => {
-        csv += `"${l.id}","${l.dateISO || l.date}","${l.time}","${l.type}","${(l.name || '').replace(/"/g, '""')}",${l.qty},${l.unitCost},${l.total}\n`;
-      });
-
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      const filenameDate = (selectedDateFilterMode === 'today' || selectedDateFilterMode === 'yesterday' || selectedDateFilterMode === 'custom') 
-        ? selectedDateISO 
-        : selectedDateFilterMode;
-      link.setAttribute('href', url);
-      link.setAttribute('download', `AM_Analyser_DailyLogs_${filenameDate}.csv`);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      showToast(`Exported ${logsToExport.length} logs to CSV`, 'emerald');
-    }
-
-    function renderInventoryTable() {
-      const tbody = document.getElementById('inventoryTableBody');
-      const items = getProcessedItems();
-      let totalStockValue = 0;
-
-      inventory.forEach(item => {
-        totalStockValue += ((item.cost || 0) * (item.remaining || 0));
-      });
-
-      if (items.length === 0) {
-        tbody.innerHTML = `
-          <tr>
-            <td colspan="5" class="p-4 text-center text-slate-500">No matching parts found for this filter.</td>
-          </tr>
-        `;
-      } else {
-        tbody.innerHTML = items.map(item => {
-          const itemVal = (item.cost || 0) * (item.remaining || 0);
-
-          return `
-            <tr class="hover:bg-workshop-800/50">
-              <td class="p-2.5 font-medium text-slate-200">
-                <div class="font-bold text-white leading-tight">${escapeHtml(item.name)}</div>
-              </td>
-              <td class="p-2.5 text-right font-semibold text-slate-300">₹${Number(item.cost).toLocaleString('en-IN')}</td>
-              <td class="p-2.5 text-center">
-                <span class="font-black ${item.remaining <= 2 ? 'text-rose-400' : 'text-emerald-400'}">
-                  ${item.remaining}
-                </span>
-              </td>
-              <td class="p-2.5 text-right font-bold text-orange-400">₹${itemVal.toLocaleString('en-IN')}</td>
-              <td class="p-2.5 text-center">
-                <div class="flex items-center justify-center gap-2">
-                  <button onclick="openEditItemModal('${item.id}')" title="Edit part & price" class="text-slate-400 hover:text-orange-400 text-xs p-1">
-                    <i class="fa-solid fa-pen"></i>
-                  </button>
-                  <button onclick="deleteItem('${item.id}')" title="Delete part" class="text-slate-500 hover:text-rose-400 text-xs p-1">
-                    <i class="fa-solid fa-trash-can"></i>
-                  </button>
-                </div>
-              </td>
-            </tr>
-          `;
-        }).join('');
-      }
-
-      document.getElementById('inventoryStats').innerText = `Total Current Inventory Value: ₹${totalStockValue.toLocaleString('en-IN')}`;
-    }
-
-    function deleteItem(itemId) {
-      inventory = inventory.filter(i => i.id !== itemId);
-      saveStorage();
-      showToast('Item removed from master list', 'rose');
-      renderAll();
-    }
-
-    function exportToGoogleSheetCSV() {
-      let csv = 'Item Name,Cost Price,Remaining Stock,Total Value (₹)\n';
-      inventory.forEach(item => {
-        const val = (item.cost || 0) * (item.remaining || 0);
-        csv += `"${item.name.replace(/"/g, '""')}",${item.cost},${item.remaining},${val}\n`;
-      });
-
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.setAttribute('href', url);
-      link.setAttribute('download', `AM_Analyser_Stock_${new Date().toISOString().slice(0, 10)}.csv`);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      closeModal('exportModal');
-      showToast('Stock CSV exported! Open in Google Sheets', 'emerald');
-    }
-
-    function copyInventoryToClipboard() {
-      let tsv = 'Item Name\tCost Price\tRemaining Stock\tTotal Value\n';
-      inventory.forEach(item => {
-        const val = (item.cost || 0) * (item.remaining || 0);
-        tsv += `${item.name}\t${item.cost}\t${item.remaining}\t${val}\n`;
-      });
-
-      const dummy = document.createElement('textarea');
-      dummy.value = tsv;
-      document.body.appendChild(dummy);
-      dummy.select();
-      document.execCommand('copy');
-      document.body.removeChild(dummy);
-
-      closeModal('exportModal');
-      showToast('Copied to clipboard! Ready to paste into Sheets', 'emerald');
-    }
-
-    function resetToInitialData() {
-      inventory = JSON.parse(JSON.stringify(DEFAULT_STOCK));
-      salesLogs = [];
-      saveStorage();
-      closeModal('exportModal');
-      showToast('Reset back to original stock', 'emerald');
-      renderAll();
-    }
-
-    function updateHeaderStats() {
-      const allCount = inventory.length;
-      const lowCount = inventory.filter(i => i.remaining > 0 && i.remaining < 5).length;
-      const outCount = inventory.filter(i => i.remaining === 0).length;
-      const inCount = inventory.filter(i => i.remaining > 0).length;
-
-      document.getElementById('countPillAll').innerText = allCount;
-      document.getElementById('countPillLow').innerText = lowCount;
-      document.getElementById('countPillOut').innerText = outCount;
-      document.getElementById('countPillIn').innerText = inCount;
-
-      document.getElementById('lowStockBadge').innerText = lowCount + outCount;
-
-      const outLogs = salesLogs.filter(l => l.type === 'OUT');
-      const totalRevenue = outLogs.reduce((sum, l) => sum + (l.total || 0), 0);
-      const totalUnits = outLogs.reduce((sum, l) => sum + (l.qty || 0), 0);
-
-      document.getElementById('todaySalesTotal').innerText = `₹${totalRevenue.toLocaleString('en-IN')}`;
-      document.getElementById('todayItemsCount').innerText = `${totalUnits} pcs`;
-    }
-
-    function getProcessedItems() {
-      let filtered = inventory.filter(item => {
-        const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase());
-        if (!matchesSearch) return false;
-
-        if (stockFilter === 'low') return item.remaining > 0 && item.remaining < 5;
-        if (stockFilter === 'out') return item.remaining <= 0;
-        if (stockFilter === 'instock') return item.remaining > 0;
-        return true;
-      });
-
-      return filtered.sort((a, b) => {
-        if (currentSort === 'name_asc') return a.name.localeCompare(b.name);
-        if (currentSort === 'stock_asc') return a.remaining - b.remaining;
-        if (currentSort === 'stock_desc') return b.remaining - a.remaining;
-        if (currentSort === 'price_asc') return a.cost - b.cost;
-        if (currentSort === 'price_desc') return b.cost - a.cost;
-        return 0;
-      });
-    }
-
-    function renderCounter() {
-      const container = document.getElementById('counterItemsList');
-      const items = getProcessedItems();
-
-      if (items.length === 0) {
-        container.innerHTML = `
-          <div class="text-center py-12 bg-workshop-900/60 rounded-2xl border border-workshop-700/60">
-            <i class="fa-solid fa-box-open text-3xl text-slate-600 mb-2"></i>
-            <p class="text-xs font-semibold text-slate-400">No matching parts found.</p>
-          </div>
-        `;
-        return;
-      }
-
-      // Preserve any typed input values before re-rendering
-      const currentValues = {};
-      items.forEach(item => {
-        const inp = document.getElementById(`saleInput-${item.id}`);
-        if (inp && inp.value !== '') {
-          currentValues[item.id] = inp.value;
-        }
-      });
-
-      container.innerHTML = items.map(item => {
+      container.innerHTML = filtered.map(item => {
         const isOutOfStock = item.remaining <= 0;
-        const isLow = item.remaining > 0 && item.remaining < 5;
-        const stockColor = isOutOfStock ? 'text-rose-400' : isLow ? 'text-amber-400' : 'text-emerald-400';
-        const stockBadge = isOutOfStock
-          ? '<span class="text-[9px] bg-rose-500/20 text-rose-300 border border-rose-500/40 px-1.5 py-0.5 rounded font-bold uppercase">Out</span>'
-          : isLow
-          ? '<span class="text-[9px] bg-amber-500/20 text-amber-300 border border-amber-500/40 px-1.5 py-0.5 rounded font-bold uppercase">Low</span>'
-          : '';
+        const isLowStock = item.remaining > 0 && item.remaining <= 5;
 
-        // If out of stock, default value is 0; otherwise clamp remembered value between 1 and available stock
-        let defaultVal = '1';
+        let badgeHtml = '';
         if (isOutOfStock) {
-          defaultVal = '0';
-        } else if (currentValues[item.id] !== undefined) {
-          const parsed = parseInt(currentValues[item.id], 10);
-          if (!isNaN(parsed)) {
-            defaultVal = String(Math.min(item.remaining, Math.max(1, parsed)));
-          }
+          badgeHtml = `<span class="text-[10px] bg-rose-500/20 text-rose-400 font-bold px-2 py-0.5 rounded-full border border-rose-500/30">0 In Stock</span>`;
+        } else if (isLowStock) {
+          badgeHtml = `<span class="text-[10px] bg-amber-500/20 text-amber-400 font-bold px-2 py-0.5 rounded-full border border-amber-500/30 font-num">${item.remaining} left</span>`;
+        } else {
+          badgeHtml = `<span class="text-[10px] bg-emerald-500/20 text-emerald-400 font-bold px-2 py-0.5 rounded-full border border-emerald-500/30 font-num">${item.remaining} pcs</span>`;
         }
 
         return `
-          <div id="itemCard-${item.id}" class="bg-workshop-900/90 border border-workshop-700/80 rounded-2xl p-3 shadow-md hover:border-slate-600 transition space-y-2.5">
+          <div class="bg-workshop-950/70 border border-workshop-700/80 rounded-2xl p-3 space-y-2.5 transition shadow-sm hover:border-slate-500">
             <div class="flex items-start justify-between gap-2">
-              <div class="min-w-0 flex-1">
-                <div class="flex items-center gap-1.5 flex-wrap">
-                  <h3 class="text-xs font-bold text-white tracking-wide truncate">${escapeHtml(item.name)}</h3>
-                  ${stockBadge}
-                </div>
-                <div class="flex items-center gap-3 mt-1 text-[11px] text-slate-400">
-                  <span>Price: <b class="text-slate-200">₹${Number(item.cost).toLocaleString('en-IN')}</b></span>
-                  <span>•</span>
-                  <span>Stock: <b class="${stockColor}">${item.remaining} pcs</b></span>
+              <div class="min-w-0">
+                <h4 class="text-xs font-bold text-slate-100 truncate">${item.name}</h4>
+                <div class="flex items-center gap-2 mt-1">
+                  <span class="text-xs font-black text-emerald-400 font-num">₹${item.cost}</span>
+                  <span class="text-slate-600 text-xs">&bull;</span>
+                  ${badgeHtml}
                 </div>
               </div>
-              <div class="flex items-center gap-1">
-                <button type="button" onclick="openInwardModal('${item.id}')" title="Stock Inward" class="tap-active w-8 h-8 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-400 border border-emerald-500/30 flex items-center justify-center text-xs font-bold">
+              
+              <button onclick="openInwardModal('${item.id}')" class="px-2 py-1 rounded-lg bg-workshop-800 hover:bg-cyan-900/40 text-cyan-400 border border-workshop-700 text-[10px] font-bold shrink-0 transition active:scale-95">
+                <i class="fa-solid fa-plus text-[9px] mr-0.5"></i> Inward
+              </button>
+            </div>
+
+            <div class="flex items-center gap-2 pt-1 border-t border-workshop-800">
+              <div class="flex items-center bg-workshop-900 border border-workshop-700 rounded-xl overflow-hidden shrink-0">
+                <button type="button" onclick="stepQty('${item.id}', -1)" ${isOutOfStock ? 'disabled' : ''} 
+                  class="w-8 h-8 flex items-center justify-center text-slate-300 hover:bg-workshop-800 active:scale-95 text-xs font-bold disabled:opacity-40">
+                  <i class="fa-solid fa-minus"></i>
+                </button>
+                <input type="number" id="qty_${item.id}" value="${isOutOfStock ? 0 : 1}" min="1" max="${item.remaining}" 
+                  oninput="validateInput('${item.id}', this.value)" ${isOutOfStock ? 'disabled' : ''}
+                  class="w-10 text-center bg-transparent text-white font-num font-bold text-xs focus:outline-none disabled:text-slate-500">
+                <button type="button" onclick="stepQty('${item.id}', 1)" ${isOutOfStock ? 'disabled' : ''} 
+                  class="w-8 h-8 flex items-center justify-center text-slate-300 hover:bg-workshop-800 active:scale-95 text-xs font-bold disabled:opacity-40">
                   <i class="fa-solid fa-plus"></i>
                 </button>
-                <button type="button" onclick="openEditItemModal('${item.id}')" title="Edit Part" class="tap-active w-8 h-8 rounded-lg bg-workshop-800 hover:bg-workshop-700 text-slate-400 hover:text-white border border-slate-700 flex items-center justify-center text-xs">
-                  <i class="fa-solid fa-pen"></i>
-                </button>
               </div>
-            </div>
 
-            <!-- Sale Counter Controls: Stepper (-) Input (+) and Sell Button -->
-            <div class="flex items-center gap-2 pt-1 border-t border-workshop-800">
-              <div class="flex items-center bg-workshop-950 border border-workshop-700 rounded-xl overflow-hidden flex-1 focus-within:border-orange-500 transition ${isOutOfStock ? 'opacity-50 pointer-events-none' : ''}">
-                <button 
-                  type="button" 
-                  onclick="stepCounterQty('${item.id}', -1)"
-                  ${isOutOfStock ? 'disabled' : ''}
-                  class="tap-active w-10 h-10 bg-workshop-800/80 hover:bg-workshop-700 disabled:opacity-40 text-slate-200 font-black text-base flex items-center justify-center border-r border-workshop-700 select-none">
-                  -
-                </button>
-                <input 
-                  type="number" 
-                  inputmode="numeric"
-                  pattern="[0-9]*"
-                  id="saleInput-${item.id}" 
-                  value="${defaultVal}" 
-                  min="${isOutOfStock ? 0 : 1}" 
-                  max="${Math.max(0, item.remaining)}"
-                  ${isOutOfStock ? 'disabled' : ''}
-                  oninput="validateSaleInput('${item.id}')"
-                  onclick="this.select()"
-                  class="w-full bg-transparent text-center font-black text-white text-base py-1.5 focus:outline-none cursor-text disabled:text-slate-500"
-                />
-                <button 
-                  type="button" 
-                  onclick="stepCounterQty('${item.id}', 1)"
-                  ${isOutOfStock ? 'disabled' : ''}
-                  class="tap-active w-10 h-10 bg-workshop-800/80 hover:bg-workshop-700 disabled:opacity-40 text-slate-200 font-black text-base flex items-center justify-center border-l border-workshop-700 select-none">
-                  +
-                </button>
-              </div>
-              <button 
-                type="button" 
-                onclick="recordCustomSale('${item.id}')"
-                ${isOutOfStock ? 'disabled' : ''}
-                class="tap-active ${isOutOfStock ? 'bg-workshop-800 text-slate-500 cursor-not-allowed border border-slate-700' : 'bg-orange-600 hover:bg-orange-500 active:bg-orange-700 text-white shadow-md shadow-orange-950/40'} font-bold text-xs px-4 h-10 rounded-xl flex items-center gap-1.5 shrink-0 transition">
-                <i class="fa-solid fa-cart-shopping text-xs"></i>
+              <button type="button" onclick="executeSale('${item.id}')" ${isOutOfStock ? 'disabled' : ''} 
+                class="flex-1 py-2 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition active:scale-95 shadow-sm
+                ${isOutOfStock ? 'bg-workshop-800 text-slate-500 border border-workshop-700 cursor-not-allowed' : 'bg-orange-600 hover:bg-orange-500 text-white shadow-orange-600/30'}">
+                <i class="fa-solid fa-arrow-up-from-bracket text-[11px]"></i>
                 <span>${isOutOfStock ? 'Out of Stock' : 'Out / Sell'}</span>
               </button>
             </div>
@@ -2059,561 +752,449 @@
       }).join('');
     }
 
-    function stepCounterQty(itemId, delta) {
-      const item = inventory.find(i => i.id === itemId);
-      const inp = document.getElementById(`saleInput-${itemId}`);
-      if (!inp || !item) return;
+    // Render Daily Logs View
+    function renderDailyLogs() {
+      const container = document.getElementById('logsContainer');
+      const title = document.getElementById('dailyLogsDateTitle');
+      const revEl = document.getElementById('logSummaryRevenue');
+      const pcsEl = document.getElementById('logSummaryPcs');
 
-      const maxStock = Math.max(0, item.remaining);
-      if (maxStock <= 0) {
-        inp.value = 0;
-        showToast('Item is out of stock (0 pcs)', 'rose');
+      title.innerText = `Sales for ${activeDateStr}`;
+
+      const daySales = salesHistory[activeDateStr] || {};
+      const entries = Object.entries(daySales).filter(([_, qty]) => qty > 0);
+
+      let totalPcs = 0;
+      let totalRev = 0;
+
+      if (entries.length === 0) {
+        revEl.innerText = "₹0";
+        pcsEl.innerText = "0 pcs";
+        container.innerHTML = `
+          <div class="p-8 text-center bg-workshop-950/40 rounded-2xl border border-workshop-800/80 text-slate-500 text-xs space-y-2">
+            <i class="fa-solid fa-clipboard-list text-3xl text-slate-600 block"></i>
+            <span>No sales recorded yet for ${activeDateStr}.</span>
+          </div>
+        `;
         return;
       }
 
-      const currentVal = parseInt(inp.value, 10);
-      const safeVal = isNaN(currentVal) ? 1 : currentVal;
-      let nextVal = safeVal + delta;
+      container.innerHTML = entries.map(([id, qty]) => {
+        const item = inventory.find(i => i.id === id);
+        if (!item) return '';
+        const itemRev = qty * item.cost;
+        totalPcs += qty;
+        totalRev += itemRev;
 
-      if (nextVal > maxStock) {
-        nextVal = maxStock;
-        playBeep(false);
-        showToast(`Cannot exceed stock limit (${maxStock} pcs available)`, 'rose');
-      } else if (nextVal < 1) {
-        nextVal = 1;
-      }
+        return `
+          <div class="bg-workshop-950/70 border border-workshop-700/80 rounded-2xl p-3 flex items-center justify-between gap-3 shadow-sm">
+            <div class="min-w-0">
+              <h4 class="text-xs font-bold text-slate-100 truncate">${item.name}</h4>
+              <div class="flex items-center gap-2 mt-1 text-[11px] font-mono">
+                <span class="text-amber-400 font-bold">${qty} pcs sold</span>
+                <span class="text-slate-600">&bull;</span>
+                <span class="text-slate-400">@ ₹${item.cost}</span>
+              </div>
+            </div>
+            <div class="text-right shrink-0 font-mono">
+              <span class="text-xs font-black text-emerald-400 block">₹${itemRev.toLocaleString('en-IN')}</span>
+              <span class="text-[10px] text-slate-500">Recorded</span>
+            </div>
+          </div>
+        `;
+      }).join('');
 
-      inp.value = nextVal;
+      revEl.innerText = `₹${Math.round(totalRev).toLocaleString('en-IN')}`;
+      pcsEl.innerText = `${totalPcs} pcs`;
     }
 
-    function validateSaleInput(itemId) {
-      const item = inventory.find(i => i.id === itemId);
-      const inp = document.getElementById(`saleInput-${itemId}`);
-      if (!inp || !item) return;
+    // Render Master Inventory View
+    function renderMasterInventory() {
+      const container = document.getElementById('masterInventoryContainer');
+      container.innerHTML = inventory.map((item, idx) => {
+        const isOutOfStock = item.remaining <= 0;
+        const isLowStock = item.remaining > 0 && item.remaining <= 5;
+        const inward = inwardHistory[item.id] || 0;
 
-      const maxStock = Math.max(0, item.remaining);
-      if (maxStock <= 0) {
-        inp.value = 0;
+        return `
+          <div class="bg-workshop-950/70 border border-workshop-700/80 rounded-2xl p-3 flex items-center justify-between gap-3 shadow-sm">
+            <div class="min-w-0 flex-1">
+              <div class="flex items-center gap-2">
+                <span class="text-[10px] text-slate-500 font-mono font-bold">#${idx + 1}</span>
+                <h4 class="text-xs font-bold text-slate-100 truncate">${item.name}</h4>
+              </div>
+              <div class="flex flex-wrap items-center gap-2 mt-1 text-[11px] font-mono">
+                <span class="text-emerald-400 font-bold">₹${item.cost}</span>
+                <span class="text-slate-600">&bull;</span>
+                <span class="text-slate-400">Stock: <b class="${isOutOfStock ? 'text-rose-400' : isLowStock ? 'text-amber-400' : 'text-slate-200'}">${item.remaining} pcs</b></span>
+                <span class="text-slate-600">&bull;</span>
+                <span class="text-cyan-400">+${inward} in</span>
+              </div>
+            </div>
+            <button onclick="openInwardModal('${item.id}')" class="px-2.5 py-1.5 rounded-lg bg-workshop-800 hover:bg-cyan-950 text-cyan-400 border border-workshop-700 text-xs font-bold shrink-0 transition active:scale-95">
+              + Inward
+            </button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Step Sale Qty Counter (+ / -)
+    function stepQty(itemId, delta) {
+      const item = inventory.find(i => i.id === itemId);
+      if (!item || item.remaining <= 0) return;
+
+      const input = document.getElementById(`qty_${itemId}`);
+      if (!input) return;
+
+      let currentVal = parseInt(input.value, 10) || 1;
+      let nextVal = currentVal + delta;
+
+      if (nextVal < 1) nextVal = 1;
+      if (nextVal > item.remaining) {
+        nextVal = item.remaining;
+        showToast(`Stock limit: only ${item.remaining} pcs left!`);
+      }
+
+      input.value = nextVal;
+    }
+
+    // Validate Input Quantity
+    function validateInput(itemId, val) {
+      const item = inventory.find(i => i.id === itemId);
+      if (!item) return;
+
+      const input = document.getElementById(`qty_${itemId}`);
+      let num = parseInt(val, 10);
+
+      if (isNaN(num) || num < 1) {
+        input.value = 1;
         return;
       }
 
-      const val = parseInt(inp.value, 10);
-      if (!isNaN(val) && val > maxStock) {
-        inp.value = maxStock;
-        playBeep(false);
-        showToast(`Capped to max available stock (${maxStock} pcs)`, 'rose');
+      if (num > item.remaining) {
+        input.value = item.remaining;
+        showToast(`Clamped to available stock (${item.remaining} pcs)`);
       }
     }
 
+    // Execute Out / Sell Action
+    function executeSale(itemId) {
+      const item = inventory.find(i => i.id === itemId);
+      if (!item) return;
+
+      if (item.remaining <= 0) {
+        showToast("Cannot sell: Part is Out of Stock!");
+        return;
+      }
+
+      const input = document.getElementById(`qty_${itemId}`);
+      const qty = parseInt(input.value, 10) || 1;
+
+      if (qty > item.remaining) {
+        showToast(`Only ${item.remaining} available in stock!`);
+        return;
+      }
+
+      // Deduct stock
+      item.remaining -= qty;
+      saveInventory();
+
+      // Record in sales history
+      if (!salesHistory[activeDateStr]) salesHistory[activeDateStr] = {};
+      const currentSold = salesHistory[activeDateStr][itemId] || 0;
+      salesHistory[activeDateStr][itemId] = currentSold + qty;
+      saveSales();
+
+      // Reset input box
+      input.value = item.remaining > 0 ? 1 : 0;
+
+      // Update UI
+      renderCounterList();
+      updateHeaderStats();
+
+      // Sync to Google Sheet
+      syncToGoogleSheet({
+        action: "sale",
+        type: "OUT",
+        itemName: item.name,
+        quantity: qty,
+        unitCost: item.cost,
+        dateLabel: activeDateStr
+      });
+
+      showToast(`Recorded ${qty} pcs of ${item.name}!`);
+    }
+
+    // Open Inward Stock Modal
     function openInwardModal(itemId) {
       const item = inventory.find(i => i.id === itemId);
       if (!item) return;
 
-      document.getElementById('inwardItemId').value = item.id;
-      document.getElementById('inwardItemSubtext').innerText = `${item.name} (Current: ${item.remaining})`;
-      document.getElementById('inwardQtyInput').value = '5';
-      openModal('inwardModal');
+      selectedInwardId = itemId;
+      document.getElementById('inwardItemName').innerText = item.name;
+      document.getElementById('inwardItemStock').innerText = `Current Stock: ${item.remaining} pcs`;
+      document.getElementById('inwardQtyInput').value = 5;
+      document.getElementById('inwardModal').classList.remove('hidden');
     }
 
-    function adjustInwardStep(delta) {
+    function closeInwardModal() {
+      document.getElementById('inwardModal').classList.add('hidden');
+      selectedInwardId = null;
+    }
+
+    function adjustInwardQty(delta) {
       const input = document.getElementById('inwardQtyInput');
-      const cur = parseInt(input.value, 10) || 0;
-      input.value = Math.max(1, cur + delta);
+      let val = (parseInt(input.value, 10) || 1) + delta;
+      if (val < 1) val = 1;
+      input.value = val;
     }
 
-    function confirmInwardStock() {
-      const itemId = document.getElementById('inwardItemId').value;
-      const qty = parseInt(document.getElementById('inwardQtyInput').value, 10);
-      const item = inventory.find(i => i.id === itemId);
+    function setInwardQuick(val) {
+      document.getElementById('inwardQtyInput').value = val;
+    }
 
-      if (!item || isNaN(qty) || qty <= 0) {
-        showToast('Invalid quantity entered', 'rose');
-        return;
-      }
+    function confirmInward() {
+      const item = inventory.find(i => i.id === selectedInwardId);
+      if (!item) return;
 
+      const qty = parseInt(document.getElementById('inwardQtyInput').value, 10) || 1;
       item.remaining += qty;
+      saveInventory();
 
-      const now = new Date();
-      const targetDate = (currentWorkingDateISO === getTodayISO())
-        ? now
-        : new Date(parseInt(currentWorkingDateISO.split('-')[0], 10), parseInt(currentWorkingDateISO.split('-')[1], 10) - 1, parseInt(currentWorkingDateISO.split('-')[2], 10));
+      inwardHistory[item.id] = (inwardHistory[item.id] || 0) + qty;
+      saveInward();
 
-      const sheetDateLabel = getSheetDateLabel(targetDate);
-      const logEntry = {
-        id: 'tx_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
-        type: 'IN',
-        itemId: item.id,
-        name: item.name,
-        qty: qty,
-        unitCost: item.cost,
-        total: item.cost * qty,
-        time: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        date: targetDate.toLocaleDateString(),
-        dateISO: currentWorkingDateISO,
-        timestamp: targetDate.getTime()
-      };
+      closeInwardModal();
+      
+      if (currentTab === 'counter') renderCounterList();
+      if (currentTab === 'inventory') renderMasterInventory();
 
-      addLogRecord(logEntry);
-
-      syncTransactionToGoogleSheet({
-        action: 'transaction',
+      // Sync to Google Sheet
+      syncToGoogleSheet({
+        action: "inward",
+        type: "IN",
         itemName: item.name,
-        type: 'IN',
         quantity: qty,
         unitCost: item.cost,
-        remainingStock: item.remaining,
-        dateLabel: sheetDateLabel,
-        isoDate: currentWorkingDateISO,
-        timestamp: targetDate.getTime()
+        dateLabel: activeDateStr
       });
 
-      playBeep(true);
-      closeModal('inwardModal');
-      showToast(`Added +${qty} to ${item.name.slice(0, 16)}`, 'emerald');
-      renderAll();
+      showToast(`Added +${qty} pcs to ${item.name}!`);
     }
 
-    function handleSearch(val) {
-      searchQuery = val || '';
-      const clearBtn = document.getElementById('clearSearchBtn');
-      if (clearBtn) clearBtn.classList.toggle('hidden', searchQuery.length === 0);
-      renderAll();
-    }
+    // Header Stats Calculator (Strictly for activeDateStr)
+    function updateHeaderStats() {
+      const daySales = salesHistory[activeDateStr] || {};
+      let totalPcs = 0;
+      let totalAmount = 0;
 
-    function clearSearch() {
-      const input = document.getElementById('searchInput');
-      if (input) input.value = '';
-      searchQuery = '';
-      const clearBtn = document.getElementById('clearSearchBtn');
-      if (clearBtn) clearBtn.classList.add('hidden');
-      renderAll();
-    }
-
-    function setStockFilter(filter) {
-      stockFilter = filter;
-      updateFilterPillsUI();
-      renderAll();
-    }
-
-    function updateFilterPillsUI() {
-      ['all', 'low', 'out', 'instock'].forEach(f => {
-        const pill = document.getElementById(`filterPill-${f}`);
-        if (!pill) return;
-        if (stockFilter === f) {
-          pill.className = "px-2.5 py-1 rounded-lg font-bold bg-orange-600 text-white whitespace-nowrap transition shadow";
-        } else {
-          pill.className = "px-2.5 py-1 rounded-lg font-bold bg-workshop-800 text-slate-300 border border-slate-700 whitespace-nowrap hover:text-white transition";
+      for (const [id, count] of Object.entries(daySales)) {
+        const item = inventory.find(i => i.id === id);
+        if (item) {
+          totalPcs += count;
+          totalAmount += (count * item.cost);
         }
-      });
-    }
-
-    function handleSortChange(val) {
-      currentSort = val;
-      renderAll();
-    }
-
-    function switchTab(tab) {
-      activeTab = tab;
-      document.getElementById('viewCounter').classList.toggle('hidden', tab !== 'counter');
-      document.getElementById('viewLogs').classList.toggle('hidden', tab !== 'logs');
-      document.getElementById('viewInventory').classList.toggle('hidden', tab !== 'inventory');
-
-      const tabs = [
-        { id: 'tabBtnCounter', name: 'counter' },
-        { id: 'tabBtnLogs', name: 'logs' },
-        { id: 'tabBtnInventory', name: 'inventory' }
-      ];
-
-      tabs.forEach(t => {
-        const btn = document.getElementById(t.id);
-        if (!btn) return;
-        if (t.name === tab) {
-          btn.className = "tap-active flex flex-col items-center justify-center py-1 rounded-xl text-orange-400 font-bold transition";
-        } else {
-          btn.className = "tap-active flex flex-col items-center justify-center py-1 rounded-xl text-slate-400 font-semibold transition";
-        }
-      });
-
-      renderAll();
-    }
-
-    function updateDateLabelUI() {
-      const label = document.getElementById('selectedDateDisplayLabel');
-      if (!label) return;
-      if (selectedDateFilterMode === 'today') {
-        label.innerText = `Today (${formatISODateLabel(getTodayISO())})`;
-      } else if (selectedDateFilterMode === 'yesterday') {
-        label.innerText = `Yesterday (${formatISODateLabel(selectedDateISO)})`;
-      } else if (selectedDateFilterMode === '7days') {
-        label.innerText = 'Past 7 Days Combined';
-      } else if (selectedDateFilterMode === 'thisMonth') {
-        label.innerText = 'Current Month (Full)';
-      } else if (selectedDateFilterMode === 'all') {
-        label.innerText = 'Full Year (365 Days)';
-      } else {
-        label.innerText = formatISODateLabel(selectedDateISO);
       }
+
+      document.getElementById('statSalesAmount').innerText = `₹${Math.round(totalAmount).toLocaleString('en-IN')}`;
+      document.getElementById('statItemsSold').innerText = `${totalPcs} pcs`;
+
+      const today = new Date();
+      const isToday = isSameDay(operatingDate, today);
+      document.getElementById('labelSalesTitle').innerText = isToday ? "Today's Sales" : `${activeDateStr} Sales`;
+      document.getElementById('labelItemsTitle').innerText = isToday ? "Today's Sold" : `Sold (${activeDateStr})`;
     }
 
-    function shiftSelectedDay(delta) {
-      selectedDateFilterMode = 'custom';
-      const parts = selectedDateISO.split('-');
-      const d = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
-      d.setDate(d.getDate() + delta);
-      selectedDateISO = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-      updateDateLabelUI();
-      updateQuickDateButtonsUI();
-      renderLogs();
-    }
-
-    function openCustomCalendar() {
-      calendarTargetMode = 'logs';
-      const parts = selectedDateISO.split('-');
-      calViewYear = parseInt(parts[0], 10);
-      calViewMonth = parseInt(parts[1], 10) - 1;
+    // Calendar Picker Modal Logic
+    function openCalendarModal() {
+      calViewYear = operatingDate.getFullYear();
+      calViewMonth = operatingDate.getMonth();
       renderCalendarDays();
-      openModal('calendarModal');
+      document.getElementById('calendarModal').classList.remove('hidden');
     }
 
-    function navigateCalMonth(step) {
-      calViewMonth += step;
-      if (calViewMonth < 0) {
-        calViewMonth = 11;
-        calViewYear--;
-      } else if (calViewMonth > 11) {
-        calViewMonth = 0;
-        calViewYear++;
-      }
+    function closeCalendarModal() {
+      document.getElementById('calendarModal').classList.add('hidden');
+    }
+
+    function navCalMonth(delta) {
+      calViewMonth += delta;
+      if (calViewMonth < 0) { calViewMonth = 11; calViewYear--; }
+      if (calViewMonth > 11) { calViewMonth = 0; calViewYear++; }
       renderCalendarDays();
     }
 
     function renderCalendarDays() {
-      const title = document.getElementById('calMonthYearTitle');
+      document.getElementById('calMonthYearLabel').innerText = `${MONTHS[calViewMonth]} ${calViewYear}`;
       const grid = document.getElementById('calDaysGrid');
-      const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-      title.innerText = `${months[calViewMonth]} ${calViewYear}`;
+      grid.innerHTML = '';
 
-      const activeCompareDate = (calendarTargetMode === 'counter') ? currentWorkingDateISO : selectedDateISO;
-
-      const firstDayIdx = new Date(calViewYear, calViewMonth, 1).getDay();
+      const firstDay = new Date(calViewYear, calViewMonth, 1).getDay();
       const daysInMonth = new Date(calViewYear, calViewMonth + 1, 0).getDate();
 
-      let cells = '';
-      for (let i = 0; i < firstDayIdx; i++) {
-        cells += `<div class="p-2"></div>`;
+      for (let i = 0; i < firstDay; i++) {
+        const blank = document.createElement('div');
+        blank.className = "h-8";
+        grid.appendChild(blank);
       }
 
-      for (let day = 1; day <= daysInMonth; day++) {
-        const dayIso = `${calViewYear}-${String(calViewMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-        const isSelected = (dayIso === activeCompareDate);
-        const isToday = (dayIso === getTodayISO());
+      for (let d = 1; d <= daysInMonth; d++) {
+        const cellDate = new Date(calViewYear, calViewMonth, d);
+        const btn = document.createElement('button');
+        const isSelected = isSameDay(cellDate, operatingDate);
 
-        cells += `
-          <button 
-            type="button" 
-            onclick="pickCalendarDate('${dayIso}')"
-            class="p-2 rounded-xl text-center font-bold transition text-xs ${
-              isSelected 
-                ? 'bg-orange-600 text-white shadow-md' 
-                : isToday 
-                ? 'border border-orange-500/60 text-orange-400 bg-orange-500/10' 
-                : 'text-slate-300 hover:bg-workshop-800'
-            }">
-            ${day}
-          </button>
-        `;
-      }
-      grid.innerHTML = cells;
-    }
+        btn.type = "button";
+        btn.innerText = d;
+        btn.className = isSelected
+          ? "h-8 rounded-lg bg-orange-600 text-white font-bold font-num text-xs shadow-md shadow-orange-600/40 flex items-center justify-center ring-2 ring-orange-400"
+          : "h-8 rounded-lg bg-workshop-800 hover:bg-workshop-700 text-slate-200 font-num text-xs flex items-center justify-center border border-workshop-700/60 transition";
 
-    function pickCalendarDate(isoStr) {
-      if (calendarTargetMode === 'counter') {
-        currentWorkingDateISO = isoStr;
-        updateWorkingDateBanner();
-        closeModal('calendarModal');
-        const isToday = (isoStr === getTodayISO());
-        showToast(isToday ? 'Log date set to Today' : `Working date set to ${formatISODateLabel(isoStr)}`, 'emerald');
-      } else {
-        selectedDateISO = isoStr;
-        selectedDateFilterMode = (isoStr === getTodayISO()) ? 'today' : 'custom';
-        closeModal('calendarModal');
-        updateDateLabelUI();
-        updateQuickDateButtonsUI();
-        renderLogs();
-      }
-    }
-
-    // STORAGE & PERSISTENCE
-    async function loadStorage() {
-      // Version bumped to 'am_stock_v4' to automatically reload updated 176 inventory items
-      const localStock = localStorage.getItem('am_stock_v4');
-      if (localStock) {
-        try {
-          inventory = JSON.parse(localStock);
-        } catch (e) {
-          inventory = JSON.parse(JSON.stringify(DEFAULT_STOCK));
-        }
-      } else {
-        inventory = JSON.parse(JSON.stringify(DEFAULT_STOCK));
-        saveStorage();
-      }
-
-      if (dbInstance) {
-        try {
-          salesLogs = await getAllLogsFromDB();
-        } catch (e) {
-          salesLogs = JSON.parse(localStorage.getItem('am_logs_fallback') || '[]');
-        }
-      } else {
-        salesLogs = JSON.parse(localStorage.getItem('am_logs_fallback') || '[]');
-      }
-    }
-
-    function saveStorage() {
-      try {
-        localStorage.setItem('am_stock_v4', JSON.stringify(inventory));
-      } catch (e) {}
-    }
-
-    function addLogRecord(logEntry) {
-      salesLogs.unshift(logEntry);
-      if (dbInstance) {
-        try {
-          const tx = dbInstance.transaction('logs', 'readwrite');
-          tx.objectStore('logs').put(logEntry);
-        } catch (e) {}
-      }
-      try {
-        localStorage.setItem('am_logs_fallback', JSON.stringify(salesLogs.slice(0, 100)));
-      } catch (e) {}
-      saveStorage();
-    }
-
-    function getAllLogsFromDB() {
-      return new Promise((resolve) => {
-        if (!dbInstance) {
-          resolve([]);
-          return;
-        }
-        const tx = dbInstance.transaction('logs', 'readonly');
-        const store = tx.objectStore('logs');
-        const req = store.getAll();
-        req.onsuccess = () => {
-          const res = req.result || [];
-          res.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-          resolve(res);
+        btn.onclick = () => {
+          setOperatingDate(cellDate);
+          closeCalendarModal();
+          showToast(`Operating date set to: ${activeDateStr}`);
         };
-        req.onerror = () => resolve([]);
-      });
-    }
 
-    // GOOGLE SHEETS LIVE SYNC LOGIC
-    function initSyncSettings() {
-      const urlInput = document.getElementById('appsScriptUrlInput');
-      if (urlInput) urlInput.value = appsScriptUrl;
-      updateSyncUI();
-    }
-
-    function updateSyncUI() {
-      const dot = document.getElementById('syncStatusDot');
-      const text = document.getElementById('syncStatusText');
-      const bannerDot = document.getElementById('syncBannerDot');
-      const bannerStatus = document.getElementById('syncBannerStatus');
-      const bannerSub = document.getElementById('syncBannerSub');
-      const queueEl = document.getElementById('offlineQueueCount');
-
-      if (queueEl) queueEl.innerText = `${offlineSyncQueue.length} queued`;
-
-      if (!appsScriptUrl) {
-        if (dot) dot.className = "w-2 h-2 rounded-full bg-slate-500 pointer-events-none";
-        if (text) text.innerText = "No Sync";
-        if (bannerDot) bannerDot.className = "w-2.5 h-2.5 rounded-full bg-slate-500";
-        if (bannerStatus) bannerStatus.innerText = "Sync Not Configured";
-        if (bannerSub) bannerSub.innerText = "Add your Apps Script Web App URL below";
-      } else {
-        if (dot) dot.className = "w-2 h-2 rounded-full bg-emerald-400 animate-pulse pointer-events-none";
-        if (text) text.innerText = "Live Sync";
-        if (bannerDot) bannerDot.className = "w-2.5 h-2.5 rounded-full bg-emerald-400";
-        if (bannerStatus) bannerStatus.innerText = "Connected to Google Sheets";
-        if (bannerSub) bannerSub.innerText = "Live updates enabled for sales & inward";
+        grid.appendChild(btn);
       }
     }
 
-    function openSyncModal(e) {
-      if (e) {
-        e.preventDefault();
-        e.stopPropagation();
-      }
-      openModal('syncModal');
+    // Search and Filter controls
+    function handleSearch(val) {
+      searchQuery = val.trim();
+      document.getElementById('clearSearchBtn').classList.toggle('hidden', searchQuery.length === 0);
+      renderCounterList();
     }
 
-    function handleModalBackdropClick(e, modalId) {
-      if (e.target.id === modalId) {
-        closeModal(modalId);
-      }
+    function clearSearch() {
+      document.getElementById('searchInput').value = '';
+      handleSearch('');
     }
 
-    function saveSyncUrl() {
-      const val = (document.getElementById('appsScriptUrlInput').value || '').trim();
-      if (!val) {
-        showToast('Please enter a valid URL', 'rose');
-        return;
+    function setFilter(flt) {
+      activeFilter = flt;
+      const btns = { all: 'fltAll', in_stock: 'fltIn', low_stock: 'fltLow', out: 'fltOut' };
+      for (const [key, id] of Object.entries(btns)) {
+        const btn = document.getElementById(id);
+        if (key === flt) {
+          btn.className = "px-2.5 py-1 rounded-lg bg-orange-600 text-white font-bold shrink-0";
+        } else {
+          btn.className = "px-2.5 py-1 rounded-lg bg-workshop-800 text-slate-300 font-semibold border border-workshop-700 shrink-0";
+        }
       }
-      appsScriptUrl = val;
-      localStorage.setItem('am_apps_script_url', appsScriptUrl);
-      updateSyncUI();
-      showToast('Apps Script URL Saved!', 'emerald');
-      processOfflineQueue();
+      renderCounterList();
+    }
+
+    // Google Sheets Sync Bridge
+    function openSyncModal() {
+      document.getElementById('syncUrlInput').value = syncConfig.url || '';
+      document.getElementById('syncTabInput').value = syncConfig.tab || 'dec';
+      document.getElementById('syncModal').classList.remove('hidden');
+    }
+
+    function closeSyncModal() {
+      document.getElementById('syncModal').classList.add('hidden');
+    }
+
+    function saveSyncSettings() {
+      syncConfig.url = document.getElementById('syncUrlInput').value.trim();
+      syncConfig.tab = document.getElementById('syncTabInput').value.trim() || 'dec';
+      localStorage.setItem(STORAGE_KEY_CONFIG, JSON.stringify(syncConfig));
+      closeSyncModal();
+      showToast("Sync settings saved!");
     }
 
     async function testConnection() {
-      if (!appsScriptUrl) {
-        showToast('Enter URL first', 'rose');
+      const url = document.getElementById('syncUrlInput').value.trim();
+      if (!url) {
+        alert("Please paste your Web App URL first.");
         return;
       }
-      showToast('Testing link with Google Sheet...', 'emerald');
+      showToast("Testing webhook connection...");
       try {
-        await fetch(appsScriptUrl, {
-          method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'ping' })
+        await fetch(url, {
+          method: "POST",
+          mode: "no-cors",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "ping" })
         });
-        showToast('Connection verified! Ready to sync', 'emerald');
+        showToast("Webhook ping sent successfully!");
       } catch (err) {
-        showToast('Connection test failed. Check URL', 'rose');
+        alert("Connection error: " + err.message);
       }
     }
 
     async function pushFullSync() {
-      if (!appsScriptUrl) {
-        showToast('Connect your Google Apps Script URL first', 'rose');
+      if (!syncConfig.url) {
+        alert("Please save your Google Apps Script Web App URL first.");
         return;
       }
-      showToast('Transferring all items to Sheet...', 'emerald');
+      showToast("Pushing 176 items to Google Sheet...");
       try {
-        await fetch(appsScriptUrl, {
-          method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'application/json' },
+        await fetch(syncConfig.url, {
+          method: "POST",
+          mode: "no-cors",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            action: 'full_snapshot',
-            items: inventory.map(i => ({ name: i.name, cost: i.cost, remaining: i.remaining }))
+            action: "full_snapshot",
+            sheetTab: syncConfig.tab,
+            items: inventory.map(i => ({
+              name: i.name,
+              remaining: i.remaining,
+              cost: i.cost
+            }))
           })
         });
-        showToast(`Successfully pushed ${inventory.length} items to Sheet!`, 'emerald');
-        closeModal('syncModal');
+        closeSyncModal();
+        showToast("Pushed all 176 items to Google Sheet!");
       } catch (err) {
-        showToast('Push failed. Stored in queue', 'rose');
+        alert("Sync error: " + err.message);
       }
     }
 
-    function syncTransactionToGoogleSheet(payload) {
-      if (!appsScriptUrl) {
-        offlineSyncQueue.push(payload);
-        localStorage.setItem('am_sync_queue_v1', JSON.stringify(offlineSyncQueue));
-        updateSyncUI();
-        return;
-      }
-
-      fetch(appsScriptUrl, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      }).catch(() => {
-        offlineSyncQueue.push(payload);
-        localStorage.setItem('am_sync_queue_v1', JSON.stringify(offlineSyncQueue));
-        updateSyncUI();
-      });
-    }
-
-    async function processOfflineQueue() {
-      if (!appsScriptUrl || offlineSyncQueue.length === 0) return;
-      const itemsToSync = [...offlineSyncQueue];
-      offlineSyncQueue = [];
-      localStorage.setItem('am_sync_queue_v1', JSON.stringify([]));
-      updateSyncUI();
-
-      for (const item of itemsToSync) {
-        try {
-          await fetch(appsScriptUrl, {
-            method: 'POST',
-            mode: 'no-cors',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(item)
-          });
-        } catch (e) {
-          offlineSyncQueue.push(item);
-        }
-      }
-      localStorage.setItem('am_sync_queue_v1', JSON.stringify(offlineSyncQueue));
-      updateSyncUI();
-    }
-
-    function registerPwaServiceWorker() {
-      if ('serviceWorker' in navigator) {
-        const swBlob = new Blob([
-          `self.addEventListener('install', e => self.skipWaiting());
-           self.addEventListener('activate', e => clients.claim());
-           self.addEventListener('fetch', e => e.respondWith(fetch(e.request).catch(() => caches.match(e.request))));`
-        ], { type: 'application/javascript' });
-        const swUrl = URL.createObjectURL(swBlob);
-        navigator.serviceWorker.register(swUrl).catch(() => {});
+    async function syncToGoogleSheet(payload) {
+      if (!syncConfig.url) return;
+      try {
+        payload.sheetTab = syncConfig.tab;
+        await fetch(syncConfig.url, {
+          method: "POST",
+          mode: "no-cors",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+      } catch (err) {
+        console.warn("Background sheet sync error:", err);
       }
     }
 
-    function renderAll() {
-      updateHeaderStats();
-      updateFilterPillsUI();
-      if (activeTab === 'counter') renderCounter();
-      else if (activeTab === 'logs') renderLogs();
-      else if (activeTab === 'inventory') renderInventoryTable();
+    // Toast message helper
+    function showToast(msg) {
+      const box = document.getElementById('toastBox');
+      const txt = document.getElementById('toastText');
+      txt.lastElementChild.innerText = msg;
+      box.classList.remove('opacity-0', 'translate-y-3');
+      setTimeout(() => {
+        box.classList.add('opacity-0', 'translate-y-3');
+      }, 2400);
     }
 
-    function openModal(id) {
-      document.getElementById(id).classList.remove('hidden');
-    }
-    function closeModal(id) {
-      document.getElementById(id).classList.add('hidden');
-    }
-
-    let toastTimeout = null;
-    function showToast(msg, type = 'emerald') {
-      const toast = document.getElementById('toast');
-      const inner = document.getElementById('toastInner');
-      const toastMsg = document.getElementById('toastMsg');
-      const icon = document.getElementById('toastIcon');
-
-      clearTimeout(toastTimeout);
-      toastMsg.innerText = msg;
-
-      if (type === 'emerald') {
-        inner.className = 'bg-slate-900 border border-emerald-500/50 text-white text-xs px-4 py-2.5 rounded-xl shadow-2xl flex items-center gap-2';
-        icon.className = 'fa-solid fa-circle-check text-emerald-400';
-      } else {
-        inner.className = 'bg-slate-900 border border-rose-500/50 text-white text-xs px-4 py-2.5 rounded-xl shadow-2xl flex items-center gap-2';
-        icon.className = 'fa-solid fa-triangle-exclamation text-rose-400';
+    // Midnight Rollover Checker: Advances to new day automatically at 00:00
+    let lastCheckedDay = new Date().getDate();
+    setInterval(() => {
+      const now = new Date();
+      if (now.getDate() !== lastCheckedDay) {
+        lastCheckedDay = now.getDate();
+        setOperatingDate(now);
       }
+    }, 30000);
 
-      toast.classList.remove('opacity-0', '-translate-y-2', 'pointer-events-none');
-
-      toastTimeout = setTimeout(() => {
-        toast.classList.add('opacity-0', '-translate-y-2', 'pointer-events-none');
-      }, 2500);
-    }
-
-    function escapeHtml(str) {
-      return (str || '').replace(/[&<>'"]/g, 
-        tag => ({
-          '&': '&amp;',
-          '<': '&lt;',
-          '>': '&gt;',
-          "'": '&#39;',
-          '"': '&quot;'
-        }[tag] || tag)
-      );
-    }
+    // Initial Launch
+    window.addEventListener('DOMContentLoaded', () => {
+      loadAppState();
+      setOperatingDate(new Date());
+      renderCounterList();
+    });
   </script>
 </body>
 </html>
