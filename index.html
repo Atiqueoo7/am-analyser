@@ -1,0 +1,2277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>A.M Analyser - Stock Manager</title>
+  <!-- Mobile & PWA meta tags -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#0f172a">
+  <link rel="apple-touch-icon" href="https://placehold.co/192x192/ea580c/ffffff?text=AM">
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            workshop: {
+              950: '#090d16',
+              900: '#0f172a',
+              800: '#1e293b',
+              700: '#334155',
+              accent: '#f97316',
+              accentHover: '#ea580c'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+    input, textarea {
+      user-select: text;
+    }
+    .tap-active:active {
+      transform: scale(0.97);
+    }
+    /* Hide spin buttons for clean mobile inputs */
+    input[type=number]::-webkit-inner-spin-button, 
+    input[type=number]::-webkit-outer-spin-button { 
+      -webkit-appearance: none; 
+      margin: 0; 
+    }
+    input[type=number] {
+      -moz-appearance: textfield;
+    }
+    .custom-scroll::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body class="bg-workshop-950 text-slate-100 min-h-screen flex flex-col justify-between antialiased">
+
+  <!-- TOP APP HEADER -->
+  <header class="sticky top-0 z-30 bg-workshop-900/95 backdrop-blur-md border-b border-workshop-700/60 shadow-lg px-3 py-2.5">
+    <div class="max-w-3xl mx-auto flex items-center justify-between gap-2">
+      <div class="flex items-center gap-2.5">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg shadow-orange-950/50">
+          <i class="fa-solid fa-wrench text-white text-lg"></i>
+        </div>
+        <div>
+          <h1 class="text-sm font-black tracking-wide text-white flex items-center gap-1.5">
+            A.M ANALYSER
+            <span class="text-[9px] bg-orange-500/20 text-orange-400 border border-orange-500/30 px-1.5 py-0.5 rounded font-bold uppercase tracking-wider">Mobile</span>
+          </h1>
+          <p class="text-[11px] text-slate-400 font-medium">Auto Parts & Lubricants Stock</p>
+        </div>
+      </div>
+
+      <!-- Quick Summary Pills -->
+      <div class="flex items-center gap-1.5">
+        <!-- Live Google Sheets Sync Status Badge -->
+        <button 
+          type="button"
+          onclick="openSyncModal(event)" 
+          id="headerSyncBadge" 
+          class="tap-active bg-workshop-800 border border-slate-700 hover:border-orange-500/50 px-2 py-1 rounded-lg flex items-center gap-1.5 transition cursor-pointer relative z-40 select-none">
+          <span id="syncStatusDot" class="w-2 h-2 rounded-full bg-slate-500 pointer-events-none"></span>
+          <span id="syncStatusText" class="text-[9px] font-bold text-slate-400 uppercase tracking-wider pointer-events-none">No Sync</span>
+        </button>
+
+        <div class="bg-workshop-800 border border-slate-700 px-2 py-1 rounded-lg text-right">
+          <span class="block text-[9px] text-slate-400 uppercase font-semibold">Low Stock</span>
+          <span id="lowStockBadge" class="text-xs font-black text-amber-400">0</span>
+        </div>
+        <button 
+          type="button"
+          onclick="openSyncModal(event)" 
+          id="syncSetupBtn"
+          title="Google Sheets Sync Setup" 
+          class="tap-active bg-workshop-800 hover:bg-workshop-700 text-orange-400 border border-slate-700 p-2 rounded-xl flex items-center justify-center transition cursor-pointer relative z-40">
+          <i class="fa-solid fa-cloud-arrow-up text-sm pointer-events-none"></i>
+        </button>
+        <button onclick="openModal('exportModal')" class="tap-active bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 border border-emerald-500/40 p-2 rounded-xl flex items-center justify-center transition">
+          <i class="fa-solid fa-file-excel text-sm"></i>
+        </button>
+        <button onclick="openModal('newItemModal')" class="tap-active bg-orange-600 hover:bg-orange-500 text-white font-bold p-2 rounded-xl flex items-center justify-center shadow-md transition">
+          <i class="fa-solid fa-plus text-sm"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Live Search & Filter Bar -->
+    <div class="max-w-3xl mx-auto mt-2">
+      <div class="relative">
+        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+        <input 
+          type="text" 
+          id="searchInput" 
+          oninput="handleSearch(this.value)"
+          placeholder="Search by part name or code (e.g. 36AA, CLUTCH, MOTUL)..." 
+          class="w-full bg-workshop-800 text-xs text-white placeholder-slate-400 pl-8 pr-8 py-2 rounded-xl border border-workshop-700 focus:outline-none focus:border-orange-500 transition"
+        />
+        <button 
+          id="clearSearchBtn" 
+          onclick="clearSearch()" 
+          class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white p-1 text-xs">
+          <i class="fa-solid fa-circle-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Sort & Filter Control Strip -->
+      <div class="mt-2.5 flex flex-col gap-2">
+        <!-- Stock Filter Pills -->
+        <div class="flex items-center gap-1.5 overflow-x-auto pb-0.5 custom-scroll text-[11px]">
+          <button 
+            type="button" 
+            onclick="setStockFilter('all')" 
+            id="filterPill-all" 
+            class="px-2.5 py-1 rounded-lg font-bold bg-orange-600 text-white whitespace-nowrap transition">
+            All (<span id="countPillAll">0</span>)
+          </button>
+          <button 
+            type="button" 
+            onclick="setStockFilter('low')" 
+            id="filterPill-low" 
+            class="px-2.5 py-1 rounded-lg font-bold bg-workshop-800 text-slate-300 border border-slate-700 whitespace-nowrap transition hover:text-amber-400">
+            Low Stock (&lt; 5) (<span id="countPillLow">0</span>)
+          </button>
+          <button 
+            type="button" 
+            onclick="setStockFilter('out')" 
+            id="filterPill-out" 
+            class="px-2.5 py-1 rounded-lg font-bold bg-workshop-800 text-slate-300 border border-slate-700 whitespace-nowrap transition hover:text-rose-400">
+            Out of Stock (0) (<span id="countPillOut">0</span>)
+          </button>
+          <button 
+            type="button" 
+            onclick="setStockFilter('instock')" 
+            id="filterPill-instock" 
+            class="px-2.5 py-1 rounded-lg font-bold bg-workshop-800 text-slate-300 border border-slate-700 whitespace-nowrap transition hover:text-emerald-400">
+            In Stock (&gt; 0) (<span id="countPillIn">0</span>)
+          </button>
+        </div>
+
+        <!-- Sort Select Bar -->
+        <div class="flex items-center justify-between gap-2 bg-workshop-900 border border-workshop-700/80 px-2.5 py-1.5 rounded-xl">
+          <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+            <i class="fa-solid fa-arrow-down-short-wide text-orange-400"></i>
+            <span>Sort By</span>
+          </span>
+          <select 
+            id="sortSelector" 
+            onchange="handleSortChange(this.value)" 
+            class="bg-workshop-800 text-xs font-semibold text-slate-200 border border-slate-700 rounded-lg px-2 py-1 focus:outline-none focus:border-orange-500">
+            <option value="name_asc">Name: A to Z</option>
+            <option value="stock_asc">Stock: Low to High (Increasing)</option>
+            <option value="stock_desc">Stock: High to Low (Decreasing)</option>
+            <option value="price_asc">Price: Low to High (Increasing ₹)</option>
+            <option value="price_desc">Price: High to Low (Decreasing ₹)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN SCROLLABLE CONTENT AREA -->
+  <main class="flex-1 max-w-3xl w-full mx-auto p-3 mb-16 custom-scroll overflow-y-auto">
+
+    <!-- VIEW 1: COUNTER (SALES / FAST OUT) -->
+    <section id="viewCounter" class="space-y-3">
+      <!-- Quick Info Bar -->
+      <div class="bg-gradient-to-r from-workshop-900 to-workshop-800 border border-workshop-700/80 rounded-xl p-3 flex items-center justify-between">
+        <div>
+          <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Today's Counter Sales</span>
+          <span id="todaySalesTotal" class="text-lg font-black text-white">₹0</span>
+        </div>
+        <div class="text-right">
+          <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Total Items Sold</span>
+          <span id="todayItemsCount" class="text-lg font-black text-orange-400">0 pcs</span>
+        </div>
+      </div>
+
+      <!-- Parts Card List -->
+      <div id="counterItemsList" class="space-y-2.5">
+        <!-- Rendered dynamically via JavaScript -->
+      </div>
+    </section>
+
+    <!-- VIEW 2: DAILY LOGS (UPGRADED 365-DAY ARCHIVE & DATE PICKER) -->
+    <section id="viewLogs" class="hidden space-y-3">
+      <!-- Header & Export Action -->
+      <div class="flex items-center justify-between px-1">
+        <div>
+          <h2 class="text-sm font-black text-white uppercase tracking-wider flex items-center gap-1.5">
+            <i class="fa-solid fa-clock-rotate-left text-orange-400"></i>
+            <span>Daily Stock Logs</span>
+          </h2>
+          <p class="text-[11px] text-slate-400">Full 365-day tracking of sales & inwards</p>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <button onclick="exportLogsCSV()" class="tap-active text-xs bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 border border-emerald-500/40 px-2.5 py-1.5 rounded-lg flex items-center gap-1 font-bold transition">
+            <i class="fa-solid fa-file-csv text-xs"></i>
+            <span>Export</span>
+          </button>
+          <button onclick="clearFilteredLogs()" class="tap-active text-xs text-rose-400 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 px-2.5 py-1.5 rounded-lg">
+            Clear
+          </button>
+        </div>
+      </div>
+
+      <!-- Date Selection & Quick Date Range Filters -->
+      <div class="bg-workshop-900 border border-workshop-700/80 rounded-2xl p-3 space-y-2.5 shadow">
+        <!-- Interactive Date Picker Bar with Prev/Next Day buttons & Custom Calendar Trigger -->
+        <div class="flex items-center gap-1.5">
+          <!-- Previous Day Button -->
+          <button 
+            type="button" 
+            onclick="shiftSelectedDay(-1)" 
+            title="Previous Day"
+            class="tap-active w-10 h-10 rounded-xl bg-workshop-950 border border-workshop-700 text-slate-300 hover:text-white flex items-center justify-center font-bold text-sm">
+            <i class="fa-solid fa-chevron-left text-xs"></i>
+          </button>
+
+          <!-- Main Date Selector Pill with Prominent Calendar Icon -->
+          <div class="flex-1 flex items-stretch bg-workshop-950 border border-workshop-700 hover:border-orange-500 rounded-xl overflow-hidden transition shadow-inner">
+            <button 
+              type="button" 
+              onclick="openCustomCalendar()" 
+              title="Open Calendar"
+              class="tap-active px-3 bg-orange-500/15 hover:bg-orange-500/25 border-r border-workshop-700 flex items-center justify-center text-orange-400 hover:text-orange-300 transition">
+              <i class="fa-solid fa-calendar-days text-base"></i>
+            </button>
+            <button 
+              type="button" 
+              onclick="openCustomCalendar()" 
+              id="datePickerTriggerBtn"
+              class="tap-active flex-1 flex items-center justify-between px-3 py-2 text-xs font-bold text-white hover:text-orange-200 transition text-left">
+              <span id="selectedDateDisplayLabel" class="tracking-wide truncate">Select Date</span>
+              <i class="fa-solid fa-calendar text-[11px] text-slate-400"></i>
+            </button>
+          </div>
+
+          <!-- Next Day Button -->
+          <button 
+            type="button" 
+            onclick="shiftSelectedDay(1)" 
+            title="Next Day"
+            id="nextDayBtn"
+            class="tap-active w-10 h-10 rounded-xl bg-workshop-950 border border-workshop-700 text-slate-300 hover:text-white flex items-center justify-center font-bold text-sm">
+            <i class="fa-solid fa-chevron-right text-xs"></i>
+          </button>
+
+          <!-- Quick Today Action Button -->
+          <button 
+            onclick="setQuickDate('today')" 
+            id="quickBtnToday"
+            class="tap-active px-3 h-10 rounded-xl text-xs font-bold bg-orange-600 text-white transition shadow flex items-center justify-center">
+            Today
+          </button>
+        </div>
+
+        <!-- Quick Filter Buttons -->
+        <div class="flex items-center gap-1.5 overflow-x-auto pb-0.5 custom-scroll text-[11px]">
+          <button type="button" onclick="setQuickDate('yesterday')" id="quickBtnYesterday" class="px-2.5 py-1 rounded-lg font-bold bg-workshop-800 text-slate-300 border border-slate-700 whitespace-nowrap hover:text-white transition">
+            Yesterday
+          </button>
+          <button type="button" onclick="setQuickDate('7days')" id="quickBtn7days" class="px-2.5 py-1 rounded-lg font-bold bg-workshop-800 text-slate-300 border border-slate-700 whitespace-nowrap hover:text-white transition">
+            Last 7 Days
+          </button>
+          <button type="button" onclick="setQuickDate('thisMonth')" id="quickBtnThisMonth" class="px-2.5 py-1 rounded-lg font-bold bg-workshop-800 text-slate-300 border border-slate-700 whitespace-nowrap hover:text-white transition">
+            This Month
+          </button>
+          <button type="button" onclick="setQuickDate('all')" id="quickBtnAll" class="px-2.5 py-1 rounded-lg font-bold bg-workshop-800 text-slate-300 border border-slate-700 whitespace-nowrap hover:text-white transition">
+            All Year (365d)
+          </button>
+        </div>
+      </div>
+
+      <!-- Selected Date Metrics Summary Card -->
+      <div class="bg-gradient-to-r from-workshop-900 to-workshop-800 border border-workshop-700/80 rounded-2xl p-3 shadow-md grid grid-cols-2 gap-2 text-xs">
+        <div class="bg-workshop-950/70 border border-workshop-700/60 rounded-xl p-2.5">
+          <div class="flex items-center justify-between text-orange-400 font-bold mb-1">
+            <span class="text-[10px] uppercase tracking-wider flex items-center gap-1">
+              <i class="fa-solid fa-cart-shopping"></i> Stocks Sold
+            </span>
+            <span id="logSummarySoldUnits" class="font-black text-white">0 pcs</span>
+          </div>
+          <div class="text-[10px] text-slate-400">Total Revenue:</div>
+          <div id="logSummarySoldRev" class="text-sm font-black text-orange-400">₹0</div>
+        </div>
+
+        <div class="bg-workshop-950/70 border border-workshop-700/60 rounded-xl p-2.5">
+          <div class="flex items-center justify-between text-emerald-400 font-bold mb-1">
+            <span class="text-[10px] uppercase tracking-wider flex items-center gap-1">
+              <i class="fa-solid fa-truck-ramp-box"></i> Stocks Added
+            </span>
+            <span id="logSummaryAddedUnits" class="font-black text-white">0 pcs</span>
+          </div>
+          <div class="text-[10px] text-slate-400">Inward Value:</div>
+          <div id="logSummaryAddedVal" class="text-sm font-black text-emerald-400">₹0</div>
+        </div>
+      </div>
+
+      <!-- Action Type Filter Tabs: All, Sold Out, Inward Added -->
+      <div class="flex items-center bg-workshop-900 p-1 rounded-xl border border-workshop-700/80 text-xs">
+        <button 
+          id="logTypeTab-all" 
+          onclick="setLogTypeFilter('all')" 
+          class="flex-1 py-1.5 rounded-lg font-bold text-center bg-orange-600 text-white transition">
+          All Activity (<span id="typeCountAll">0</span>)
+        </button>
+        <button 
+          id="logTypeTab-OUT" 
+          onclick="setLogTypeFilter('OUT')" 
+          class="flex-1 py-1.5 rounded-lg font-semibold text-center text-slate-400 hover:text-white transition">
+          Sold Out (<span id="typeCountOut">0</span>)
+        </button>
+        <button 
+          id="logTypeTab-IN" 
+          onclick="setLogTypeFilter('IN')" 
+          class="flex-1 py-1.5 rounded-lg font-semibold text-center text-slate-400 hover:text-white transition">
+          Added In (<span id="typeCountIn">0</span>)
+        </button>
+      </div>
+
+      <!-- Logs Item List -->
+      <div id="logsContainer" class="space-y-2">
+        <!-- Rendered dynamically via JavaScript -->
+      </div>
+    </section>
+
+    <!-- VIEW 3: INVENTORY MASTER & SHEET SYNC -->
+    <section id="viewInventory" class="hidden space-y-3">
+      <div class="flex items-center justify-between px-1">
+        <div>
+          <h2 class="text-sm font-black text-white uppercase tracking-wider">Stock Valuation Master</h2>
+          <p class="text-[11px] text-slate-400" id="inventoryStats">Total Capital: ₹0</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="openSyncModal(event)" class="tap-active text-xs bg-orange-600 hover:bg-orange-500 text-white font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5 shadow">
+            <i class="fa-solid fa-cloud-bolt text-xs"></i> Sheet Sync
+          </button>
+          <button onclick="exportToGoogleSheetCSV()" class="tap-active text-xs bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5 shadow">
+            <i class="fa-solid fa-download text-xs"></i> CSV
+          </button>
+        </div>
+      </div>
+
+      <div class="bg-workshop-900 border border-workshop-700 rounded-xl overflow-hidden shadow">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-workshop-800 text-slate-400 uppercase text-[10px] tracking-wider border-b border-workshop-700">
+              <tr>
+                <th class="p-2.5">Part Details</th>
+                <th class="p-2.5 text-right">Cost</th>
+                <th class="p-2.5 text-center">Remaining</th>
+                <th class="p-2.5 text-right">Value</th>
+                <th class="p-2.5 text-center">Action</th>
+              </tr>
+            </thead>
+            <tbody id="inventoryTableBody" class="divide-y divide-workshop-800 text-slate-300">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- BOTTOM MOBILE NAVIGATION TABS -->
+  <nav class="fixed bottom-0 left-0 right-0 z-40 bg-workshop-900/95 backdrop-blur-md border-t border-workshop-700/80 px-4 py-2">
+    <div class="max-w-md mx-auto grid grid-cols-3 gap-2 text-center">
+      <button 
+        id="tabBtnCounter" 
+        onclick="switchTab('counter')" 
+        class="tap-active flex flex-col items-center justify-center py-1 rounded-xl text-orange-400 font-bold transition">
+        <i class="fa-solid fa-calculator text-base"></i>
+        <span class="text-[10px] mt-0.5">Counter Out</span>
+      </button>
+
+      <button 
+        id="tabBtnLogs" 
+        onclick="switchTab('logs')" 
+        class="tap-active flex flex-col items-center justify-center py-1 rounded-xl text-slate-400 font-semibold transition">
+        <div class="relative">
+          <i class="fa-solid fa-list-check text-base"></i>
+          <span id="logsCountBadge" class="hidden absolute -top-1 -right-2 bg-orange-500 text-white text-[9px] w-3.5 h-3.5 rounded-full flex items-center justify-center font-black">0</span>
+        </div>
+        <span class="text-[10px] mt-0.5">Daily Logs</span>
+      </button>
+
+      <button 
+        id="tabBtnInventory" 
+        onclick="switchTab('inventory')" 
+        class="tap-active flex flex-col items-center justify-center py-1 rounded-xl text-slate-400 font-semibold transition">
+        <i class="fa-solid fa-boxes-stacked text-base"></i>
+        <span class="text-[10px] mt-0.5">Master Sheet</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- MODAL: ADD / INWARD STOCK -->
+  <div id="inwardModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-workshop-900 border border-workshop-700 rounded-2xl w-full max-w-sm p-4 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between border-b border-workshop-700/70 pb-2.5">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+            <i class="fa-solid fa-truck-ramp-box text-sm"></i>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-white">Stock Inward</h3>
+            <p class="text-[10px] text-slate-400" id="inwardItemSubtext">Add incoming parts</p>
+          </div>
+        </div>
+        <button onclick="closeModal('inwardModal')" class="text-slate-400 hover:text-white text-base p-1">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <input type="hidden" id="inwardItemId" />
+      
+      <div>
+        <label class="block text-xs font-semibold text-slate-300 mb-1">Quantity Received</label>
+        <div class="flex items-center gap-2">
+          <button type="button" onclick="adjustInwardStep(-1)" class="w-10 h-10 bg-workshop-800 rounded-xl text-lg font-bold border border-slate-700 text-slate-300">-</button>
+          <input 
+            type="number" 
+            id="inwardQtyInput" 
+            value="5" 
+            min="1" 
+            class="flex-1 text-center bg-workshop-950 border border-workshop-700 rounded-xl py-2 text-base font-bold text-white focus:outline-none focus:border-emerald-500"
+          />
+          <button type="button" onclick="adjustInwardStep(1)" class="w-10 h-10 bg-workshop-800 rounded-xl text-lg font-bold border border-slate-700 text-slate-300">+</button>
+        </div>
+      </div>
+
+      <div class="flex gap-2 pt-1">
+        <button onclick="closeModal('inwardModal')" class="tap-active flex-1 bg-workshop-800 hover:bg-workshop-700 text-slate-300 text-xs py-2.5 rounded-xl font-bold">Cancel</button>
+        <button onclick="confirmInwardStock()" class="tap-active flex-1 bg-emerald-600 hover:bg-emerald-500 text-white text-xs py-2.5 rounded-xl font-bold shadow-lg shadow-emerald-900/30">Add to Stock</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: EDIT ITEM DETAILS (NAME, PRICE, STOCK) -->
+  <div id="editItemModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-workshop-900 border border-workshop-700 rounded-2xl w-full max-w-sm p-4 shadow-2xl space-y-3">
+      <div class="flex items-center justify-between border-b border-workshop-700/70 pb-2">
+        <h3 class="text-sm font-bold text-white flex items-center gap-2">
+          <i class="fa-solid fa-pen-to-square text-orange-400"></i>
+          <span>Edit Part & Price</span>
+        </h3>
+        <button onclick="closeModal('editItemModal')" class="text-slate-400 hover:text-white p-1">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <input type="hidden" id="editItemId" />
+
+      <div class="space-y-2.5">
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-300 mb-1">Part Name & Code</label>
+          <input 
+            type="text" 
+            id="editItemName" 
+            placeholder="e.g. B 36AA4105 CYL BLOCK PIST" 
+            class="w-full bg-workshop-950 border border-workshop-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-orange-500"
+          />
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-300 mb-1">Cost Price (₹)</label>
+            <input 
+              type="number" 
+              id="editItemCost" 
+              step="any"
+              placeholder="0" 
+              class="w-full bg-workshop-950 border border-workshop-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-orange-500"
+            />
+          </div>
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-300 mb-1">Remaining Stock</label>
+            <input 
+              type="number" 
+              id="editItemStock" 
+              min="0"
+              placeholder="0" 
+              class="w-full bg-workshop-950 border border-workshop-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-orange-500"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div class="flex gap-2 pt-2">
+        <button onclick="closeModal('editItemModal')" class="tap-active flex-1 bg-workshop-800 text-slate-300 text-xs py-2.5 rounded-xl font-bold">Cancel</button>
+        <button onclick="saveEditItem()" class="tap-active flex-1 bg-orange-600 hover:bg-orange-500 text-white text-xs py-2.5 rounded-xl font-bold shadow-lg shadow-orange-950/40">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: ADD BRAND NEW PART -->
+  <div id="newItemModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-workshop-900 border border-workshop-700 rounded-2xl w-full max-w-sm p-4 shadow-2xl space-y-3">
+      <div class="flex items-center justify-between border-b border-workshop-700/70 pb-2">
+        <h3 class="text-sm font-bold text-white flex items-center gap-2">
+          <i class="fa-solid fa-plus-circle text-orange-400"></i>
+          <span>Add New Item / Part</span>
+        </h3>
+        <button onclick="closeModal('newItemModal')" class="text-slate-400 hover:text-white p-1">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div class="space-y-2.5">
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-300 mb-1">Part Name & Code</label>
+          <input 
+            type="text" 
+            id="newItemName" 
+            placeholder="e.g. B 36AA4105 CYL BLOCK PIST" 
+            class="w-full bg-workshop-950 border border-workshop-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-orange-500 uppercase"
+          />
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-300 mb-1">Cost Price (₹)</label>
+            <input 
+              type="number" 
+              id="newItemCost" 
+              step="any"
+              placeholder="0" 
+              class="w-full bg-workshop-950 border border-workshop-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-orange-500"
+            />
+          </div>
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-300 mb-1">Stock Quantity</label>
+            <input 
+              type="number" 
+              id="newItemStock" 
+              min="0"
+              value="5" 
+              class="w-full bg-workshop-950 border border-workshop-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-orange-500"
+            />
+          </div>
+        </div>
+      </div>
+      <div class="flex gap-2 pt-2">
+        <button onclick="closeModal('newItemModal')" class="tap-active flex-1 bg-workshop-800 text-slate-300 text-xs py-2.5 rounded-xl font-bold">Cancel</button>
+        <button onclick="saveNewItem()" class="tap-active flex-1 bg-orange-600 hover:bg-orange-500 text-white text-xs py-2.5 rounded-xl font-bold shadow-lg shadow-orange-950/40">Register Part</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: GOOGLE SHEETS LIVE AUTO-SYNC & PHONE INSTALL SETUP -->
+  <div 
+    id="syncModal" 
+    onclick="handleModalBackdropClick(event, 'syncModal')"
+    class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4" 
+    style="z-index: 99999;">
+    <div 
+      onclick="event.stopPropagation()" 
+      class="bg-workshop-900 border border-workshop-700 rounded-2xl w-full max-w-md max-h-[90vh] flex flex-col p-4 shadow-2xl space-y-3.5 relative z-10">
+      <div class="flex items-center justify-between border-b border-workshop-700/80 pb-2.5 shrink-0">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-lg bg-orange-500/20 text-orange-400 flex items-center justify-center">
+            <i class="fa-solid fa-cloud-bolt text-sm"></i>
+          </div>
+          <div>
+            <h3 class="text-xs font-black text-white uppercase tracking-wider">Google Sheets Auto-Sync</h3>
+            <p class="text-[10px] text-slate-400">Direct real-time link to A.M Analyser</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeModal('syncModal')" class="text-slate-400 hover:text-white text-sm p-1 cursor-pointer">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="flex-1 overflow-y-auto custom-scroll space-y-3.5 text-xs text-slate-300 pr-1">
+        <!-- Status Banner -->
+        <div id="syncStatusBanner" class="p-2.5 rounded-xl border bg-workshop-950 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span id="syncBannerDot" class="w-2.5 h-2.5 rounded-full bg-slate-500"></span>
+            <div>
+              <p id="syncBannerStatus" class="font-bold text-white text-xs">Sync Not Configured</p>
+              <p id="syncBannerSub" class="text-[10px] text-slate-400">Add your Apps Script Web App URL below</p>
+            </div>
+          </div>
+          <button onclick="testConnection()" class="tap-active text-[10px] font-bold px-2.5 py-1 bg-workshop-800 hover:bg-workshop-700 border border-slate-700 rounded-lg text-slate-200">
+            Test Link
+          </button>
+        </div>
+
+        <!-- Webhook URL input -->
+        <div>
+          <label class="block text-[11px] font-bold text-slate-300 mb-1">
+            Google Apps Script Web App URL:
+          </label>
+          <input 
+            type="url" 
+            id="appsScriptUrlInput" 
+            placeholder="https://script.google.com/macros/s/.../exec"
+            class="w-full bg-workshop-950 border border-workshop-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-orange-500"
+          />
+          <p class="text-[10px] text-slate-400 mt-1">Every stock deduction or inward entry is automatically submitted to this URL.</p>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex gap-2">
+          <button onclick="saveSyncUrl()" class="tap-active flex-1 bg-orange-600 hover:bg-orange-500 text-white font-bold py-2 rounded-xl text-xs shadow-md">
+            Save & Connect
+          </button>
+          <button onclick="pushFullSync()" class="tap-active flex-1 bg-workshop-800 hover:bg-workshop-700 border border-slate-700 text-slate-200 font-bold py-2 rounded-xl text-xs flex items-center justify-center gap-1.5">
+            <i class="fa-solid fa-arrows-rotate text-[11px]"></i>
+            <span>Sync All Stock</span>
+          </button>
+        </div>
+
+        <!-- Offline Queue Status -->
+        <div class="p-2 bg-workshop-950/70 border border-workshop-800 rounded-xl flex items-center justify-between text-[11px]">
+          <span class="text-slate-400">Pending offline entries:</span>
+          <span id="offlineQueueCount" class="font-black text-amber-400">0 queued</span>
+        </div>
+
+        <!-- Step-by-Step Instructions Toggle -->
+        <details class="bg-workshop-950 border border-workshop-800 rounded-xl p-2.5">
+          <summary class="font-bold text-[11px] text-orange-400 cursor-pointer flex items-center justify-between">
+            <span>Show Google Apps Script Code</span>
+            <i class="fa-solid fa-code text-xs"></i>
+          </summary>
+          <div class="mt-2 text-[10px] text-slate-300 space-y-1.5 leading-relaxed">
+            <p>1. Open your <b>A.M Analyser</b> Google Sheet on computer.</p>
+            <p>2. Go to <b>Extensions &gt; Apps Script</b> and paste this code:</p>
+            <textarea readonly onclick="this.select()" class="w-full h-36 bg-black text-emerald-400 font-mono text-[9px] p-2 rounded-lg border border-slate-800 select-all">
+function doPost(e) {
+  try {
+    var data = JSON.parse(e.postData.contents);
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var sheet = ss.getActiveSheet();
+    if (data.action === "ping") {
+      return ContentService.createTextOutput(JSON.stringify({status: "ok", message: "Connected successfully!"})).setMimeType(ContentService.MimeType.JSON);
+    }
+    var itemName = data.itemName;
+    var type = data.type; // "OUT" or "IN"
+    var qty = Number(data.quantity);
+    var dateHeader = data.dateLabel; // e.g. "6-Nov"
+    var values = sheet.getDataRange().getValues();
+    var headers = values[0];
+    var colDate = -1, colRemaining = -1, colNewStock = -1;
+    for (var c = 0; c < headers.length; c++) {
+      var h = headers[c].toString().trim().toLowerCase();
+      if (h === dateHeader.toLowerCase()) colDate = c;
+      if (h.indexOf("remaining") !== -1) colRemaining = c;
+      if (h.indexOf("new stock") !== -1) colNewStock = c;
+    }
+    var targetRow = -1;
+    for (var r = 1; r < values.length; r++) {
+      if (values[r][0].toString().trim().toLowerCase() === itemName.trim().toLowerCase()) {
+        targetRow = r + 1;
+        break;
+      }
+    }
+    if (targetRow !== -1) {
+      if (type === "OUT") {
+        if (colDate !== -1) {
+          var curDay = Number(sheet.getRange(targetRow, colDate + 1).getValue()) || 0;
+          sheet.getRange(targetRow, colDate + 1).setValue(curDay + qty);
+        }
+        if (colRemaining !== -1) {
+          var curRem = Number(sheet.getRange(targetRow, colRemaining + 1).getValue()) || 0;
+          sheet.getRange(targetRow, colRemaining + 1).setValue(Math.max(0, curRem - qty));
+        }
+      } else if (type === "IN") {
+        if (colRemaining !== -1) {
+          var curRem = Number(sheet.getRange(targetRow, colRemaining + 1).getValue()) || 0;
+          sheet.getRange(targetRow, colRemaining + 1).setValue(curRem + qty);
+        }
+        if (colNewStock !== -1) {
+          var curNew = Number(sheet.getRange(targetRow, colNewStock + 1).getValue()) || 0;
+          sheet.getRange(targetRow, colNewStock + 1).setValue(curNew + qty);
+        }
+      }
+      return ContentService.createTextOutput(JSON.stringify({status: "success"})).setMimeType(ContentService.MimeType.JSON);
+    }
+    return ContentService.createTextOutput(JSON.stringify({status: "not_found"})).setMimeType(ContentService.MimeType.JSON);
+  } catch (err) {
+    return ContentService.createTextOutput(JSON.stringify({status: "error", message: err.toString()})).setMimeType(ContentService.MimeType.JSON);
+  }
+}</textarea>
+            <p>3. Click <b>Deploy &gt; New deployment &gt; Web app</b>.</p>
+            <p>4. Set <i>Who has access</i> to <b>Anyone</b>, click Deploy, and paste the URL above.</p>
+          </div>
+        </details>
+
+        <!-- Phone Installation Helper -->
+        <div class="p-2.5 bg-workshop-950 border border-workshop-800 rounded-xl space-y-1">
+          <p class="font-bold text-white text-[11px] flex items-center gap-1.5">
+            <i class="fa-solid fa-mobile-screen-button text-orange-400"></i>
+            <span>Add to Phone Home Screen (Use like an App)</span>
+          </p>
+          <p class="text-[10px] text-slate-400 leading-relaxed">
+            • <b>Chrome / Android:</b> Tap the 3 dots (⋮) in the top-right &gt; tap <b>"Add to Home screen"</b>.<br>
+            • <b>Safari / iPhone:</b> Tap the Share button (<i class="fa-solid fa-arrow-up-from-bracket"></i>) &gt; tap <b>"Add to Home Screen"</b>.
+          </p>
+        </div>
+      </div>
+
+      <div class="pt-2 border-t border-workshop-700/80 shrink-0">
+        <button onclick="closeModal('syncModal')" class="tap-active w-full bg-workshop-800 hover:bg-workshop-700 text-slate-300 text-xs py-2 rounded-xl font-bold">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: BUILT-IN CUSTOM CALENDAR PICKER (WORKS 100% IN IFRAMES / PREVIEWS) -->
+  <div id="calendarModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-workshop-900 border border-workshop-700 rounded-2xl w-full max-w-xs p-4 shadow-2xl space-y-3">
+      <!-- Calendar Header -->
+      <div class="flex items-center justify-between border-b border-workshop-700/80 pb-2.5">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-lg bg-orange-500/20 text-orange-400 flex items-center justify-center">
+            <i class="fa-solid fa-calendar-days text-sm"></i>
+          </div>
+          <div>
+            <h3 class="text-xs font-black text-white uppercase tracking-wider">Select Date</h3>
+            <p class="text-[10px] text-slate-400">View stock logs by day</p>
+          </div>
+        </div>
+        <button onclick="closeModal('calendarModal')" class="text-slate-400 hover:text-white text-sm p-1">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Month & Year Selector Controls -->
+      <div class="flex items-center justify-between bg-workshop-950 p-1.5 rounded-xl border border-workshop-700/80">
+        <button type="button" onclick="navigateCalMonth(-1)" class="w-7 h-7 flex items-center justify-center rounded-lg text-slate-300 hover:bg-workshop-800 text-xs font-bold">
+          <i class="fa-solid fa-chevron-left"></i>
+        </button>
+
+        <div class="flex items-center gap-1">
+          <span id="calMonthYearTitle" class="text-xs font-bold text-white tracking-wide">Month Year</span>
+        </div>
+
+        <button type="button" onclick="navigateCalMonth(1)" class="w-7 h-7 flex items-center justify-center rounded-lg text-slate-300 hover:bg-workshop-800 text-xs font-bold">
+          <i class="fa-solid fa-chevron-right"></i>
+        </button>
+      </div>
+
+      <!-- Days of Week Header -->
+      <div class="grid grid-cols-7 gap-1 text-center text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+        <span>Su</span>
+        <span>Mo</span>
+        <span>Tu</span>
+        <span>We</span>
+        <span>Th</span>
+        <span>Fr</span>
+        <span>Sa</span>
+      </div>
+
+      <!-- Days Grid -->
+      <div id="calDaysGrid" class="grid grid-cols-7 gap-1 text-xs">
+        <!-- Rendered dynamically -->
+      </div>
+
+      <!-- Calendar Bottom Action Buttons -->
+      <div class="flex items-center justify-between pt-2 border-t border-workshop-700/80">
+        <button onclick="pickCalendarDate(getTodayISO())" class="tap-active text-xs font-bold text-orange-400 hover:underline px-1">
+          Jump to Today
+        </button>
+        <button onclick="closeModal('calendarModal')" class="tap-active bg-workshop-800 hover:bg-workshop-700 text-slate-300 text-xs px-3 py-1.5 rounded-lg font-bold">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: EXPORT & GOOGLE SHEETS HELPER -->
+  <div id="exportModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-workshop-900 border border-workshop-700 rounded-2xl w-full max-w-sm p-4 shadow-2xl space-y-3">
+      <div class="flex items-center justify-between border-b border-workshop-700/70 pb-2">
+        <h3 class="text-sm font-bold text-emerald-400 flex items-center gap-2">
+          <i class="fa-solid fa-file-excel"></i>
+          <span>Google Sheets Export</span>
+        </h3>
+        <button onclick="closeModal('exportModal')" class="text-slate-400 hover:text-white p-1">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <p class="text-xs text-slate-300 leading-relaxed">
+        Export your updated inventory valuation data into clean CSV or copy it directly for your Google Sheet.
+      </p>
+
+      <div class="space-y-2 pt-1">
+        <button onclick="exportToGoogleSheetCSV()" class="tap-active w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-2 shadow">
+          <i class="fa-solid fa-file-arrow-down"></i>
+          <span>Download Stock CSV</span>
+        </button>
+        <button onclick="copyInventoryToClipboard()" class="tap-active w-full bg-workshop-800 hover:bg-workshop-700 text-slate-200 font-semibold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-2 border border-slate-700">
+          <i class="fa-solid fa-copy"></i>
+          <span>Copy Clean Table for Google Sheets</span>
+        </button>
+      </div>
+
+      <div class="pt-2 border-t border-workshop-700/80">
+        <button onclick="resetToInitialData()" class="tap-active w-full text-rose-400 hover:text-rose-300 bg-rose-500/10 hover:bg-rose-500/20 py-2 rounded-xl text-[11px] font-bold transition border border-rose-500/30">
+          Reset to Original Google Sheet Stock
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION CONTAINER -->
+  <div id="toast" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 transition-all duration-300 opacity-0 pointer-events-none transform -translate-y-2">
+    <div id="toastInner" class="bg-slate-900 border border-slate-700 text-white text-xs px-4 py-2.5 rounded-xl shadow-2xl flex items-center gap-2">
+      <i id="toastIcon" class="fa-solid fa-circle-check text-emerald-400"></i>
+      <span id="toastMsg" class="font-medium">Notification</span>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT APPLICATION LOGIC -->
+  <script>
+    // PRE-LOADED DATA FROM 'A.M Analyser' GOOGLE SHEET
+    const DEFAULT_STOCK = [
+      { id: 'itm_1', name: 'B 36AA4105 CYL BLOCK PIST', cost: 3250, remaining: 1 },
+      { id: 'itm_2', name: 'B AA101033 CRANK SHAFT', cost: 3200, remaining: 0 },
+      { id: 'itm_3', name: 'VARROC STATER MOTER ASSY', cost: 2700, remaining: 0 },
+      { id: 'itm_4', name: 'B AN101123 BORE KIT 205CC', cost: 2650, remaining: 3 },
+      { id: 'itm_5', name: 'B AF201036 REGULATOR', cost: 1460, remaining: 0 },
+      { id: 'itm_6', name: 'ISK REAR WHEEL BEARING KIT', cost: 1050, remaining: 8 },
+      { id: 'itm_7', name: 'B AA101666 CAM SHAFT ASSY', cost: 850, remaining: 19 },
+      { id: 'itm_8', name: 'B AA101864 ASSY CAM SHAFT', cost: 835, remaining: 13 },
+      { id: 'itm_9', name: 'B AB171044 FRONT SHOCKER', cost: 730, remaining: 0 },
+      { id: 'itm_10', name: 'B P-PLUS 2.1LTR', cost: 700, remaining: 35 },
+      { id: 'itm_11', name: 'VARROC HALF BENDEX PINIUM', cost: 660, remaining: 2 },
+      { id: 'itm_12', name: 'B 36RA0002CLUCH PLATE', cost: 500, remaining: 10 },
+      { id: 'itm_13', name: '4025 CLUTCH PLATE', cost: 480, remaining: 32 },
+      { id: 'itm_14', name: 'GTX 20W50 1LTR', cost: 390, remaining: 8 },
+      { id: 'itm_15', name: 'B AA191092 CLUTCH CABEL COM', cost: 380, remaining: 8 },
+      { id: 'itm_16', name: 'B AA101473 CLUTCH HUB 4/S', cost: 320, remaining: 32 },
+      { id: 'itm_17', name: 'MOTUL CNG POUCH 1LTR', cost: 265, remaining: 26 },
+      { id: 'itm_18', name: 'B AF121612 OIL FILTER', cost: 170, remaining: 25 },
+      { id: 'itm_19', name: 'MAHLE OIL FILTER COMP', cost: 85, remaining: 135 },
+      { id: 'itm_20', name: 'ST OIL FILTER COM', cost: 85, remaining: 60 }
+    ];
+
+    // STATE
+    let inventory = [];
+    let salesLogs = [];
+    let activeTab = 'counter';
+    let searchQuery = '';
+    let currentSort = 'name_asc';
+    let stockFilter = 'all'; // 'all', 'low', 'out', 'instock'
+
+    // GOOGLE SHEETS SYNC STATE
+    let appsScriptUrl = localStorage.getItem('am_apps_script_url') || '';
+    let offlineSyncQueue = JSON.parse(localStorage.getItem('am_sync_queue_v1') || '[]');
+
+    // LOGS STATE & DATE FILTERING (365-DAY STORAGE)
+    let selectedDateFilterMode = 'today'; // 'today', 'yesterday', '7days', 'thisMonth', 'all', 'custom'
+    let selectedDateISO = getTodayISO();
+    let selectedLogType = 'all'; // 'all', 'OUT', 'IN'
+
+    // Calendar Modal State
+    let calViewYear = new Date().getFullYear();
+    let calViewMonth = new Date().getMonth(); // 0 to 11
+
+    function getTodayISO() {
+      const d = new Date();
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    }
+
+    function formatISODateLabel(isoStr) {
+      if (!isoStr) return '';
+      const parts = isoStr.split('-');
+      if (parts.length !== 3) return isoStr;
+      const d = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+      return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+    }
+
+    // INDEXEDDB DATABASE FOR 1-YEAR HIGH-CAPACITY LOG PERSISTENCE
+    const DB_NAME = 'AM_Analyser_DB';
+    const DB_VERSION = 1;
+    let dbInstance = null;
+
+    function openDatabase() {
+      return new Promise((resolve) => {
+        if (!window.indexedDB) {
+          resolve(null);
+          return;
+        }
+        const req = indexedDB.open(DB_NAME, DB_VERSION);
+        req.onupgradeneeded = function(e) {
+          const db = e.target.result;
+          if (!db.objectStoreNames.contains('logs')) {
+            const store = db.createObjectStore('logs', { keyPath: 'id' });
+            store.createIndex('dateISO', 'dateISO', { unique: false });
+            store.createIndex('timestamp', 'timestamp', { unique: false });
+          }
+        };
+        req.onsuccess = function(e) {
+          dbInstance = e.target.result;
+          resolve(dbInstance);
+        };
+        req.onerror = function() {
+          resolve(null);
+        };
+      });
+    }
+
+    // WEB AUDIO API SYNTHESIS (NO EXTERNAL AUDIO FILES)
+    let audioCtx = null;
+    function getAudioContext() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      return audioCtx;
+    }
+
+    function playBeep(isSuccess = true) {
+      try {
+        const ctx = getAudioContext();
+        if (ctx.state === 'suspended') ctx.resume();
+
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        const now = ctx.currentTime;
+        if (isSuccess) {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(587.33, now); // D5
+          osc.frequency.setValueAtTime(880, now + 0.08); // A5
+          gain.gain.setValueAtTime(0.12, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+          osc.start(now);
+          osc.stop(now + 0.22);
+        } else {
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(180, now);
+          gain.gain.setValueAtTime(0.15, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+          osc.start(now);
+          osc.stop(now + 0.25);
+        }
+      } catch (e) {
+        // Audio may be restricted before user tap
+      }
+    }
+
+    // INITIALIZATION
+    window.onload = async function() {
+      await openDatabase();
+      await loadStorage();
+      initSyncSettings();
+      updateDateLabelUI();
+      renderAll();
+      processOfflineQueue();
+
+      // Bind direct click and touch listener fallbacks for the sync modal
+      const badge = document.getElementById('headerSyncBadge');
+      const iconBtn = document.getElementById('syncSetupBtn');
+      if (badge) {
+        badge.addEventListener('click', openSyncModal);
+      }
+      if (iconBtn) {
+        iconBtn.addEventListener('click', openSyncModal);
+      }
+    };
+
+    function initSyncSettings() {
+      updateSyncStatusUI();
+    }
+
+    function updateSyncStatusUI() {
+      const dot = document.getElementById('syncStatusDot');
+      const text = document.getElementById('syncStatusText');
+      const bannerDot = document.getElementById('syncBannerDot');
+      const bannerStatus = document.getElementById('syncBannerStatus');
+      const bannerSub = document.getElementById('syncBannerSub');
+      const queueCount = document.getElementById('offlineQueueCount');
+
+      if (queueCount) {
+        queueCount.innerText = `${offlineSyncQueue.length} queued`;
+      }
+
+      if (appsScriptUrl) {
+        if (dot) dot.className = "w-2 h-2 rounded-full bg-emerald-400 animate-pulse pointer-events-none";
+        if (text) {
+          text.className = "text-[9px] font-bold text-emerald-400 uppercase tracking-wider pointer-events-none";
+          text.innerText = "Connected";
+        }
+        if (bannerDot) bannerDot.className = "w-2.5 h-2.5 rounded-full bg-emerald-400";
+        if (bannerStatus) bannerStatus.innerText = "Google Sheet Sync Active";
+        if (bannerSub) bannerSub.innerText = "All changes will automatically sync to your sheet";
+      } else {
+        if (dot) dot.className = "w-2 h-2 rounded-full bg-slate-500 pointer-events-none";
+        if (text) {
+          text.className = "text-[9px] font-bold text-slate-400 uppercase tracking-wider pointer-events-none";
+          text.innerText = "No Sync";
+        }
+        if (bannerDot) bannerDot.className = "w-2.5 h-2.5 rounded-full bg-slate-500";
+        if (bannerStatus) bannerStatus.innerText = "Sync Not Configured";
+        if (bannerSub) bannerSub.innerText = "Add your Apps Script Web App URL below";
+      }
+    }
+
+    function openSyncModal(event) {
+      if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+      const modal = document.getElementById('syncModal');
+      if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        const input = document.getElementById('appsScriptUrlInput');
+        if (input && appsScriptUrl) {
+          input.value = appsScriptUrl;
+        }
+      }
+    }
+
+    function handleModalBackdropClick(event, modalId) {
+      if (event.target && event.target.id === modalId) {
+        closeModal(modalId);
+      }
+    }
+
+    function closeModal(id) {
+      const modal = document.getElementById(id);
+      if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+    }
+
+    function saveSyncUrl() {
+      const input = document.getElementById('appsScriptUrlInput');
+      const val = (input ? input.value : '').trim();
+
+      if (!val) {
+        appsScriptUrl = '';
+        localStorage.removeItem('am_apps_script_url');
+        updateSyncStatusUI();
+        showToast('Google Sheet sync link removed', 'rose');
+        return;
+      }
+
+      if (!val.startsWith('http')) {
+        showToast('Please enter a valid https:// script URL', 'rose');
+        return;
+      }
+
+      appsScriptUrl = val;
+      localStorage.setItem('am_apps_script_url', appsScriptUrl);
+      updateSyncStatusUI();
+      playBeep(true);
+      showToast('Connected! Testing link...', 'emerald');
+      testConnection();
+      processOfflineQueue();
+    }
+
+    async function testConnection() {
+      if (!appsScriptUrl) {
+        showToast('Please enter Web App URL first', 'rose');
+        return;
+      }
+
+      showToast('Pinging Google Sheet...', 'emerald');
+      try {
+        await fetch(appsScriptUrl, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'text/plain' },
+          body: JSON.stringify({ action: 'ping', timestamp: Date.now() })
+        });
+
+        playBeep(true);
+        showToast('Ping sent! Google Sheet bridge is reachable', 'emerald');
+      } catch (err) {
+        playBeep(false);
+        showToast('Network error pinging Google Sheet', 'rose');
+      }
+    }
+
+    // DISPATCH BACKGROUND AUTO-SYNC TO GOOGLE SHEETS
+    function syncTransactionToGoogleSheet(payload) {
+      if (!appsScriptUrl) {
+        return; // Local operation only if no webhook configured
+      }
+
+      // Add to offline queue
+      offlineSyncQueue.push(payload);
+      localStorage.setItem('am_sync_queue_v1', JSON.stringify(offlineSyncQueue));
+      updateSyncStatusUI();
+
+      processOfflineQueue();
+    }
+
+    async function processOfflineQueue() {
+      if (!appsScriptUrl || offlineSyncQueue.length === 0) return;
+
+      const itemToSync = offlineSyncQueue[0];
+      try {
+        await fetch(appsScriptUrl, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'text/plain' },
+          body: JSON.stringify(itemToSync)
+        });
+
+        // If fetch succeeds (or no-cors opaque response accepted)
+        offlineSyncQueue.shift();
+        localStorage.setItem('am_sync_queue_v1', JSON.stringify(offlineSyncQueue));
+        updateSyncStatusUI();
+
+        showToast(`Synced "${itemToSync.itemName.slice(0, 15)}" with Google Sheet`, 'emerald');
+
+        // Continue processing next item if queue has more
+        if (offlineSyncQueue.length > 0) {
+          setTimeout(processOfflineQueue, 500);
+        }
+      } catch (err) {
+        console.warn('Sync failed, kept in offline queue for next retry', err);
+      }
+    }
+
+    // PUSH FULL INVENTORY VALUATION SYNC
+    async function pushFullSync() {
+      if (!appsScriptUrl) {
+        showToast('Configure Web App URL first', 'rose');
+        return;
+      }
+
+      showToast('Pushing stock snapshot to Google Sheet...', 'emerald');
+      try {
+        await fetch(appsScriptUrl, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'text/plain' },
+          body: JSON.stringify({
+            action: 'full_snapshot',
+            timestamp: Date.now(),
+            items: inventory
+          })
+        });
+
+        playBeep(true);
+        showToast('Full stock snapshot transmitted!', 'emerald');
+      } catch (e) {
+        showToast('Sync request failed to transmit', 'rose');
+      }
+    }
+
+    function getSheetDateLabel(dateObj = new Date()) {
+      const day = dateObj.getDate();
+      const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      return `${day}-${monthNames[dateObj.getMonth()]}`;
+    }
+
+    function updateDateLabelUI() {
+      const label = document.getElementById('selectedDateDisplayLabel');
+
+      if (label) {
+        if (selectedDateFilterMode === 'today') {
+          label.innerHTML = `Today, ${formatISODateLabel(selectedDateISO)}`;
+        } else if (selectedDateFilterMode === 'yesterday') {
+          label.innerHTML = `Yesterday, ${formatISODateLabel(selectedDateISO)}`;
+        } else if (selectedDateFilterMode === '7days') {
+          label.innerHTML = `Last 7 Days Range`;
+        } else if (selectedDateFilterMode === 'thisMonth') {
+          label.innerHTML = `This Month Range`;
+        } else if (selectedDateFilterMode === 'all') {
+          label.innerHTML = `All Year (365 Days)`;
+        } else {
+          label.innerHTML = formatISODateLabel(selectedDateISO);
+        }
+      }
+    }
+
+    // SHIFT DAY VIA PREV (<) / NEXT (>) ARROWS
+    function shiftSelectedDay(offsetDays) {
+      let baseDate;
+      if (selectedDateISO) {
+        const parts = selectedDateISO.split('-');
+        baseDate = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+      } else {
+        baseDate = new Date();
+      }
+
+      baseDate.setDate(baseDate.getDate() + offsetDays);
+
+      selectedDateISO = `${baseDate.getFullYear()}-${String(baseDate.getMonth() + 1).padStart(2, '0')}-${String(baseDate.getDate()).padStart(2, '0')}`;
+      selectedDateFilterMode = (selectedDateISO === getTodayISO()) ? 'today' : 'custom';
+
+      updateDateLabelUI();
+      updateQuickDateButtonsUI();
+      renderLogs();
+    }
+
+    // CUSTOM IN-APP CALENDAR LOGIC
+    function openCustomCalendar() {
+      if (selectedDateISO) {
+        const parts = selectedDateISO.split('-');
+        calViewYear = parseInt(parts[0], 10);
+        calViewMonth = parseInt(parts[1], 10) - 1;
+      } else {
+        const n = new Date();
+        calViewYear = n.getFullYear();
+        calViewMonth = n.getMonth();
+      }
+      renderCalendarGrid();
+      openModal('calendarModal');
+    }
+
+    function navigateCalMonth(direction) {
+      calViewMonth += direction;
+      if (calViewMonth < 0) {
+        calViewMonth = 11;
+        calViewYear--;
+      } else if (calViewMonth > 11) {
+        calViewMonth = 0;
+        calViewYear++;
+      }
+      renderCalendarGrid();
+    }
+
+    function renderCalendarGrid() {
+      const title = document.getElementById('calMonthYearTitle');
+      const grid = document.getElementById('calDaysGrid');
+
+      const monthNames = [
+        'January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December'
+      ];
+
+      title.innerText = `${monthNames[calViewMonth]} ${calViewYear}`;
+
+      // First day of month (0 = Sun, 1 = Mon, ...)
+      const firstDayIdx = new Date(calViewYear, calViewMonth, 1).getDay();
+      // Total days in month
+      const daysInMonth = new Date(calViewYear, calViewMonth + 1, 0).getDate();
+
+      const todayISO = getTodayISO();
+      let html = '';
+
+      // Blank slots before first day
+      for (let i = 0; i < firstDayIdx; i++) {
+        html += `<div class="h-8"></div>`;
+      }
+
+      // Day buttons
+      for (let day = 1; day <= daysInMonth; day++) {
+        const thisISO = `${calViewYear}-${String(calViewMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        const isSelected = (thisISO === selectedDateISO);
+        const isToday = (thisISO === todayISO);
+
+        let btnClass = "h-8 rounded-lg flex items-center justify-center font-bold text-xs tap-active transition ";
+        if (isSelected) {
+          btnClass += "bg-orange-600 text-white shadow-md shadow-orange-950/50";
+        } else if (isToday) {
+          btnClass += "border border-orange-500/60 text-orange-400 bg-orange-500/10";
+        } else {
+          btnClass += "text-slate-200 hover:bg-workshop-800 bg-workshop-950/60";
+        }
+
+        html += `
+          <button type="button" onclick="pickCalendarDate('${thisISO}')" class="${btnClass}">
+            ${day}
+          </button>
+        `;
+      }
+
+      grid.innerHTML = html;
+    }
+
+    function pickCalendarDate(isoStr) {
+      selectedDateISO = isoStr;
+      selectedDateFilterMode = (selectedDateISO === getTodayISO()) ? 'today' : 'custom';
+      closeModal('calendarModal');
+      updateDateLabelUI();
+      updateQuickDateButtonsUI();
+      renderLogs();
+    }
+
+    async function loadStorage() {
+      try {
+        const savedInv = localStorage.getItem('am_inventory_v1');
+        inventory = savedInv ? JSON.parse(savedInv) : [...DEFAULT_STOCK];
+
+        // Load logs from IndexedDB if available; fallback to localStorage
+        if (dbInstance) {
+          salesLogs = await getAllLogsFromDB();
+        } else {
+          const savedLogs = localStorage.getItem('am_sales_logs_v1');
+          salesLogs = savedLogs ? JSON.parse(savedLogs) : [];
+        }
+
+        // Migrate existing logs if missing dateISO
+        let needsMigration = false;
+        salesLogs.forEach(log => {
+          if (!log.dateISO) {
+            log.dateISO = getTodayISO();
+            log.timestamp = log.timestamp || Date.now();
+            needsMigration = true;
+          }
+        });
+        if (needsMigration) {
+          saveStorage();
+        }
+      } catch (e) {
+        inventory = [...DEFAULT_STOCK];
+        salesLogs = [];
+      }
+    }
+
+    function getAllLogsFromDB() {
+      return new Promise((resolve) => {
+        if (!dbInstance) return resolve([]);
+        try {
+          const tx = dbInstance.transaction('logs', 'readonly');
+          const store = tx.objectStore('logs');
+          const req = store.getAll();
+          req.onsuccess = () => resolve(req.result || []);
+          req.onerror = () => resolve([]);
+        } catch (e) {
+          resolve([]);
+        }
+      });
+    }
+
+    function saveStorage() {
+      try {
+        localStorage.setItem('am_inventory_v1', JSON.stringify(inventory));
+        // Keep recent logs in localStorage as redundancy
+        localStorage.setItem('am_sales_logs_v1', JSON.stringify(salesLogs.slice(0, 300)));
+
+        // Persist all 365-day records to IndexedDB
+        if (dbInstance) {
+          const tx = dbInstance.transaction('logs', 'readwrite');
+          const store = tx.objectStore('logs');
+          store.clear();
+          salesLogs.forEach(log => store.put(log));
+        }
+      } catch (e) {
+        console.error('Storage save error', e);
+      }
+    }
+
+    function addLogRecord(record) {
+      salesLogs.unshift(record);
+      // Prune records older than 365 days (1 year)
+      const oneYearAgo = Date.now() - (365 * 24 * 60 * 60 * 1000);
+      salesLogs = salesLogs.filter(l => (l.timestamp || Date.now()) >= oneYearAgo);
+
+      saveStorage();
+    }
+
+    // TAB SWITCHING
+    function switchTab(tab) {
+      activeTab = tab;
+      
+      const vCounter = document.getElementById('viewCounter');
+      const vLogs = document.getElementById('viewLogs');
+      const vInv = document.getElementById('viewInventory');
+
+      const btnCounter = document.getElementById('tabBtnCounter');
+      const btnLogs = document.getElementById('tabBtnLogs');
+      const btnInv = document.getElementById('tabBtnInventory');
+
+      vCounter.classList.add('hidden');
+      vLogs.classList.add('hidden');
+      vInv.classList.add('hidden');
+
+      btnCounter.className = "tap-active flex flex-col items-center justify-center py-1 rounded-xl text-slate-400 font-semibold transition";
+      btnLogs.className = "tap-active flex flex-col items-center justify-center py-1 rounded-xl text-slate-400 font-semibold transition";
+      btnInv.className = "tap-active flex flex-col items-center justify-center py-1 rounded-xl text-slate-400 font-semibold transition";
+
+      if (tab === 'counter') {
+        vCounter.classList.remove('hidden');
+        btnCounter.className = "tap-active flex flex-col items-center justify-center py-1 rounded-xl text-orange-400 font-bold transition";
+        renderCounter();
+      } else if (tab === 'logs') {
+        vLogs.classList.remove('hidden');
+        btnLogs.className = "tap-active flex flex-col items-center justify-center py-1 rounded-xl text-orange-400 font-bold transition";
+        renderLogs();
+      } else {
+        vInv.classList.remove('hidden');
+        btnInv.className = "tap-active flex flex-col items-center justify-center py-1 rounded-xl text-orange-400 font-bold transition";
+        renderInventoryTable();
+      }
+    }
+
+    // SEARCH & FILTER
+    function handleSearch(val) {
+      searchQuery = val.trim().toLowerCase();
+      document.getElementById('clearSearchBtn').classList.toggle('hidden', searchQuery.length === 0);
+      renderCurrentView();
+    }
+
+    function clearSearch() {
+      const input = document.getElementById('searchInput');
+      input.value = '';
+      searchQuery = '';
+      document.getElementById('clearSearchBtn').classList.add('hidden');
+      renderCurrentView();
+    }
+
+    function setStockFilter(filter) {
+      stockFilter = filter;
+      updateFilterPillsUI();
+      renderCurrentView();
+    }
+
+    function handleSortChange(sortVal) {
+      currentSort = sortVal;
+      renderCurrentView();
+    }
+
+    function updateFilterPillsUI() {
+      const filters = ['all', 'low', 'out', 'instock'];
+      filters.forEach(f => {
+        const pill = document.getElementById(`filterPill-${f}`);
+        if (!pill) return;
+        if (f === stockFilter) {
+          pill.className = "px-2.5 py-1 rounded-lg font-bold bg-orange-600 text-white whitespace-nowrap transition shadow-sm";
+        } else {
+          pill.className = "px-2.5 py-1 rounded-lg font-bold bg-workshop-800 text-slate-300 border border-slate-700 whitespace-nowrap transition hover:text-white";
+        }
+      });
+    }
+
+    function getProcessedItems() {
+      let items = inventory.filter(item => 
+        item.name.toLowerCase().includes(searchQuery)
+      );
+
+      if (stockFilter === 'low') {
+        items = items.filter(item => item.remaining > 0 && item.remaining < 5);
+      } else if (stockFilter === 'out') {
+        items = items.filter(item => item.remaining === 0);
+      } else if (stockFilter === 'instock') {
+        items = items.filter(item => item.remaining > 0);
+      }
+
+      return items.slice().sort((a, b) => {
+        if (currentSort === 'stock_asc') {
+          return a.remaining - b.remaining;
+        } else if (currentSort === 'stock_desc') {
+          return b.remaining - a.remaining;
+        } else if (currentSort === 'price_asc') {
+          return a.cost - b.cost;
+        } else if (currentSort === 'price_desc') {
+          return b.cost - a.cost;
+        } else {
+          return a.name.localeCompare(b.name);
+        }
+      });
+    }
+
+    function renderCurrentView() {
+      if (activeTab === 'counter') renderCounter();
+      else if (activeTab === 'inventory') renderInventoryTable();
+      else if (activeTab === 'logs') renderLogs();
+    }
+
+    // RENDER COUNTER (SALES) ITEMS
+    function renderCounter() {
+      const container = document.getElementById('counterItemsList');
+      const filtered = getProcessedItems();
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-12 bg-workshop-900/60 rounded-2xl border border-workshop-700/60">
+            <i class="fa-solid fa-box-open text-3xl text-slate-600 mb-2"></i>
+            <p class="text-sm font-semibold text-slate-400">No items match the chosen filter/search</p>
+            <button onclick="setStockFilter('all'); clearSearch();" class="mt-3 text-xs text-orange-400 underline">Reset all filters</button>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = filtered.map(item => {
+        let stockBadge = '';
+        if (item.remaining === 0) {
+          stockBadge = `<span class="bg-rose-500/15 text-rose-400 border border-rose-500/30 text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider">Out of Stock</span>`;
+        } else if (item.remaining <= 3) {
+          stockBadge = `<span class="bg-amber-500/15 text-amber-400 border border-amber-500/30 text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider">Low: ${item.remaining} left</span>`;
+        } else {
+          stockBadge = `<span class="bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider">${item.remaining} in stock</span>`;
+        }
+
+        const isOutOfStock = item.remaining <= 0;
+
+        return `
+          <div id="card-${item.id}" class="bg-workshop-900/90 border border-workshop-700/80 rounded-2xl p-3.5 shadow-md transition-all duration-200">
+            <div class="flex items-start justify-between gap-2">
+              <div class="flex-1 pr-1">
+                <h3 class="text-xs font-bold text-slate-100 leading-snug tracking-tight">
+                  ${escapeHtml(item.name)}
+                </h3>
+                <div class="flex items-center gap-2 mt-1.5 flex-wrap">
+                  <span class="text-xs font-black text-orange-400">₹${Number(item.cost).toLocaleString('en-IN')}</span>
+                  ${stockBadge}
+                </div>
+              </div>
+
+              <!-- Item Actions: Edit & Inward -->
+              <div class="flex items-center gap-1.5 shrink-0">
+                <button 
+                  onclick="openEditItemModal('${item.id}')" 
+                  title="Edit Name & Price"
+                  class="tap-active text-slate-400 hover:text-orange-400 bg-workshop-950 border border-workshop-700 w-8 h-8 rounded-xl flex items-center justify-center transition">
+                  <i class="fa-solid fa-pen text-xs"></i>
+                </button>
+                <button 
+                  onclick="openInwardModal('${item.id}')" 
+                  title="Inward / Add Stock"
+                  class="tap-active text-slate-400 hover:text-emerald-400 bg-workshop-950 border border-workshop-700 w-8 h-8 rounded-xl flex items-center justify-center transition">
+                  <i class="fa-solid fa-plus text-xs"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Custom Qty Out Entry Row -->
+            <div class="mt-3 pt-2.5 border-t border-workshop-700/60 flex items-center justify-between gap-2">
+              <div class="flex items-center gap-1.5 flex-1 max-w-[160px]">
+                <button 
+                  type="button"
+                  onclick="stepSaleInput('${item.id}', -1)"
+                  ${isOutOfStock ? 'disabled' : ''}
+                  class="w-8 h-8 bg-workshop-950 border border-workshop-700 rounded-lg text-slate-300 text-sm font-bold flex items-center justify-center tap-active disabled:opacity-30">
+                  -
+                </button>
+                <input 
+                  type="number" 
+                  id="saleInput-${item.id}" 
+                  value="" 
+                  min="1" 
+                  max="${item.remaining}" 
+                  placeholder="Qty"
+                  ${isOutOfStock ? 'disabled' : ''}
+                  class="w-14 text-center bg-workshop-950 border border-workshop-700 rounded-lg py-1 text-sm font-bold text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-orange-500 disabled:opacity-40"
+                />
+                <button 
+                  type="button"
+                  onclick="stepSaleInput('${item.id}', 1)"
+                  ${isOutOfStock ? 'disabled' : ''}
+                  class="w-8 h-8 bg-workshop-950 border border-workshop-700 rounded-lg text-slate-300 text-sm font-bold flex items-center justify-center tap-active disabled:opacity-30">
+                  +
+                </button>
+              </div>
+
+              <button 
+                onclick="recordCustomSale('${item.id}')" 
+                ${isOutOfStock ? 'disabled' : ''}
+                class="tap-active px-3.5 py-1.5 bg-orange-600 hover:bg-orange-500 disabled:bg-slate-700 disabled:opacity-40 text-white font-bold text-xs rounded-xl flex items-center gap-1.5 shadow-md shadow-orange-950/40">
+                <i class="fa-solid fa-cart-shopping text-xs"></i>
+                <span>Out / Sell</span>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // STEP SALE INPUT QUANTITY UP/DOWN
+    function stepSaleInput(itemId, step) {
+      const input = document.getElementById(`saleInput-${itemId}`);
+      if (!input) return;
+      const rawVal = input.value.trim();
+      let val = rawVal === '' ? (step > 0 ? 1 : 0) : parseInt(rawVal);
+      if (isNaN(val)) val = 1;
+      else if (rawVal !== '') val = val + step;
+
+      val = Math.max(1, val);
+      const item = inventory.find(i => i.id === itemId);
+      if (item && item.remaining > 0) {
+        val = Math.min(val, item.remaining);
+      }
+      input.value = val;
+    }
+
+    // RECORD CUSTOM QUANTITY SALE
+    function recordCustomSale(itemId) {
+      const input = document.getElementById(`saleInput-${itemId}`);
+      const rawVal = input ? input.value.trim() : '';
+
+      if (rawVal === '') {
+        playBeep(false);
+        showToast('Please enter quantity first', 'rose');
+        if (input) input.focus();
+        return;
+      }
+
+      const qty = parseInt(rawVal, 10);
+      const item = inventory.find(i => i.id === itemId);
+
+      if (!item) return;
+
+      if (isNaN(qty) || qty <= 0) {
+        playBeep(false);
+        showToast('Please enter 1 or more quantity', 'rose');
+        if (input) input.focus();
+        return;
+      }
+
+      if (item.remaining < qty) {
+        playBeep(false);
+        showToast(`Only ${item.remaining} pcs left in stock!`, 'rose');
+        return;
+      }
+
+      // Deduct stock
+      item.remaining -= qty;
+
+      // Log sale with ISO date for exact daily logs & 365-day tracking
+      const now = new Date();
+      const sheetDateLabel = getSheetDateLabel(now);
+      const logEntry = {
+        id: 'tx_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+        type: 'OUT',
+        itemId: item.id,
+        name: item.name,
+        qty: qty,
+        unitCost: item.cost,
+        total: item.cost * qty,
+        time: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        date: now.toLocaleDateString(),
+        dateISO: getTodayISO(),
+        timestamp: now.getTime()
+      };
+      
+      addLogRecord(logEntry);
+
+      // Trigger automatic background Google Sheet Sync
+      syncTransactionToGoogleSheet({
+        action: 'transaction',
+        itemName: item.name,
+        type: 'OUT',
+        quantity: qty,
+        unitCost: item.cost,
+        remainingStock: item.remaining,
+        dateLabel: sheetDateLabel,
+        isoDate: getTodayISO(),
+        timestamp: now.getTime()
+      });
+
+      playBeep(true);
+      flashCardSuccess(itemId);
+      showToast(`Sold ${qty}x ${item.name.slice(0, 16)}...`, 'emerald');
+
+      renderAll();
+    }
+
+    // VISUAL FLASH EFFECT
+    function flashCardSuccess(itemId) {
+      const card = document.getElementById(`card-${itemId}`);
+      if (card) {
+        card.classList.add('ring-2', 'ring-emerald-500', 'bg-emerald-950/30');
+        setTimeout(() => {
+          card.classList.remove('ring-2', 'ring-emerald-500', 'bg-emerald-950/30');
+        }, 400);
+      }
+    }
+
+    // INWARD STOCK MODAL LOGIC
+    function openInwardModal(itemId) {
+      const item = inventory.find(i => i.id === itemId);
+      if (!item) return;
+
+      document.getElementById('inwardItemId').value = itemId;
+      document.getElementById('inwardItemSubtext').innerText = `${item.name} (Current: ${item.remaining})`;
+      document.getElementById('inwardQtyInput').value = '5';
+      openModal('inwardModal');
+    }
+
+    function adjustInwardStep(step) {
+      const input = document.getElementById('inwardQtyInput');
+      let val = parseInt(input.value) || 0;
+      val = Math.max(1, val + step);
+      input.value = val;
+    }
+
+    function confirmInwardStock() {
+      const itemId = document.getElementById('inwardItemId').value;
+      const qty = parseInt(document.getElementById('inwardQtyInput').value) || 0;
+      const item = inventory.find(i => i.id === itemId);
+
+      if (!item || qty <= 0) {
+        showToast('Please enter a valid incoming quantity', 'rose');
+        return;
+      }
+
+      item.remaining += qty;
+
+      const now = new Date();
+      const sheetDateLabel = getSheetDateLabel(now);
+      addLogRecord({
+        id: 'tx_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+        type: 'IN',
+        itemId: item.id,
+        name: item.name,
+        qty: qty,
+        unitCost: item.cost,
+        total: item.cost * qty,
+        time: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        date: now.toLocaleDateString(),
+        dateISO: getTodayISO(),
+        timestamp: now.getTime()
+      });
+
+      // Trigger automatic background Google Sheet Sync
+      syncTransactionToGoogleSheet({
+        action: 'transaction',
+        itemName: item.name,
+        type: 'IN',
+        quantity: qty,
+        unitCost: item.cost,
+        remainingStock: item.remaining,
+        dateLabel: sheetDateLabel,
+        isoDate: getTodayISO(),
+        timestamp: now.getTime()
+      });
+
+      playBeep(true);
+      closeModal('inwardModal');
+      showToast(`Added +${qty} pcs to ${item.name.slice(0, 15)}`, 'emerald');
+      renderAll();
+    }
+
+    // OPEN & SAVE EDIT ITEM MODAL (NAME, PRICE, STOCK)
+    function openEditItemModal(itemId) {
+      const item = inventory.find(i => i.id === itemId);
+      if (!item) return;
+
+      document.getElementById('editItemId').value = item.id;
+      document.getElementById('editItemName').value = item.name;
+      document.getElementById('editItemCost').value = item.cost;
+      document.getElementById('editItemStock').value = item.remaining;
+
+      openModal('editItemModal');
+    }
+
+    function saveEditItem() {
+      const itemId = document.getElementById('editItemId').value;
+      const name = document.getElementById('editItemName').value.trim().toUpperCase();
+      const cost = parseFloat(document.getElementById('editItemCost').value);
+      const stock = parseInt(document.getElementById('editItemStock').value);
+
+      if (!name) {
+        playBeep(false);
+        showToast('Part name cannot be empty', 'rose');
+        return;
+      }
+
+      if (isNaN(cost) || cost < 0) {
+        playBeep(false);
+        showToast('Please enter a valid cost price', 'rose');
+        return;
+      }
+
+      if (isNaN(stock) || stock < 0) {
+        playBeep(false);
+        showToast('Please enter a valid stock count', 'rose');
+        return;
+      }
+
+      const item = inventory.find(i => i.id === itemId);
+      if (!item) return;
+
+      item.name = name;
+      item.cost = cost;
+      item.remaining = stock;
+
+      saveStorage();
+      closeModal('editItemModal');
+      playBeep(true);
+      showToast('Item details updated successfully', 'emerald');
+      renderAll();
+    }
+
+    // ADD NEW CUSTOM PART
+    function saveNewItem() {
+      const name = document.getElementById('newItemName').value.trim().toUpperCase();
+      const cost = parseFloat(document.getElementById('newItemCost').value) || 0;
+      const stock = parseInt(document.getElementById('newItemStock').value) || 0;
+
+      if (!name) {
+        showToast('Please enter part name or code', 'rose');
+        return;
+      }
+
+      const newItem = {
+        id: 'itm_' + Date.now(),
+        name: name,
+        cost: cost,
+        remaining: stock
+      };
+
+      inventory.unshift(newItem);
+      saveStorage();
+
+      document.getElementById('newItemName').value = '';
+      document.getElementById('newItemCost').value = '';
+      document.getElementById('newItemStock').value = '5';
+      closeModal('newItemModal');
+
+      playBeep(true);
+      showToast('New part registered in inventory!', 'emerald');
+      renderAll();
+    }
+
+    // DAILY LOGS CONTROLLER & DATE FILTERS
+    function setQuickDate(mode) {
+      selectedDateFilterMode = mode;
+
+      if (mode === 'today') {
+        selectedDateISO = getTodayISO();
+      } else if (mode === 'yesterday') {
+        const y = new Date();
+        y.setDate(y.getDate() - 1);
+        selectedDateISO = `${y.getFullYear()}-${String(y.getMonth() + 1).padStart(2, '0')}-${String(y.getDate()).padStart(2, '0')}`;
+      }
+
+      updateDateLabelUI();
+      updateQuickDateButtonsUI();
+      renderLogs();
+    }
+
+    function setLogTypeFilter(type) {
+      selectedLogType = type;
+      ['all', 'OUT', 'IN'].forEach(t => {
+        const btn = document.getElementById(`logTypeTab-${t}`);
+        if (!btn) return;
+        if (t === type) {
+          btn.className = "flex-1 py-1.5 rounded-lg font-bold text-center bg-orange-600 text-white transition shadow";
+        } else {
+          btn.className = "flex-1 py-1.5 rounded-lg font-semibold text-center text-slate-400 hover:text-white transition";
+        }
+      });
+      renderLogs();
+    }
+
+    function updateQuickDateButtonsUI() {
+      const quickBtns = [
+        { id: 'quickBtnToday', mode: 'today' },
+        { id: 'quickBtnYesterday', mode: 'yesterday' },
+        { id: 'quickBtn7days', mode: '7days' },
+        { id: 'quickBtnThisMonth', mode: 'thisMonth' },
+        { id: 'quickBtnAll', mode: 'all' }
+      ];
+
+      quickBtns.forEach(b => {
+        const el = document.getElementById(b.id);
+        if (!el) return;
+        if (selectedDateFilterMode === b.mode) {
+          el.className = "px-2.5 py-1 rounded-lg font-bold bg-orange-600 text-white whitespace-nowrap transition shadow";
+        } else {
+          el.className = "px-2.5 py-1 rounded-lg font-bold bg-workshop-800 text-slate-300 border border-slate-700 whitespace-nowrap hover:text-white transition";
+        }
+      });
+    }
+
+    function getFilteredLogs() {
+      const now = new Date();
+
+      return salesLogs.filter(log => {
+        // Date match filter
+        let dateMatches = false;
+        const logDateISO = log.dateISO || getTodayISO();
+
+        if (selectedDateFilterMode === 'today' || selectedDateFilterMode === 'yesterday' || selectedDateFilterMode === 'custom') {
+          dateMatches = (logDateISO === selectedDateISO);
+        } else if (selectedDateFilterMode === '7days') {
+          const sevenDaysAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
+          dateMatches = ((log.timestamp || Date.now()) >= sevenDaysAgo);
+        } else if (selectedDateFilterMode === 'thisMonth') {
+          const logDate = new Date(log.timestamp || Date.now());
+          dateMatches = (logDate.getMonth() === now.getMonth() && logDate.getFullYear() === now.getFullYear());
+        } else if (selectedDateFilterMode === 'all') {
+          dateMatches = true; // 365-day full archive
+        }
+
+        if (!dateMatches) return false;
+
+        // Type filter match (All, Sold Out, Inward Added)
+        if (selectedLogType !== 'all' && log.type !== selectedLogType) {
+          return false;
+        }
+
+        return true;
+      });
+    }
+
+    // RENDER LOGS WITH METRICS & IMMEDIATE DAILY DETAILS
+    function renderLogs() {
+      const container = document.getElementById('logsContainer');
+      const badge = document.getElementById('logsCountBadge');
+
+      // Update badge on footer tab
+      if (salesLogs.length > 0) {
+        badge.classList.remove('hidden');
+        badge.innerText = salesLogs.length > 99 ? '99+' : salesLogs.length;
+      } else {
+        badge.classList.add('hidden');
+      }
+
+      // Compute counts for the selected date context
+      const filteredAllTypes = salesLogs.filter(log => {
+        const logDateISO = log.dateISO || getTodayISO();
+        if (selectedDateFilterMode === 'today' || selectedDateFilterMode === 'yesterday' || selectedDateFilterMode === 'custom') {
+          return (logDateISO === selectedDateISO);
+        } else if (selectedDateFilterMode === '7days') {
+          return ((log.timestamp || Date.now()) >= (Date.now() - 7 * 86400000));
+        } else if (selectedDateFilterMode === 'thisMonth') {
+          const d = new Date(log.timestamp || Date.now());
+          const n = new Date();
+          return (d.getMonth() === n.getMonth() && d.getFullYear() === n.getFullYear());
+        }
+        return true;
+      });
+
+      const outLogs = filteredAllTypes.filter(l => l.type === 'OUT');
+      const inLogs = filteredAllTypes.filter(l => l.type === 'IN');
+
+      const soldUnits = outLogs.reduce((sum, l) => sum + (l.qty || 0), 0);
+      const soldRevenue = outLogs.reduce((sum, l) => sum + (l.total || 0), 0);
+      const addedUnits = inLogs.reduce((sum, l) => sum + (l.qty || 0), 0);
+      const addedValue = inLogs.reduce((sum, l) => sum + (l.total || 0), 0);
+
+      // Update Daily Summary Box
+      document.getElementById('logSummarySoldUnits').innerText = `${soldUnits} pcs`;
+      document.getElementById('logSummarySoldRev').innerText = `₹${soldRevenue.toLocaleString('en-IN')}`;
+      document.getElementById('logSummaryAddedUnits').innerText = `${addedUnits} pcs`;
+      document.getElementById('logSummaryAddedVal').innerText = `₹${addedValue.toLocaleString('en-IN')}`;
+
+      // Update type sub-tabs counts
+      document.getElementById('typeCountAll').innerText = filteredAllTypes.length;
+      document.getElementById('typeCountOut').innerText = outLogs.length;
+      document.getElementById('typeCountIn').innerText = inLogs.length;
+
+      const visibleLogs = getFilteredLogs();
+
+      if (visibleLogs.length === 0) {
+        const dateDesc = (selectedDateFilterMode === 'today') ? 'today' : (selectedDateFilterMode === 'yesterday') ? 'yesterday' : `on ${selectedDateISO}`;
+        container.innerHTML = `
+          <div class="text-center py-12 bg-workshop-900/60 rounded-2xl border border-workshop-700/60">
+            <i class="fa-solid fa-calendar-xmark text-3xl text-slate-600 mb-2"></i>
+            <p class="text-xs font-semibold text-slate-400">No stock sales or inward items recorded ${dateDesc}.</p>
+            <button onclick="setQuickDate('today'); setLogTypeFilter('all');" class="mt-2.5 text-xs text-orange-400 underline font-semibold">
+              Return to Today's Logs
+            </button>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = visibleLogs.map(log => {
+        const isOut = log.type === 'OUT';
+        const typeBadge = isOut 
+          ? `<span class="bg-orange-500/15 text-orange-400 border border-orange-500/30 text-[9px] font-black px-1.5 py-0.5 rounded uppercase flex items-center gap-1"><i class="fa-solid fa-arrow-down text-[8px]"></i> SOLD OUT</span>`
+          : `<span class="bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 text-[9px] font-black px-1.5 py-0.5 rounded uppercase flex items-center gap-1"><i class="fa-solid fa-arrow-up text-[8px]"></i> INWARD ADD</span>`;
+
+        return `
+          <div class="bg-workshop-900/90 border border-workshop-700 rounded-xl p-3 flex items-center justify-between gap-3 shadow hover:border-slate-600 transition">
+            <div class="flex items-center gap-2.5 flex-1 min-w-0">
+              <div class="w-9 h-9 rounded-xl ${isOut ? 'bg-orange-600/20 text-orange-400 border border-orange-500/30' : 'bg-emerald-600/20 text-emerald-400 border border-emerald-500/30'} flex items-center justify-center shrink-0">
+                <i class="fa-solid ${isOut ? 'fa-cart-shopping' : 'fa-truck-ramp-box'} text-xs"></i>
+              </div>
+              <div class="min-w-0">
+                <div class="flex items-center gap-1.5">
+                  ${typeBadge}
+                  <span class="text-xs font-bold text-white truncate">${escapeHtml(log.name)}</span>
+                </div>
+                <p class="text-[10px] text-slate-400 mt-0.5 flex items-center gap-1.5 flex-wrap">
+                  <span class="font-semibold text-slate-300">${log.dateISO || log.date}</span>
+                  <span>•</span>
+                  <span>${log.time}</span>
+                  <span>•</span>
+                  <span class="font-bold ${isOut ? 'text-orange-400' : 'text-emerald-400'}">${isOut ? '-' : '+'}${log.qty} pcs</span>
+                  <span>@ ₹${Number(log.unitCost).toLocaleString('en-IN')}</span>
+                </p>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2 shrink-0">
+              <div class="text-right">
+                <span class="text-xs font-black block ${isOut ? 'text-white' : 'text-emerald-400'}">₹${Number(log.total).toLocaleString('en-IN')}</span>
+                <span class="text-[9px] text-slate-500 font-medium">${isOut ? 'Revenue' : 'Inward Val'}</span>
+              </div>
+              <button onclick="revertLogById('${log.id}')" title="Undo / Delete this transaction" class="tap-active text-slate-500 hover:text-rose-400 p-1.5 rounded-lg hover:bg-workshop-800 transition text-xs">
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // REVERT A SPECIFIC LOG ENTRY BY ID
+    function revertLogById(logId) {
+      const idx = salesLogs.findIndex(l => l.id === logId);
+      if (idx === -1) return;
+
+      const log = salesLogs[idx];
+      const item = inventory.find(i => i.id === log.itemId);
+      if (item) {
+        if (log.type === 'OUT') {
+          item.remaining += log.qty;
+        } else {
+          item.remaining = Math.max(0, item.remaining - log.qty);
+        }
+      }
+
+      salesLogs.splice(idx, 1);
+      saveStorage();
+      playBeep(true);
+      showToast('Transaction reverted & stock adjusted', 'emerald');
+      renderAll();
+    }
+
+    function clearFilteredLogs() {
+      const visible = getFilteredLogs();
+      if (visible.length === 0) {
+        showToast('No logs to clear for this filter', 'rose');
+        return;
+      }
+
+      const visibleIds = new Set(visible.map(l => l.id));
+      salesLogs = salesLogs.filter(l => !visibleIds.has(l.id));
+      saveStorage();
+      showToast(`Cleared ${visible.length} log records`, 'emerald');
+      renderAll();
+    }
+
+    // EXPORT FILTERED LOGS TO CSV (DOWNLOAD)
+    function exportLogsCSV() {
+      const logsToExport = getFilteredLogs();
+      if (logsToExport.length === 0) {
+        showToast('No log records found to export', 'rose');
+        return;
+      }
+
+      let csv = 'Log ID,Date,Time,Type,Part Name,Quantity,Unit Cost (INR),Total Value (INR)\n';
+      logsToExport.forEach(l => {
+        csv += `"${l.id}","${l.dateISO || l.date}","${l.time}","${l.type}","${(l.name || '').replace(/"/g, '""')}",${l.qty},${l.unitCost},${l.total}\n`;
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      const filenameDate = (selectedDateFilterMode === 'today' || selectedDateFilterMode === 'yesterday' || selectedDateFilterMode === 'custom') 
+        ? selectedDateISO 
+        : selectedDateFilterMode;
+      link.setAttribute('href', url);
+      link.setAttribute('download', `AM_Analyser_DailyLogs_${filenameDate}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showToast(`Exported ${logsToExport.length} logs to CSV`, 'emerald');
+    }
+
+    // RENDER INVENTORY TABLE VIEW
+    function renderInventoryTable() {
+      const tbody = document.getElementById('inventoryTableBody');
+      const items = getProcessedItems();
+      let totalStockValue = 0;
+
+      // Calculate total value across entire inventory
+      inventory.forEach(item => {
+        totalStockValue += ((item.cost || 0) * (item.remaining || 0));
+      });
+
+      if (items.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="5" class="p-4 text-center text-slate-500">No matching parts found for this filter.</td>
+          </tr>
+        `;
+      } else {
+        tbody.innerHTML = items.map(item => {
+          const itemVal = (item.cost || 0) * (item.remaining || 0);
+
+          return `
+            <tr class="hover:bg-workshop-800/50">
+              <td class="p-2.5 font-medium text-slate-200">
+                <div class="font-bold text-white leading-tight">${escapeHtml(item.name)}</div>
+              </td>
+              <td class="p-2.5 text-right font-semibold text-slate-300">₹${Number(item.cost).toLocaleString('en-IN')}</td>
+              <td class="p-2.5 text-center">
+                <span class="font-black ${item.remaining <= 2 ? 'text-rose-400' : 'text-emerald-400'}">
+                  ${item.remaining}
+                </span>
+              </td>
+              <td class="p-2.5 text-right font-bold text-orange-400">₹${itemVal.toLocaleString('en-IN')}</td>
+              <td class="p-2.5 text-center">
+                <div class="flex items-center justify-center gap-2">
+                  <button onclick="openEditItemModal('${item.id}')" title="Edit part & price" class="text-slate-400 hover:text-orange-400 text-xs p-1">
+                    <i class="fa-solid fa-pen"></i>
+                  </button>
+                  <button onclick="deleteItem('${item.id}')" title="Delete part" class="text-slate-500 hover:text-rose-400 text-xs p-1">
+                    <i class="fa-solid fa-trash-can"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+      document.getElementById('inventoryStats').innerText = `Total Current Inventory Value: ₹${totalStockValue.toLocaleString('en-IN')}`;
+    }
+
+    function deleteItem(itemId) {
+      inventory = inventory.filter(i => i.id !== itemId);
+      saveStorage();
+      showToast('Item removed from master list', 'rose');
+      renderAll();
+    }
+
+    // EXPORT TO GOOGLE SHEETS CLEAN CSV
+    function exportToGoogleSheetCSV() {
+      let csv = 'Item Name,Cost Price,Remaining Stock,Total Value (₹)\n';
+      inventory.forEach(item => {
+        const val = (item.cost || 0) * (item.remaining || 0);
+        csv += `"${item.name.replace(/"/g, '""')}",${item.cost},${item.remaining},${val}\n`;
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', `AM_Analyser_Stock_${new Date().toISOString().slice(0, 10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      closeModal('exportModal');
+      showToast('Stock CSV exported! Open in Google Sheets', 'emerald');
+    }
+
+    function copyInventoryToClipboard() {
+      let tsv = 'Item Name\tCost Price\tRemaining Stock\tTotal Value\n';
+      inventory.forEach(item => {
+        const val = (item.cost || 0) * (item.remaining || 0);
+        tsv += `${item.name}\t${item.cost}\t${item.remaining}\t${val}\n`;
+      });
+
+      const dummy = document.createElement('textarea');
+      dummy.value = tsv;
+      document.body.appendChild(dummy);
+      dummy.select();
+      document.execCommand('copy');
+      document.body.removeChild(dummy);
+
+      closeModal('exportModal');
+      showToast('Copied to clipboard! Ready to paste into Sheets', 'emerald');
+    }
+
+    // RESET TO INITIAL SHEET DATA
+    function resetToInitialData() {
+      inventory = JSON.parse(JSON.stringify(DEFAULT_STOCK));
+      salesLogs = [];
+      saveStorage();
+      closeModal('exportModal');
+      showToast('Reset back to original A.M Analyser data', 'emerald');
+      renderAll();
+    }
+
+    // UPDATE STATS & COUNTERS
+    function updateHeaderStats() {
+      // Stock breakdown counts for pill indicators
+      const allCount = inventory.length;
+      const lowCount = inventory.filter(i => i.remaining > 0 && i.remaining < 5).length;
+      const outCount = inventory.filter(i => i.remaining === 0).length;
+      const inCount = inventory.filter(i => i.remaining > 0).length;
+
+      document.getElementById('countPillAll').innerText = allCount;
+      document.getElementById('countPillLow').innerText = lowCount;
+      document.getElementById('countPillOut').innerText = outCount;
+      document.getElementById('countPillIn').innerText = inCount;
+
+      document.getElementById('lowStockBadge').innerText = lowCount + outCount;
+
+      // Today's counter summary
+      const outLogs = salesLogs.filter(l => l.type === 'OUT');
+      const totalRevenue = outLogs.reduce((sum, l) => sum + (l.total || 0), 0);
+      const totalUnits = outLogs.reduce((sum, l) => sum + (l.qty || 0), 0);
+
+      document.getElementById('todaySalesTotal').innerText = `₹${totalRevenue.toLocaleString('en-IN')}`;
+      document.getElementById('todayItemsCount').innerText = `${totalUnits} pcs`;
+    }
+
+    function renderAll() {
+      updateHeaderStats();
+      updateFilterPillsUI();
+      if (activeTab === 'counter') renderCounter();
+      else if (activeTab === 'logs') renderLogs();
+      else if (activeTab === 'inventory') renderInventoryTable();
+    }
+
+    // MODAL CONTROLS
+    function openModal(id) {
+      document.getElementById(id).classList.remove('hidden');
+    }
+    function closeModal(id) {
+      document.getElementById(id).classList.add('hidden');
+    }
+
+    // TOAST NOTIFICATIONS
+    let toastTimeout = null;
+    function showToast(msg, type = 'emerald') {
+      const toast = document.getElementById('toast');
+      const inner = document.getElementById('toastInner');
+      const toastMsg = document.getElementById('toastMsg');
+      const icon = document.getElementById('toastIcon');
+
+      clearTimeout(toastTimeout);
+      toastMsg.innerText = msg;
+
+      if (type === 'emerald') {
+        inner.className = 'bg-slate-900 border border-emerald-500/50 text-white text-xs px-4 py-2.5 rounded-xl shadow-2xl flex items-center gap-2';
+        icon.className = 'fa-solid fa-circle-check text-emerald-400';
+      } else {
+        inner.className = 'bg-slate-900 border border-rose-500/50 text-white text-xs px-4 py-2.5 rounded-xl shadow-2xl flex items-center gap-2';
+        icon.className = 'fa-solid fa-triangle-exclamation text-rose-400';
+      }
+
+      toast.classList.remove('opacity-0', '-translate-y-2', 'pointer-events-none');
+
+      toastTimeout = setTimeout(() => {
+        toast.classList.add('opacity-0', '-translate-y-2', 'pointer-events-none');
+      }, 2500);
+    }
+
+    function escapeHtml(str) {
+      return (str || '').replace(/[&<>'"]/g, 
+        tag => ({
+          '&': '&amp;',
+          '<': '&lt;',
+          '>': '&gt;',
+          "'": '&#39;',
+          '"': '&quot;'
+        }[tag] || tag)
+      );
+    }
+  </script>
+</body>
+</html>
