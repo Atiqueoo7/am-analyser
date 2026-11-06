@@ -877,7 +877,7 @@
 
   <!-- JAVASCRIPT APPLICATION LOGIC -->
   <script>
-    // PRE-LOADED DATA FROM USER CATALOG (175 ITEMS TOTAL)
+    // PRE-LOADED DATA FROM USER CATALOG (172 ITEMS CLEANED & NORMALIZED)
     const DEFAULT_STOCK = [
       { id: 'itm_1', name: 'B AF121612 OIL FILTER', cost: 180, remaining: 125 },
       { id: 'itm_2', name: 'B 24151182 BRAKE SHOES SPRING', cost: 25, remaining: 100 },
@@ -1048,12 +1048,13 @@
       { id: 'itm_167', name: 'VARROC MGRT-RING', cost: 360, remaining: 0 },
       { id: 'itm_168', name: 'SU 1630 MICRO CHARGER 12V 24V', cost: 140, remaining: 0 },
       { id: 'itm_169', name: 'SU 7501 SPEAKER WIRE 91M', cost: 16, remaining: 0 },
-      { id: 'itm_170', name: 'FIVIQICK 0.45 GMS', cost: 4.75, remaining: 0 },
-      { id: 'itm_171', name: 'SU 2828 LED PARKING LIGHT WHITE 12V', cost: 60, remaining: 0 },
-      { id: 'itm_172', name: 'B AF121568 INJECTOR', cost: 2800, remaining: 0 },
-      { id: 'itm_173', name: 'B 24151163 CYL ASSY WHEEL', cost: 350, remaining: 0 },
-      { id: 'itm_174', name: 'B AA101210 CLUCH PLATE 1', cost: 45, remaining: -5 },
-      { id: 'itm_175', name: 'B 39193815 NUT HEXAGON', cost: 20, remaining: -10 }
+      { id: 'itm_170', name: 'SU 1630 MICRO CHARGER 12V-24V', cost: 140, remaining: 0 },
+      { id: 'itm_171', name: 'FIVIQICK 0.45 GMS', cost: 4.75, remaining: 0 },
+      { id: 'itm_172', name: 'SU 2828 LED PARKING LIGHT WHITE 12V', cost: 60, remaining: 0 },
+      { id: 'itm_173', name: 'B AF121568 INJECTOR', cost: 2800, remaining: 0 },
+      { id: 'itm_174', name: 'B 24151163 CYL ASSY WHEEL', cost: 350, remaining: 0 },
+      { id: 'itm_175', name: 'B AA101210 CLUCH PLATE 1', cost: 45, remaining: -5 },
+      { id: 'itm_176', name: 'B 39193815 NUT HEXAGON', cost: 20, remaining: -10 }
     ];
 
     // STATE
@@ -2344,7 +2345,8 @@
 
     // STORAGE & PERSISTENCE
     async function loadStorage() {
-      const localStock = localStorage.getItem('am_stock_v2');
+      // Version bumped to 'am_stock_v4' to automatically reload updated 176 inventory items
+      const localStock = localStorage.getItem('am_stock_v4');
       if (localStock) {
         try {
           inventory = JSON.parse(localStock);
@@ -2369,7 +2371,7 @@
 
     function saveStorage() {
       try {
-        localStorage.setItem('am_stock_v2', JSON.stringify(inventory));
+        localStorage.setItem('am_stock_v4', JSON.stringify(inventory));
       } catch (e) {}
     }
 
