@@ -8,8 +8,12 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="theme-color" content="#0f172a">
+  <meta name="theme-color" content="#090d16">
   <link rel="apple-touch-icon" href="https://placehold.co/192x192/ea580c/ffffff?text=AM">
+
+  <!-- INLINE WEB APP MANIFEST: Forces Chrome & Safari into standalone full-screen window mode -->
+  <link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22A.M%20Analyser%22%2C%22short_name%22%3A%22AM%20Analyser%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23090d16%22%2C%22theme_color%22%3A%22%23090d16%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22https%3A%2F%2Fplacehold.co%2F192x192%2Fea580c%2Fffffff%3Ftext%3DAM%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image%2Fpng%22%2C%22purpose%22%3A%22any%20maskable%22%7D%2C%7B%22src%22%3A%22https%3A%2F%2Fplacehold.co%2F512x512%2Fea580c%2Fffffff%3Ftext%3DAM%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fpng%22%2C%22purpose%22%3A%22any%20maskable%22%7D%5D%7D">
+
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Font Awesome Icons -->
@@ -977,6 +981,7 @@ function doPost(e) {
 
     // INITIALIZATION
     window.onload = async function() {
+      registerPwaServiceWorker();
       await openDatabase();
       await loadStorage();
       initSyncSettings();
@@ -994,6 +999,24 @@ function doPost(e) {
         iconBtn.addEventListener('click', openSyncModal);
       }
     };
+
+    // REGISTER INLINE SERVICE WORKER (Enables native Chrome PWA install & standalone mode)
+    function registerPwaServiceWorker() {
+      if ('serviceWorker' in navigator) {
+        try {
+          const swCode = `
+            self.addEventListener('install', (e) => self.skipWaiting());
+            self.addEventListener('activate', (e) => e.waitUntil(clients.claim()));
+            self.addEventListener('fetch', (e) => {});
+          `;
+          const blob = new Blob([swCode], { type: 'application/javascript' });
+          const swUrl = URL.createObjectURL(blob);
+          navigator.serviceWorker.register(swUrl).catch(() => {});
+        } catch (e) {
+          // SW registration silent fallback
+        }
+      }
+    }
 
     function initSyncSettings() {
       updateSyncStatusUI();
@@ -2271,6 +2294,29 @@ function doPost(e) {
           '"': '&quot;'
         }[tag] || tag)
       );
+    }
+
+    // REGISTER INLINE SERVICE WORKER FOR NATIVE CHROME INSTALLATION
+    function registerInlineServiceWorker() {
+      if ('serviceWorker' in navigator) {
+        try {
+          const swCode = `
+            self.addEventListener('install', (e) => self.skipWaiting());
+            self.addEventListener('activate', (e) => self.clients.claim());
+            self.addEventListener('fetch', (e) => {
+              // Network fallback
+              e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
+            });
+          `;
+          const blob = new Blob([swCode], { type: 'text/javascript' });
+          const swUrl = URL.createObjectURL(blob);
+          navigator.serviceWorker.register(swUrl).catch(() => {
+            // Service worker registration optional in sandbox
+          });
+        } catch (err) {
+          // Fallback gracefully
+        }
+      }
     }
   </script>
 </body>
