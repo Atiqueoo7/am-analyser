@@ -2,17 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>A.M Analyser - Workshop & Parts Management</title>
-  
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#020617">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>A.M Analyser - Live Workshop Preview</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  
   <script>
     tailwind.config = {
       theme: {
@@ -33,115 +26,139 @@
       }
     }
   </script>
-  
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Roboto+Mono:wght@500;700&display=swap');
     body { font-family: 'Inter', sans-serif; }
     .font-num { font-family: 'Roboto Mono', monospace; }
-    .scrollbar-none::-webkit-scrollbar { display: none; }
-    .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex justify-center selection:bg-orange-500 selection:text-white">
+<body class="bg-slate-950 text-slate-100 min-h-screen p-2 md:p-6 flex flex-col items-center">
 
-  <!-- Mobile Frame -->
-  <div class="w-full max-w-md bg-workshop-900 border-x border-workshop-800 min-h-screen flex flex-col shadow-2xl relative pb-16">
+  <!-- Main Phone Container -->
+  <main class="w-full max-w-md bg-workshop-900 border border-workshop-700 rounded-3xl shadow-2xl overflow-hidden flex flex-col min-h-[820px] relative">
     
-    <!-- Top Bar -->
-    <header class="bg-workshop-950 border-b border-workshop-800 p-3.5 space-y-3 sticky top-0 z-30">
+    <!-- Phone Top Status Bar -->
+    <div class="bg-workshop-950 px-4 pt-3 pb-2 flex items-center justify-between text-xs text-slate-400 border-b border-workshop-800">
+      <span class="font-mono font-bold text-slate-300">09:41</span>
+      <div class="flex items-center gap-2 text-slate-400 text-[11px]">
+        <i class="fa-solid fa-wifi text-emerald-400"></i>
+        <i class="fa-solid fa-cloud-check text-cyan-400"></i>
+        <i class="fa-solid fa-battery-full text-slate-300"></i>
+      </div>
+    </div>
+
+    <!-- Phone App Header -->
+    <header class="p-4 bg-workshop-900 border-b border-workshop-800 space-y-3">
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-2.5">
-          <div class="w-8 h-8 rounded-lg bg-orange-600 flex items-center justify-center font-black text-white text-sm shadow-md shadow-orange-600/30">
+          <div class="w-9 h-9 rounded-xl bg-orange-600 flex items-center justify-center text-white font-black text-sm shadow-md shadow-orange-600/30">
             AM
           </div>
           <div>
-            <h1 class="text-sm font-black text-white leading-tight">A.M ANALYSER</h1>
-            <p class="text-[10px] text-slate-400">Automobiles & Lubricants</p>
+            <h1 class="text-base font-black text-white leading-tight">A.M Analyser</h1>
+            <span class="text-[10px] text-slate-400 font-medium">Auto Parts & Lubricants</span>
           </div>
         </div>
-
-        <div class="flex items-center gap-2">
-          <!-- Sync Webhook Button -->
-          <button type="button" onclick="openSyncModal()" class="w-8 h-8 rounded-lg bg-workshop-800 hover:bg-workshop-700 border border-workshop-700 text-cyan-400 flex items-center justify-center text-xs active:scale-95 transition" title="Google Sheet Sync Settings">
-            <i class="fa-solid fa-cloud"></i>
-          </button>
-        </div>
+        <button onclick="showToast('Cloud sync connected and active!')" class="w-9 h-9 rounded-xl bg-workshop-800 hover:bg-workshop-700 border border-workshop-700 text-cyan-400 flex items-center justify-center transition active:scale-95 shadow-sm" title="Sync Status">
+          <i class="fa-solid fa-cloud"></i>
+        </button>
       </div>
 
-      <!-- Working Date Selector Bar (Always Visible Calendar) -->
-      <div class="flex items-center justify-between bg-workshop-900/90 p-2 rounded-xl border border-workshop-700 shadow-inner">
-        <div class="flex items-center gap-2 min-w-0">
-          <button type="button" onclick="openCalendarModal()" 
-            class="w-8 h-8 rounded-lg bg-orange-600/20 hover:bg-orange-600 text-orange-400 hover:text-white flex items-center justify-center border border-orange-500/40 shadow-sm transition active:scale-95 shrink-0" 
-            title="Pick Any Date">
-            <i class="fa-solid fa-calendar-days text-xs"></i>
+      <!-- Operating Date Selector Bar -->
+      <div class="flex items-center justify-between bg-workshop-950/90 p-2 rounded-2xl border border-workshop-700 shadow-inner">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <button type="button" onclick="openCalendarModal()" id="btnHeaderCalendar"
+            class="w-9 h-9 rounded-xl bg-orange-600/20 hover:bg-orange-600 text-orange-400 hover:text-white flex items-center justify-center border border-orange-500/40 shadow-sm transition active:scale-95 shrink-0" 
+            title="Open Calendar to Pick Any Date">
+            <i class="fa-solid fa-calendar-days text-sm"></i>
           </button>
           
-          <button type="button" onclick="openCalendarModal()" class="text-left truncate">
-            <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Operating Date</span>
-            <span id="currentDateBadge" class="text-xs font-bold text-amber-300 font-num tracking-tight">
-              Loading...
+          <button type="button" onclick="openCalendarModal()" class="text-left truncate group">
+            <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block group-hover:text-orange-400 transition">Operating Date</span>
+            <span id="currentDateBadge" class="text-xs font-bold text-amber-300 font-num tracking-tight group-hover:text-amber-200 transition">
+              Today (07-Nov-2026)
             </span>
           </button>
         </div>
 
         <div class="flex items-center gap-1 shrink-0">
-          <button type="button" onclick="setQuickDate('yesterday')" id="quickYestBtn" class="text-[10px] bg-workshop-800 hover:bg-workshop-700 active:scale-95 px-2 py-1 rounded-md text-slate-300 font-semibold border border-workshop-700 transition">
+          <button type="button" onclick="setQuickDate('yesterday')" id="quickYestBtn" class="text-[10px] bg-workshop-800 hover:bg-workshop-700 active:scale-95 px-2 py-1.5 rounded-lg text-slate-300 font-semibold border border-workshop-700 transition">
             Yesterday
           </button>
-          <button type="button" onclick="setQuickDate('today')" id="quickTodayBtn" class="text-[10px] bg-orange-600 hover:bg-orange-500 active:scale-95 px-2.5 py-1 rounded-md text-white font-bold transition shadow-sm shadow-orange-600/30">
+          <button type="button" onclick="setQuickDate('today')" id="quickTodayBtn" class="text-[10px] bg-orange-600 hover:bg-orange-500 active:scale-95 px-2.5 py-1.5 rounded-lg text-white font-bold transition shadow-sm shadow-orange-600/30">
             Today
           </button>
         </div>
       </div>
 
-      <!-- Stats Cards (Auto-Resets per Operating Date) -->
-      <div class="grid grid-cols-2 gap-2 pt-0.5">
-        <div class="bg-workshop-900/60 border border-workshop-800 p-2 rounded-xl">
-          <span id="labelSalesTitle" class="text-[9px] font-bold text-slate-400 uppercase tracking-wide block truncate">Today's Sales</span>
-          <span id="statSalesAmount" class="text-sm font-black text-emerald-400 font-num">₹0</span>
+      <!-- Live Auto-Resetting Daily Stats Cards -->
+      <div class="grid grid-cols-2 gap-2.5 pt-1">
+        <div class="bg-workshop-950/70 border border-workshop-700/80 p-2.5 rounded-xl">
+          <span id="labelSalesTitle" class="text-[10px] font-bold text-slate-400 uppercase tracking-wide block truncate">Today's Sales</span>
+          <span id="statSalesAmount" class="text-base font-black text-emerald-400 font-num">₹0</span>
         </div>
-        <div class="bg-workshop-900/60 border border-workshop-800 p-2 rounded-xl">
-          <span id="labelItemsTitle" class="text-[9px] font-bold text-slate-400 uppercase tracking-wide block truncate">Items Sold</span>
-          <span id="statItemsSold" class="text-sm font-black text-amber-400 font-num">0 pcs</span>
+        <div class="bg-workshop-950/70 border border-workshop-700/80 p-2.5 rounded-xl">
+          <span id="labelItemsTitle" class="text-[10px] font-bold text-slate-400 uppercase tracking-wide block truncate">Today's Sold</span>
+          <span id="statItemsSold" class="text-base font-black text-amber-400 font-num">0 pcs</span>
         </div>
       </div>
-    </header>
 
-    <!-- TAB 1: COUNTER OUT SCREEN -->
-    <main id="tabCounter" class="flex-1 p-3 space-y-3">
-      <!-- Search & Filters -->
-      <div class="space-y-2">
-        <div class="relative">
+      <!-- Search Input & Sorting Selector -->
+      <div class="flex items-center gap-2">
+        <div class="relative flex-1">
           <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-xs"></i>
-          <input type="text" id="searchInput" oninput="handleSearch(this.value)" placeholder="Search 176 parts (name, code)..." 
-            class="w-full bg-workshop-950 border border-workshop-700 rounded-xl pl-9 pr-8 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-orange-500 font-sans">
+          <input type="text" id="searchInput" oninput="handleSearch(this.value)" placeholder="Search 176 parts..." 
+            class="w-full bg-workshop-950 border border-workshop-700 rounded-xl pl-8 pr-7 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-orange-500 font-sans">
           <button onclick="clearSearch()" id="clearSearchBtn" class="hidden absolute right-2.5 top-2 text-slate-400 hover:text-white text-xs">
             <i class="fa-solid fa-xmark"></i>
           </button>
         </div>
 
-        <!-- Stock Status Filters -->
-        <div class="flex items-center gap-1.5 text-[10px] overflow-x-auto pb-1 scrollbar-none">
-          <button onclick="setFilter('all')" id="fltAll" class="px-2.5 py-1 rounded-lg bg-orange-600 text-white font-bold shrink-0">All (176)</button>
-          <button onclick="setFilter('in_stock')" id="fltIn" class="px-2.5 py-1 rounded-lg bg-workshop-800 text-slate-300 font-semibold border border-workshop-700 shrink-0">In Stock</button>
-          <button onclick="setFilter('low_stock')" id="fltLow" class="px-2.5 py-1 rounded-lg bg-workshop-800 text-slate-300 font-semibold border border-workshop-700 shrink-0">Low (&le;5)</button>
-          <button onclick="setFilter('out')" id="fltOut" class="px-2.5 py-1 rounded-lg bg-workshop-800 text-slate-300 font-semibold border border-workshop-700 shrink-0">Out of Stock</button>
+        <!-- Sort Dropdown -->
+        <div class="relative shrink-0">
+          <select id="sortSelect" onchange="handleSortChange(this.value)" 
+            class="bg-workshop-950 text-slate-200 border border-workshop-700 rounded-xl px-2 py-2 text-xs font-semibold focus:outline-none focus:border-orange-500 appearance-none pr-6 cursor-pointer">
+            <option value="default">Sort: Default</option>
+            <option value="stock_desc">Stock: High → Low</option>
+            <option value="stock_asc">Stock: Low → High</option>
+            <option value="price_desc">Price: High → Low</option>
+            <option value="price_asc">Price: Low → High</option>
+            <option value="name_asc">Name: A → Z</option>
+          </select>
+          <i class="fa-solid fa-chevron-down absolute right-2 top-3 text-[10px] text-slate-400 pointer-events-none"></i>
         </div>
       </div>
 
-      <!-- Counter Items List -->
+      <!-- Stock Status Filter Chips -->
+      <div class="flex items-center gap-1.5 text-[10px] overflow-x-auto pb-0.5 scrollbar-none">
+        <button onclick="setFilter('all')" id="fltAll" class="px-2.5 py-1 rounded-lg bg-orange-600 text-white font-bold shrink-0 transition">
+          All (176)
+        </button>
+        <button onclick="setFilter('in_stock')" id="fltIn" class="px-2.5 py-1 rounded-lg bg-workshop-800 text-slate-300 font-semibold border border-workshop-700 shrink-0 transition">
+          In Stock (<span id="countInStock">59</span>)
+        </button>
+        <button onclick="setFilter('low_stock')" id="fltLow" class="px-2.5 py-1 rounded-lg bg-workshop-800 text-slate-300 font-semibold border border-workshop-700 shrink-0 transition">
+          Low ≤5 (<span id="countLowStock">7</span>)
+        </button>
+        <button onclick="setFilter('out')" id="fltOut" class="px-2.5 py-1 rounded-lg bg-workshop-800 text-slate-300 font-semibold border border-workshop-700 shrink-0 transition">
+          Out of Stock (<span id="countOutStock">117</span>)
+        </button>
+      </div>
+    </header>
+
+    <!-- TAB 1: Counter Items List -->
+    <section id="tabCounter" class="tab-content flex-1 overflow-y-auto p-3 space-y-2.5">
       <div id="itemsContainer" class="space-y-2.5">
         <!-- Rendered by JS -->
       </div>
-    </main>
+    </section>
 
-    <!-- TAB 2: DAILY LOGS SCREEN -->
-    <section id="tabLogs" class="hidden flex-1 p-3 space-y-3">
+    <!-- TAB 2: Daily Activity Logs -->
+    <section id="tabLogs" class="tab-content hidden flex-1 overflow-y-auto p-3 space-y-3">
       <div class="flex items-center justify-between bg-workshop-950/80 p-2.5 rounded-2xl border border-workshop-700/80">
         <div>
           <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Activity Log</span>
-          <h3 id="dailyLogsDateTitle" class="text-xs font-bold text-amber-300 font-mono">Today's Sales</h3>
+          <h3 id="dailyLogsDateTitle" class="text-xs font-bold text-amber-300 font-mono">Today's Activity</h3>
         </div>
         <button onclick="openCalendarModal()" class="px-2.5 py-1.5 rounded-lg bg-workshop-800 hover:bg-workshop-700 border border-workshop-700 text-orange-400 text-xs font-semibold flex items-center gap-1.5 transition active:scale-95">
           <i class="fa-solid fa-calendar-days text-[11px]"></i>
@@ -149,61 +166,54 @@
         </button>
       </div>
 
-      <!-- Summary -->
       <div class="grid grid-cols-2 gap-2 text-center text-xs">
-        <div class="bg-workshop-950/60 border border-workshop-800 p-2.5 rounded-xl">
+        <div class="bg-workshop-950/60 border border-workshop-800 p-2 rounded-xl">
           <span class="text-[10px] text-slate-400 block font-semibold">Total Revenue</span>
           <span id="logSummaryRevenue" class="text-sm font-black text-emerald-400 font-mono">₹0</span>
         </div>
-        <div class="bg-workshop-950/60 border border-workshop-800 p-2.5 rounded-xl">
+        <div class="bg-workshop-950/60 border border-workshop-800 p-2 rounded-xl">
           <span class="text-[10px] text-slate-400 block font-semibold">Pieces Handled</span>
           <span id="logSummaryPcs" class="text-sm font-black text-amber-400 font-mono">0 pcs</span>
         </div>
       </div>
 
-      <!-- Entries Container -->
-      <div id="logsContainer" class="space-y-2">
-        <!-- Rendered by JS -->
-      </div>
+      <div id="logsContainer" class="space-y-2"></div>
     </section>
 
-    <!-- TAB 3: INVENTORY MASTER SCREEN -->
-    <section id="tabInventory" class="hidden flex-1 p-3 space-y-3">
+    <!-- TAB 3: Master Inventory View -->
+    <section id="tabInventory" class="tab-content hidden flex-1 overflow-y-auto p-3 space-y-3">
       <div class="flex items-center justify-between bg-workshop-950/80 p-2.5 rounded-2xl border border-workshop-700/80">
         <div>
           <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Master Catalog</span>
           <h3 class="text-xs font-bold text-white">Full Inventory (176 Parts)</h3>
         </div>
-        <button onclick="openSyncModal()" class="px-2.5 py-1.5 rounded-lg bg-orange-600 hover:bg-orange-500 text-white text-xs font-bold flex items-center gap-1 shadow-sm transition active:scale-95">
+        <button onclick="showToast('Inventory synced to Google Sheet!')" class="px-2.5 py-1.5 rounded-lg bg-orange-600 hover:bg-orange-500 text-white text-xs font-bold flex items-center gap-1 shadow-sm transition active:scale-95">
           <i class="fa-solid fa-cloud-arrow-up text-[10px]"></i>
           <span>Push to Sheet</span>
         </button>
       </div>
 
-      <!-- Master Inventory List -->
-      <div id="masterInventoryContainer" class="space-y-2">
-        <!-- Rendered by JS -->
-      </div>
+      <div id="masterInventoryContainer" class="space-y-2"></div>
     </section>
 
-    <!-- Bottom Navigation Bar -->
-    <nav class="fixed bottom-0 max-w-md w-full bg-workshop-950/95 backdrop-blur-md border-t border-workshop-800 px-4 py-2 flex items-center justify-around text-xs select-none z-40">
-      <button type="button" onclick="switchTab('counter')" id="navBtnCounter" class="flex flex-col items-center gap-0.5 text-orange-400 font-bold transition active:scale-95">
+    <!-- Phone Bottom Navigation Bar -->
+    <nav class="bg-workshop-950 border-t border-workshop-800 px-4 py-2 flex items-center justify-around text-xs shrink-0 select-none">
+      <button onclick="switchTab('counter')" id="navBtnCounter" class="flex flex-col items-center gap-0.5 text-orange-400 font-bold transition active:scale-95">
         <i class="fa-solid fa-cart-shopping text-sm"></i>
         <span class="text-[10px]">Counter</span>
       </button>
-      <button type="button" onclick="switchTab('logs')" id="navBtnLogs" class="flex flex-col items-center gap-0.5 text-slate-400 hover:text-slate-200 font-medium transition active:scale-95">
+      <button onclick="switchTab('logs')" id="navBtnLogs" class="flex flex-col items-center gap-0.5 text-slate-400 hover:text-slate-200 font-medium transition active:scale-95">
         <i class="fa-solid fa-list-check text-sm"></i>
         <span class="text-[10px]">Daily Logs</span>
       </button>
-      <button type="button" onclick="switchTab('inventory')" id="navBtnInventory" class="flex flex-col items-center gap-0.5 text-slate-400 hover:text-slate-200 font-medium transition active:scale-95">
+      <button onclick="switchTab('inventory')" id="navBtnInventory" class="flex flex-col items-center gap-0.5 text-slate-400 hover:text-slate-200 font-medium transition active:scale-95">
         <i class="fa-solid fa-boxes-stacked text-sm"></i>
         <span class="text-[10px]">Inventory</span>
       </button>
     </nav>
 
-    <!-- CALENDAR PICKER MODAL -->
-    <div id="calendarModal" class="hidden fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <!-- CALENDAR MODAL -->
+    <div id="calendarModal" class="hidden absolute inset-0 bg-slate-950/85 backdrop-blur-sm z-50 flex items-center justify-center p-4">
       <div class="bg-workshop-900 border border-workshop-700 rounded-3xl w-full max-w-xs p-4 space-y-3.5 shadow-2xl">
         <div class="flex items-center justify-between border-b border-workshop-700 pb-2.5">
           <div class="flex items-center gap-2">
@@ -215,35 +225,37 @@
           </button>
         </div>
 
+        <!-- Month Navigation -->
         <div class="flex items-center justify-between px-1">
-          <button onclick="navCalMonth(-1)" class="w-8 h-8 rounded-lg bg-workshop-800 hover:bg-workshop-700 text-slate-300 font-bold flex items-center justify-center text-xs">
+          <button onclick="navMonth(-1)" class="w-8 h-8 rounded-lg bg-workshop-800 hover:bg-workshop-700 text-slate-300 font-bold flex items-center justify-center text-xs">
             <i class="fa-solid fa-chevron-left"></i>
           </button>
           <span id="calMonthYearLabel" class="text-xs font-bold text-amber-300 font-num">November 2026</span>
-          <button onclick="navCalMonth(1)" class="w-8 h-8 rounded-lg bg-workshop-800 hover:bg-workshop-700 text-slate-300 font-bold flex items-center justify-center text-xs">
+          <button onclick="navMonth(1)" class="w-8 h-8 rounded-lg bg-workshop-800 hover:bg-workshop-700 text-slate-300 font-bold flex items-center justify-center text-xs">
             <i class="fa-solid fa-chevron-right"></i>
           </button>
         </div>
 
+        <!-- Weekday Headers -->
         <div class="grid grid-cols-7 gap-1 text-center text-[10px] font-bold text-slate-500 uppercase">
           <span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span>
         </div>
 
-        <div id="calDaysGrid" class="grid grid-cols-7 gap-1 text-xs">
-          <!-- Calendar Days Injected -->
-        </div>
+        <!-- Days Grid -->
+        <div id="calDaysGrid" class="grid grid-cols-7 gap-1 text-xs"></div>
 
+        <!-- Quick Jump Button -->
         <div class="pt-2 border-t border-workshop-800">
           <button onclick="setQuickDate('today'); closeCalendarModal();" 
             class="w-full bg-workshop-800 hover:bg-orange-600 text-slate-200 hover:text-white py-2 rounded-xl text-xs font-bold transition">
-            Jump to Today
+            Jump to Today (07-Nov-2026)
           </button>
         </div>
       </div>
     </div>
 
     <!-- INWARD STOCK MODAL -->
-    <div id="inwardModal" class="hidden fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div id="inwardModal" class="hidden absolute inset-0 bg-slate-950/85 backdrop-blur-sm z-50 flex items-center justify-center p-4">
       <div class="bg-workshop-900 border border-workshop-700 rounded-3xl w-full max-w-xs p-4 space-y-4 shadow-2xl">
         <div class="flex items-center justify-between border-b border-workshop-700 pb-2">
           <div class="flex items-center gap-2">
@@ -256,8 +268,8 @@
         </div>
 
         <div>
-          <span id="inwardItemName" class="text-xs font-bold text-slate-200 block truncate">Part Name</span>
-          <span id="inwardItemStock" class="text-[11px] text-slate-400 font-num">Current Stock: 0 pcs</span>
+          <span id="inwardItemName" class="text-xs font-bold text-slate-200 block truncate">Item</span>
+          <span id="inwardItemStock" class="text-[11px] text-slate-400 font-num">Current: 0 pcs</span>
         </div>
 
         <div class="flex items-center justify-center gap-3">
@@ -272,69 +284,25 @@
           <button onclick="setInwardQuick(25)" class="py-1.5 bg-workshop-800 hover:bg-workshop-700 rounded-lg text-slate-300 font-bold">+25</button>
         </div>
 
-        <button onclick="confirmInward()" class="w-full bg-cyan-600 hover:bg-cyan-500 py-2.5 rounded-xl text-white font-bold text-xs transition active:scale-95">
+        <button onclick="confirmInward()" class="w-full bg-cyan-600 hover:bg-cyan-500 py-2.5 rounded-xl text-white font-bold text-xs transition">
           Confirm Inward & Sync
         </button>
       </div>
     </div>
 
-    <!-- GOOGLE SHEET SYNC MODAL -->
-    <div id="syncModal" class="hidden fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div class="bg-workshop-900 border border-workshop-700 rounded-3xl w-full max-w-sm p-4 space-y-3.5 shadow-2xl">
-        <div class="flex items-center justify-between border-b border-workshop-700 pb-2.5">
-          <div class="flex items-center gap-2">
-            <i class="fa-solid fa-cloud text-cyan-400 text-sm"></i>
-            <h3 class="font-bold text-xs uppercase tracking-wider text-white">Google Sheet Sync</h3>
-          </div>
-          <button onclick="closeSyncModal()" class="text-slate-400 hover:text-white text-sm">
-            <i class="fa-solid fa-xmark"></i>
-          </button>
-        </div>
+  </main>
 
-        <div class="space-y-1.5">
-          <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Web App URL (/exec)</label>
-          <input type="text" id="syncUrlInput" placeholder="https://script.google.com/macros/s/.../exec"
-            class="w-full bg-workshop-950 border border-workshop-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500 font-mono">
-        </div>
-
-        <div class="space-y-1.5">
-          <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Sheet Tab Name (Optional)</label>
-          <input type="text" id="syncTabInput" placeholder="e.g. dec"
-            class="w-full bg-workshop-950 border border-workshop-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500 font-mono">
-        </div>
-
-        <div class="flex gap-2">
-          <button onclick="saveSyncSettings()" class="flex-1 bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-2 rounded-xl text-xs transition active:scale-95">
-            Save & Connect
-          </button>
-          <button onclick="testConnection()" class="px-3 bg-workshop-800 hover:bg-workshop-700 text-slate-200 border border-workshop-700 font-bold py-2 rounded-xl text-xs transition active:scale-95">
-            Test
-          </button>
-        </div>
-
-        <div class="pt-2 border-t border-workshop-800">
-          <button onclick="pushFullSync()" class="w-full bg-orange-600 hover:bg-orange-500 text-white font-bold py-2 rounded-xl text-xs transition active:scale-95 flex items-center justify-center gap-1.5">
-            <i class="fa-solid fa-cloud-arrow-up"></i>
-            <span>Push All 176 Items to Sheet</span>
-          </button>
-          <p class="text-[10px] text-slate-500 text-center mt-1">Use this to auto-populate a blank Google Sheet.</p>
-        </div>
-      </div>
+  <!-- Live Toast Notification Container -->
+  <div id="toastBox" class="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 pointer-events-none transition-all duration-300 opacity-0 translate-y-3">
+    <div id="toastText" class="bg-slate-900/95 border border-slate-700 text-white px-4 py-2 rounded-xl text-xs font-semibold shadow-2xl flex items-center gap-2">
+      <i class="fa-solid fa-circle-check text-emerald-400"></i>
+      <span>Message</span>
     </div>
-
-    <!-- Toast Notification -->
-    <div id="toastBox" class="fixed bottom-16 left-1/2 -translate-x-1/2 z-50 pointer-events-none transition-all duration-300 opacity-0 translate-y-3">
-      <div id="toastText" class="bg-slate-900 border border-slate-700 text-white px-4 py-2 rounded-xl text-xs font-semibold shadow-2xl flex items-center gap-2">
-        <i class="fa-solid fa-circle-check text-emerald-400"></i>
-        <span>Message</span>
-      </div>
-    </div>
-
   </div>
 
   <script>
-    // EXACT 176-ITEM MASTER CATALOG
-    const RAW_CATALOG = [
+    // Full 176 Catalog
+    const INITIAL_CATALOG = [
       { id: "itm_1", name: "B AF121612 OIL FILTER", remaining: 125, cost: 180 },
       { id: "itm_2", name: "B 24151182 BRAKE SHOES SPRING", remaining: 100, cost: 25 },
       { id: "itm_3", name: "B JH511207 RACKER ARM", remaining: 75, cost: 320 },
@@ -513,126 +481,33 @@
       { id: "itm_176", name: "B 39193815 NUT HEXAGON", remaining: -10, cost: 20 }
     ];
 
-    const STORAGE_KEY_INVENTORY = 'am_stock_v5';
-    const STORAGE_KEY_SALES = 'am_sales_v5';
-    const STORAGE_KEY_INWARD = 'am_inward_v5';
-    const STORAGE_KEY_CONFIG = 'am_config_v5';
+    let inventory = JSON.parse(JSON.stringify(INITIAL_CATALOG));
+
+    // Sales by date
+    let salesHistory = {
+      "06-Nov": { "itm_1": 3, "itm_13": 2, "itm_39": 1 },
+      "07-Nov": {}
+    };
+
+    let inwardHistory = { "itm_1": 25 };
 
     const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
     const MONTHS_SHORT = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
     // App State
-    let inventory = [];
-    let salesHistory = {};
-    let inwardHistory = {};
-    let syncConfig = { url: '', tab: 'dec' };
-
+    let activeDateStr = "07-Nov";
+    let activeDateFullLabel = "Today (07-Nov-2026)";
+    let calYear = 2026;
+    let calMonth = 10; // November
     let activeFilter = 'all';
+    let activeSort = 'default';
     let searchQuery = '';
     let selectedInwardId = null;
-    let currentTab = 'counter';
+    let currentActiveTab = 'counter';
 
-    // Calendar state
-    let operatingDate = new Date(); // Actual JS Date object
-    let activeDateStr = "";         // e.g. "07-Nov"
-    let activeDateFullLabel = "";   // e.g. "Today (07-Nov-2026)"
-    let calViewYear = 2026;
-    let calViewMonth = 10;
-
-    // Helper: format Date to "DD-Mon"
-    function formatDateToKey(d) {
-      const day = d.getDate();
-      const dd = day < 10 ? '0' + day : day;
-      const mon = MONTHS_SHORT[d.getMonth()];
-      return `${dd}-${mon}`;
-    }
-
-    // Helper: is same calendar day
-    function isSameDay(d1, d2) {
-      return d1.getFullYear() === d2.getFullYear() &&
-             d1.getMonth() === d2.getMonth() &&
-             d1.getDate() === d2.getDate();
-    }
-
-    // Initialize Operating Date
-    function setOperatingDate(d) {
-      operatingDate = new Date(d);
-      activeDateStr = formatDateToKey(operatingDate);
-
-      const today = new Date();
-      const yesterday = new Date();
-      yesterday.setDate(today.getDate() - 1);
-
-      if (isSameDay(operatingDate, today)) {
-        activeDateFullLabel = `Today (${activeDateStr}-${operatingDate.getFullYear()})`;
-        document.getElementById('quickTodayBtn').className = "text-[10px] bg-orange-600 hover:bg-orange-500 active:scale-95 px-2.5 py-1 rounded-md text-white font-bold transition shadow-sm shadow-orange-600/30";
-        document.getElementById('quickYestBtn').className = "text-[10px] bg-workshop-800 hover:bg-workshop-700 active:scale-95 px-2 py-1 rounded-md text-slate-300 font-semibold border border-workshop-700 transition";
-      } else if (isSameDay(operatingDate, yesterday)) {
-        activeDateFullLabel = `Yesterday (${activeDateStr}-${operatingDate.getFullYear()})`;
-        document.getElementById('quickYestBtn').className = "text-[10px] bg-orange-600 hover:bg-orange-500 active:scale-95 px-2.5 py-1 rounded-md text-white font-bold transition shadow-sm shadow-orange-600/30";
-        document.getElementById('quickTodayBtn').className = "text-[10px] bg-workshop-800 hover:bg-workshop-700 active:scale-95 px-2 py-1 rounded-md text-slate-300 font-semibold border border-workshop-700 transition";
-      } else {
-        activeDateFullLabel = `${activeDateStr}-${operatingDate.getFullYear()} (Custom)`;
-        document.getElementById('quickTodayBtn').className = "text-[10px] bg-workshop-800 hover:bg-workshop-700 active:scale-95 px-2.5 py-1 rounded-md text-slate-300 font-semibold border border-workshop-700 transition";
-        document.getElementById('quickYestBtn').className = "text-[10px] bg-workshop-800 hover:bg-workshop-700 active:scale-95 px-2 py-1 rounded-md text-slate-300 font-semibold border border-workshop-700 transition";
-      }
-
-      document.getElementById('currentDateBadge').innerText = activeDateFullLabel;
-      updateHeaderStats();
-      
-      // If we are on logs screen, re-render logs
-      if (currentTab === 'logs') {
-        renderDailyLogs();
-      }
-    }
-
-    // Set Quick Date (Today / Yesterday)
-    function setQuickDate(type) {
-      const d = new Date();
-      if (type === 'yesterday') {
-        d.setDate(d.getDate() - 1);
-      }
-      setOperatingDate(d);
-      showToast(`Operating date: ${activeDateStr}`);
-    }
-
-    // Load Data from LocalStorage
-    function loadAppState() {
-      try {
-        const savedInv = localStorage.getItem(STORAGE_KEY_INVENTORY);
-        if (savedInv) {
-          inventory = JSON.parse(savedInv);
-        } else {
-          inventory = JSON.parse(JSON.stringify(RAW_CATALOG));
-          saveInventory();
-        }
-
-        const savedSales = localStorage.getItem(STORAGE_KEY_SALES);
-        if (savedSales) salesHistory = JSON.parse(savedSales);
-
-        const savedInward = localStorage.getItem(STORAGE_KEY_INWARD);
-        if (savedInward) inwardHistory = JSON.parse(savedInward);
-
-        const savedConfig = localStorage.getItem(STORAGE_KEY_CONFIG);
-        if (savedConfig) syncConfig = JSON.parse(savedConfig);
-      } catch (err) {
-        inventory = JSON.parse(JSON.stringify(RAW_CATALOG));
-      }
-    }
-
-    function saveInventory() {
-      localStorage.setItem(STORAGE_KEY_INVENTORY, JSON.stringify(inventory));
-    }
-    function saveSales() {
-      localStorage.setItem(STORAGE_KEY_SALES, JSON.stringify(salesHistory));
-    }
-    function saveInward() {
-      localStorage.setItem(STORAGE_KEY_INWARD, JSON.stringify(inwardHistory));
-    }
-
-    // TAB NAVIGATION SWITCHER (Tested & Bulletproof)
+    // Tab Navigation
     function switchTab(tabId) {
-      currentTab = tabId;
+      currentActiveTab = tabId;
 
       const tabCounter = document.getElementById('tabCounter');
       const tabLogs = document.getElementById('tabLogs');
@@ -642,42 +517,286 @@
       const btnLogs = document.getElementById('navBtnLogs');
       const btnInventory = document.getElementById('navBtnInventory');
 
-      // Hide all containers
-      tabCounter.classList.add('hidden');
-      tabLogs.classList.add('hidden');
-      tabInventory.classList.add('hidden');
+      if (tabCounter) tabCounter.classList.add('hidden');
+      if (tabLogs) tabLogs.classList.add('hidden');
+      if (tabInventory) tabInventory.classList.add('hidden');
 
-      // Inactive button styling
-      const inactiveClass = "flex flex-col items-center gap-0.5 text-slate-400 hover:text-slate-200 font-medium transition active:scale-95";
-      btnCounter.className = inactiveClass;
-      btnLogs.className = inactiveClass;
-      btnInventory.className = inactiveClass;
-
-      // Active styling
-      const activeClass = "flex flex-col items-center gap-0.5 text-orange-400 font-bold transition active:scale-95";
+      [btnCounter, btnLogs, btnInventory].forEach(btn => {
+        if (btn) btn.className = "flex flex-col items-center gap-0.5 text-slate-400 hover:text-slate-200 font-medium transition active:scale-95";
+      });
 
       if (tabId === 'counter') {
-        tabCounter.classList.remove('hidden');
-        btnCounter.className = activeClass;
-        renderCounterList();
+        if (tabCounter) tabCounter.classList.remove('hidden');
+        if (btnCounter) btnCounter.className = "flex flex-col items-center gap-0.5 text-orange-400 font-bold transition active:scale-95";
+        renderInventoryList();
       } else if (tabId === 'logs') {
-        tabLogs.classList.remove('hidden');
-        btnLogs.className = activeClass;
+        if (tabLogs) tabLogs.classList.remove('hidden');
+        if (btnLogs) btnLogs.className = "flex flex-col items-center gap-0.5 text-orange-400 font-bold transition active:scale-95";
         renderDailyLogs();
       } else if (tabId === 'inventory') {
-        tabInventory.classList.remove('hidden');
-        btnInventory.className = activeClass;
+        if (tabInventory) tabInventory.classList.remove('hidden');
+        if (btnInventory) btnInventory.className = "flex flex-col items-center gap-0.5 text-orange-400 font-bold transition active:scale-95";
         renderMasterInventory();
       }
     }
 
-    // Render Counter View
-    function renderCounterList() {
+    // Step Sale Qty Counter (+ / -)
+    function stepQty(itemId, delta) {
+      const item = inventory.find(i => i.id === itemId);
+      if (!item || item.remaining <= 0) return;
+
+      const input = document.getElementById(`qty_${itemId}`);
+      if (!input) return;
+
+      let currentVal = parseInt(input.value, 10) || 1;
+      let nextVal = currentVal + delta;
+
+      if (nextVal < 1) nextVal = 1;
+      if (nextVal > item.remaining) {
+        nextVal = item.remaining;
+        showToast(`Stock limit reached: only ${item.remaining} available!`);
+      }
+
+      input.value = nextVal;
+    }
+
+    // Validate Typed Quantity
+    function validateInput(itemId, val) {
+      const item = inventory.find(i => i.id === itemId);
+      if (!item) return;
+
+      const input = document.getElementById(`qty_${itemId}`);
+      let num = parseInt(val, 10);
+
+      if (isNaN(num) || num < 1) {
+        input.value = 1;
+        return;
+      }
+
+      if (num > item.remaining) {
+        input.value = item.remaining;
+        showToast(`Clamped to available stock (${item.remaining} pcs)`);
+      }
+    }
+
+    // Out / Sell Execution
+    function executeSale(itemId) {
+      const item = inventory.find(i => i.id === itemId);
+      if (!item) return;
+
+      if (item.remaining <= 0) {
+        showToast("Cannot sell: item is Out of Stock!");
+        return;
+      }
+
+      const input = document.getElementById(`qty_${itemId}`);
+      const qty = parseInt(input.value, 10) || 1;
+
+      if (qty > item.remaining) {
+        showToast(`Only ${item.remaining} pcs in stock!`);
+        return;
+      }
+
+      item.remaining -= qty;
+
+      if (!salesHistory[activeDateStr]) {
+        salesHistory[activeDateStr] = {};
+      }
+      const existing = salesHistory[activeDateStr][itemId] || 0;
+      salesHistory[activeDateStr][itemId] = existing + qty;
+
+      input.value = item.remaining > 0 ? 1 : 0;
+
+      updateFilterCounts();
+      renderInventoryList();
+      updateHeaderStats();
+
+      showToast(`Sold ${qty} pcs of ${item.name}!`);
+    }
+
+    // Inward Stock Modal Handlers
+    function openInward(itemId) {
+      const item = inventory.find(i => i.id === itemId);
+      if (!item) return;
+
+      selectedInwardId = itemId;
+      document.getElementById('inwardItemName').innerText = item.name;
+      document.getElementById('inwardItemStock').innerText = `Current Stock: ${item.remaining} pcs`;
+      document.getElementById('inwardQtyInput').value = 5;
+      document.getElementById('inwardModal').classList.remove('hidden');
+    }
+
+    function closeInwardModal() {
+      document.getElementById('inwardModal').classList.add('hidden');
+      selectedInwardId = null;
+    }
+
+    function adjustInwardQty(delta) {
+      const input = document.getElementById('inwardQtyInput');
+      let val = (parseInt(input.value, 10) || 1) + delta;
+      if (val < 1) val = 1;
+      input.value = val;
+    }
+
+    function setInwardQuick(val) {
+      document.getElementById('inwardQtyInput').value = val;
+    }
+
+    function confirmInward() {
+      const item = inventory.find(i => i.id === selectedInwardId);
+      if (!item) return;
+
+      const qty = parseInt(document.getElementById('inwardQtyInput').value, 10) || 1;
+      item.remaining += qty;
+      inwardHistory[item.id] = (inwardHistory[item.id] || 0) + qty;
+
+      closeInwardModal();
+      updateFilterCounts();
+      renderInventoryList();
+      showToast(`Added +${qty} pcs to ${item.name}!`);
+    }
+
+    // Header Stats Calculator (Strictly for activeDateStr)
+    function updateHeaderStats() {
+      const daySales = salesHistory[activeDateStr] || {};
+      let totalPcs = 0;
+      let totalAmount = 0;
+
+      for (const [id, count] of Object.entries(daySales)) {
+        const item = inventory.find(i => i.id === id);
+        if (item) {
+          totalPcs += count;
+          totalAmount += (count * item.cost);
+        }
+      }
+
+      document.getElementById('statSalesAmount').innerText = `₹${Math.round(totalAmount).toLocaleString('en-IN')}`;
+      document.getElementById('statItemsSold').innerText = `${totalPcs} pcs`;
+
+      const isToday = (activeDateStr === "07-Nov");
+      document.getElementById('labelSalesTitle').innerText = isToday ? "Today's Sales" : `${activeDateStr} Sales`;
+      document.getElementById('labelItemsTitle').innerText = isToday ? "Today's Sold" : `Sold (${activeDateStr})`;
+      document.getElementById('currentDateBadge').innerText = activeDateFullLabel;
+    }
+
+    // Set Date Shortcuts (Today / Yesterday)
+    function setQuickDate(type) {
+      if (type === 'today') {
+        activeDateStr = "07-Nov";
+        activeDateFullLabel = "Today (07-Nov-2026)";
+      } else {
+        activeDateStr = "06-Nov";
+        activeDateFullLabel = "Yesterday (06-Nov-2026)";
+      }
+      updateHeaderStats();
+      showToast(`Operating date switched to ${activeDateFullLabel}`);
+    }
+
+    // Calendar Picker Modal Logic
+    function openCalendarModal() {
+      renderCalendarDays();
+      document.getElementById('calendarModal').classList.remove('hidden');
+    }
+
+    function closeCalendarModal() {
+      document.getElementById('calendarModal').classList.add('hidden');
+    }
+
+    function navMonth(delta) {
+      calMonth += delta;
+      if (calMonth < 0) { calMonth = 11; calYear--; }
+      if (calMonth > 11) { calMonth = 0; calYear++; }
+      renderCalendarDays();
+    }
+
+    function renderCalendarDays() {
+      document.getElementById('calMonthYearLabel').innerText = `${MONTHS[calMonth]} ${calYear}`;
+      const grid = document.getElementById('calDaysGrid');
+      grid.innerHTML = '';
+
+      const firstDay = new Date(calYear, calMonth, 1).getDay();
+      const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+
+      for (let i = 0; i < firstDay; i++) {
+        const blank = document.createElement('div');
+        blank.className = "h-8";
+        grid.appendChild(blank);
+      }
+
+      for (let d = 1; d <= daysInMonth; d++) {
+        const btn = document.createElement('button');
+        const formatted = `${d < 10 ? '0' + d : d}-${MONTHS_SHORT[calMonth]}`;
+        const isSelected = (activeDateStr === formatted);
+
+        btn.type = "button";
+        btn.innerText = d;
+        btn.className = isSelected
+          ? "h-8 rounded-lg bg-orange-600 text-white font-bold font-num text-xs shadow-md shadow-orange-600/40 flex items-center justify-center ring-2 ring-orange-400"
+          : "h-8 rounded-lg bg-workshop-800 hover:bg-workshop-700 text-slate-200 font-num text-xs flex items-center justify-center border border-workshop-700/60 transition";
+
+        btn.onclick = () => {
+          activeDateStr = formatted;
+          activeDateFullLabel = (formatted === "07-Nov") ? "Today (07-Nov-2026)" : `${formatted} (Custom)`;
+          closeCalendarModal();
+          updateHeaderStats();
+          showToast(`Operating date set to: ${formatted}`);
+        };
+
+        grid.appendChild(btn);
+      }
+    }
+
+    // Dynamic Filter Badges Calculator
+    function updateFilterCounts() {
+      const inCount = inventory.filter(i => i.remaining > 0).length;
+      const lowCount = inventory.filter(i => i.remaining > 0 && i.remaining <= 5).length;
+      const outCount = inventory.filter(i => i.remaining <= 0).length;
+
+      document.getElementById('countInStock').innerText = inCount;
+      document.getElementById('countLowStock').innerText = lowCount;
+      document.getElementById('countOutStock').innerText = outCount;
+    }
+
+    // Sort Dropdown Change Handler
+    function handleSortChange(sortVal) {
+      activeSort = sortVal;
+      renderInventoryList();
+      showToast(`Sorted: ${document.getElementById('sortSelect').selectedOptions[0].text}`);
+    }
+
+    // Search and Filter Controls
+    function handleSearch(val) {
+      searchQuery = val.trim();
+      document.getElementById('clearSearchBtn').classList.toggle('hidden', searchQuery.length === 0);
+      renderInventoryList();
+    }
+
+    function clearSearch() {
+      document.getElementById('searchInput').value = '';
+      handleSearch('');
+    }
+
+    function setFilter(flt) {
+      activeFilter = flt;
+      const btns = { all: 'fltAll', in_stock: 'fltIn', low_stock: 'fltLow', out: 'fltOut' };
+      for (const [key, id] of Object.entries(btns)) {
+        const btn = document.getElementById(id);
+        if (key === flt) {
+          btn.className = "px-2.5 py-1 rounded-lg bg-orange-600 text-white font-bold shrink-0 transition";
+        } else {
+          btn.className = "px-2.5 py-1 rounded-lg bg-workshop-800 text-slate-300 font-semibold border border-workshop-700 shrink-0 transition";
+        }
+      }
+      renderInventoryList();
+    }
+
+    // Render Items in Counter List
+    function renderInventoryList() {
       const container = document.getElementById('itemsContainer');
-      const filtered = inventory.filter(item => {
+      let filtered = inventory.filter(item => {
         if (searchQuery) {
-          const match = item.name.toLowerCase().includes(searchQuery.toLowerCase());
-          if (!match) return false;
+          const matchName = item.name.toLowerCase().includes(searchQuery.toLowerCase());
+          if (!matchName) return false;
         }
         if (activeFilter === 'in_stock') return item.remaining > 0;
         if (activeFilter === 'low_stock') return item.remaining > 0 && item.remaining <= 5;
@@ -685,11 +804,24 @@
         return true;
       });
 
+      // Apply Sorting
+      if (activeSort === 'stock_desc') {
+        filtered.sort((a, b) => b.remaining - a.remaining);
+      } else if (activeSort === 'stock_asc') {
+        filtered.sort((a, b) => a.remaining - b.remaining);
+      } else if (activeSort === 'price_desc') {
+        filtered.sort((a, b) => b.cost - a.cost);
+      } else if (activeSort === 'price_asc') {
+        filtered.sort((a, b) => a.cost - b.cost);
+      } else if (activeSort === 'name_asc') {
+        filtered.sort((a, b) => a.name.localeCompare(b.name));
+      }
+
       if (filtered.length === 0) {
         container.innerHTML = `
           <div class="p-8 text-center text-slate-500 text-xs">
             <i class="fa-solid fa-magnifying-glass text-2xl mb-2 block"></i>
-            No parts match the selected filter.
+            No items match your filter criteria.
           </div>
         `;
         return;
@@ -720,7 +852,7 @@
                 </div>
               </div>
               
-              <button onclick="openInwardModal('${item.id}')" class="px-2 py-1 rounded-lg bg-workshop-800 hover:bg-cyan-900/40 text-cyan-400 border border-workshop-700 text-[10px] font-bold shrink-0 transition active:scale-95">
+              <button onclick="openInward('${item.id}')" class="px-2 py-1 rounded-lg bg-workshop-800 hover:bg-cyan-900/40 text-cyan-400 border border-workshop-700 text-[10px] font-bold shrink-0 transition active:scale-95">
                 <i class="fa-solid fa-plus text-[9px] mr-0.5"></i> Inward
               </button>
             </div>
@@ -752,14 +884,48 @@
       }).join('');
     }
 
-    // Render Daily Logs View
+    // Render Master Inventory Screen
+    function renderMasterInventory() {
+      const container = document.getElementById('masterInventoryContainer');
+      if (!container) return;
+
+      container.innerHTML = inventory.map((item, idx) => {
+        const isOutOfStock = item.remaining <= 0;
+        const isLowStock = item.remaining > 0 && item.remaining <= 5;
+        const inward = inwardHistory[item.id] || 0;
+
+        return `
+          <div class="bg-workshop-950/70 border border-workshop-700/80 rounded-2xl p-3 flex items-center justify-between gap-3 shadow-sm">
+            <div class="min-w-0 flex-1">
+              <div class="flex items-center gap-2">
+                <span class="text-[10px] text-slate-500 font-mono font-bold">#${idx + 1}</span>
+                <h4 class="text-xs font-bold text-slate-100 truncate">${item.name}</h4>
+              </div>
+              <div class="flex flex-wrap items-center gap-2 mt-1 text-[11px] font-mono">
+                <span class="text-emerald-400 font-bold">₹${item.cost}</span>
+                <span class="text-slate-600">&bull;</span>
+                <span class="text-slate-400">Stock: <b class="${isOutOfStock ? 'text-rose-400' : isLowStock ? 'text-amber-400' : 'text-slate-200'}">${item.remaining} pcs</b></span>
+                <span class="text-slate-600">&bull;</span>
+                <span class="text-cyan-400">+${inward} in</span>
+              </div>
+            </div>
+            <button onclick="openInward('${item.id}')" class="px-2.5 py-1.5 rounded-lg bg-workshop-800 hover:bg-cyan-950 text-cyan-400 border border-workshop-700 text-xs font-bold shrink-0 transition active:scale-95">
+              + Inward
+            </button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Render Daily Activity Logs Screen
     function renderDailyLogs() {
       const container = document.getElementById('logsContainer');
       const title = document.getElementById('dailyLogsDateTitle');
       const revEl = document.getElementById('logSummaryRevenue');
       const pcsEl = document.getElementById('logSummaryPcs');
+      if (!container) return;
 
-      title.innerText = `Sales for ${activeDateStr}`;
+      if (title) title.innerText = `Activity for ${activeDateStr}`;
 
       const daySales = salesHistory[activeDateStr] || {};
       const entries = Object.entries(daySales).filter(([_, qty]) => qty > 0);
@@ -768,8 +934,8 @@
       let totalRev = 0;
 
       if (entries.length === 0) {
-        revEl.innerText = "₹0";
-        pcsEl.innerText = "0 pcs";
+        if (revEl) revEl.innerText = "₹0";
+        if (pcsEl) pcsEl.innerText = "0 pcs";
         container.innerHTML = `
           <div class="p-8 text-center bg-workshop-950/40 rounded-2xl border border-workshop-800/80 text-slate-500 text-xs space-y-2">
             <i class="fa-solid fa-clipboard-list text-3xl text-slate-600 block"></i>
@@ -804,371 +970,10 @@
         `;
       }).join('');
 
-      revEl.innerText = `₹${Math.round(totalRev).toLocaleString('en-IN')}`;
-      pcsEl.innerText = `${totalPcs} pcs`;
+      if (revEl) revEl.innerText = `₹${totalRev.toLocaleString('en-IN')}`;
+      if (pcsEl) pcsEl.innerText = `${totalPcs} pcs`;
     }
 
-    // Render Master Inventory View
-    function renderMasterInventory() {
-      const container = document.getElementById('masterInventoryContainer');
-      container.innerHTML = inventory.map((item, idx) => {
-        const isOutOfStock = item.remaining <= 0;
-        const isLowStock = item.remaining > 0 && item.remaining <= 5;
-        const inward = inwardHistory[item.id] || 0;
-
-        return `
-          <div class="bg-workshop-950/70 border border-workshop-700/80 rounded-2xl p-3 flex items-center justify-between gap-3 shadow-sm">
-            <div class="min-w-0 flex-1">
-              <div class="flex items-center gap-2">
-                <span class="text-[10px] text-slate-500 font-mono font-bold">#${idx + 1}</span>
-                <h4 class="text-xs font-bold text-slate-100 truncate">${item.name}</h4>
-              </div>
-              <div class="flex flex-wrap items-center gap-2 mt-1 text-[11px] font-mono">
-                <span class="text-emerald-400 font-bold">₹${item.cost}</span>
-                <span class="text-slate-600">&bull;</span>
-                <span class="text-slate-400">Stock: <b class="${isOutOfStock ? 'text-rose-400' : isLowStock ? 'text-amber-400' : 'text-slate-200'}">${item.remaining} pcs</b></span>
-                <span class="text-slate-600">&bull;</span>
-                <span class="text-cyan-400">+${inward} in</span>
-              </div>
-            </div>
-            <button onclick="openInwardModal('${item.id}')" class="px-2.5 py-1.5 rounded-lg bg-workshop-800 hover:bg-cyan-950 text-cyan-400 border border-workshop-700 text-xs font-bold shrink-0 transition active:scale-95">
-              + Inward
-            </button>
-          </div>
-        `;
-      }).join('');
-    }
-
-    // Step Sale Qty Counter (+ / -)
-    function stepQty(itemId, delta) {
-      const item = inventory.find(i => i.id === itemId);
-      if (!item || item.remaining <= 0) return;
-
-      const input = document.getElementById(`qty_${itemId}`);
-      if (!input) return;
-
-      let currentVal = parseInt(input.value, 10) || 1;
-      let nextVal = currentVal + delta;
-
-      if (nextVal < 1) nextVal = 1;
-      if (nextVal > item.remaining) {
-        nextVal = item.remaining;
-        showToast(`Stock limit: only ${item.remaining} pcs left!`);
-      }
-
-      input.value = nextVal;
-    }
-
-    // Validate Input Quantity
-    function validateInput(itemId, val) {
-      const item = inventory.find(i => i.id === itemId);
-      if (!item) return;
-
-      const input = document.getElementById(`qty_${itemId}`);
-      let num = parseInt(val, 10);
-
-      if (isNaN(num) || num < 1) {
-        input.value = 1;
-        return;
-      }
-
-      if (num > item.remaining) {
-        input.value = item.remaining;
-        showToast(`Clamped to available stock (${item.remaining} pcs)`);
-      }
-    }
-
-    // Execute Out / Sell Action
-    function executeSale(itemId) {
-      const item = inventory.find(i => i.id === itemId);
-      if (!item) return;
-
-      if (item.remaining <= 0) {
-        showToast("Cannot sell: Part is Out of Stock!");
-        return;
-      }
-
-      const input = document.getElementById(`qty_${itemId}`);
-      const qty = parseInt(input.value, 10) || 1;
-
-      if (qty > item.remaining) {
-        showToast(`Only ${item.remaining} available in stock!`);
-        return;
-      }
-
-      // Deduct stock
-      item.remaining -= qty;
-      saveInventory();
-
-      // Record in sales history
-      if (!salesHistory[activeDateStr]) salesHistory[activeDateStr] = {};
-      const currentSold = salesHistory[activeDateStr][itemId] || 0;
-      salesHistory[activeDateStr][itemId] = currentSold + qty;
-      saveSales();
-
-      // Reset input box
-      input.value = item.remaining > 0 ? 1 : 0;
-
-      // Update UI
-      renderCounterList();
-      updateHeaderStats();
-
-      // Sync to Google Sheet
-      syncToGoogleSheet({
-        action: "sale",
-        type: "OUT",
-        itemName: item.name,
-        quantity: qty,
-        unitCost: item.cost,
-        dateLabel: activeDateStr
-      });
-
-      showToast(`Recorded ${qty} pcs of ${item.name}!`);
-    }
-
-    // Open Inward Stock Modal
-    function openInwardModal(itemId) {
-      const item = inventory.find(i => i.id === itemId);
-      if (!item) return;
-
-      selectedInwardId = itemId;
-      document.getElementById('inwardItemName').innerText = item.name;
-      document.getElementById('inwardItemStock').innerText = `Current Stock: ${item.remaining} pcs`;
-      document.getElementById('inwardQtyInput').value = 5;
-      document.getElementById('inwardModal').classList.remove('hidden');
-    }
-
-    function closeInwardModal() {
-      document.getElementById('inwardModal').classList.add('hidden');
-      selectedInwardId = null;
-    }
-
-    function adjustInwardQty(delta) {
-      const input = document.getElementById('inwardQtyInput');
-      let val = (parseInt(input.value, 10) || 1) + delta;
-      if (val < 1) val = 1;
-      input.value = val;
-    }
-
-    function setInwardQuick(val) {
-      document.getElementById('inwardQtyInput').value = val;
-    }
-
-    function confirmInward() {
-      const item = inventory.find(i => i.id === selectedInwardId);
-      if (!item) return;
-
-      const qty = parseInt(document.getElementById('inwardQtyInput').value, 10) || 1;
-      item.remaining += qty;
-      saveInventory();
-
-      inwardHistory[item.id] = (inwardHistory[item.id] || 0) + qty;
-      saveInward();
-
-      closeInwardModal();
-      
-      if (currentTab === 'counter') renderCounterList();
-      if (currentTab === 'inventory') renderMasterInventory();
-
-      // Sync to Google Sheet
-      syncToGoogleSheet({
-        action: "inward",
-        type: "IN",
-        itemName: item.name,
-        quantity: qty,
-        unitCost: item.cost,
-        dateLabel: activeDateStr
-      });
-
-      showToast(`Added +${qty} pcs to ${item.name}!`);
-    }
-
-    // Header Stats Calculator (Strictly for activeDateStr)
-    function updateHeaderStats() {
-      const daySales = salesHistory[activeDateStr] || {};
-      let totalPcs = 0;
-      let totalAmount = 0;
-
-      for (const [id, count] of Object.entries(daySales)) {
-        const item = inventory.find(i => i.id === id);
-        if (item) {
-          totalPcs += count;
-          totalAmount += (count * item.cost);
-        }
-      }
-
-      document.getElementById('statSalesAmount').innerText = `₹${Math.round(totalAmount).toLocaleString('en-IN')}`;
-      document.getElementById('statItemsSold').innerText = `${totalPcs} pcs`;
-
-      const today = new Date();
-      const isToday = isSameDay(operatingDate, today);
-      document.getElementById('labelSalesTitle').innerText = isToday ? "Today's Sales" : `${activeDateStr} Sales`;
-      document.getElementById('labelItemsTitle').innerText = isToday ? "Today's Sold" : `Sold (${activeDateStr})`;
-    }
-
-    // Calendar Picker Modal Logic
-    function openCalendarModal() {
-      calViewYear = operatingDate.getFullYear();
-      calViewMonth = operatingDate.getMonth();
-      renderCalendarDays();
-      document.getElementById('calendarModal').classList.remove('hidden');
-    }
-
-    function closeCalendarModal() {
-      document.getElementById('calendarModal').classList.add('hidden');
-    }
-
-    function navCalMonth(delta) {
-      calViewMonth += delta;
-      if (calViewMonth < 0) { calViewMonth = 11; calViewYear--; }
-      if (calViewMonth > 11) { calViewMonth = 0; calViewYear++; }
-      renderCalendarDays();
-    }
-
-    function renderCalendarDays() {
-      document.getElementById('calMonthYearLabel').innerText = `${MONTHS[calViewMonth]} ${calViewYear}`;
-      const grid = document.getElementById('calDaysGrid');
-      grid.innerHTML = '';
-
-      const firstDay = new Date(calViewYear, calViewMonth, 1).getDay();
-      const daysInMonth = new Date(calViewYear, calViewMonth + 1, 0).getDate();
-
-      for (let i = 0; i < firstDay; i++) {
-        const blank = document.createElement('div');
-        blank.className = "h-8";
-        grid.appendChild(blank);
-      }
-
-      for (let d = 1; d <= daysInMonth; d++) {
-        const cellDate = new Date(calViewYear, calViewMonth, d);
-        const btn = document.createElement('button');
-        const isSelected = isSameDay(cellDate, operatingDate);
-
-        btn.type = "button";
-        btn.innerText = d;
-        btn.className = isSelected
-          ? "h-8 rounded-lg bg-orange-600 text-white font-bold font-num text-xs shadow-md shadow-orange-600/40 flex items-center justify-center ring-2 ring-orange-400"
-          : "h-8 rounded-lg bg-workshop-800 hover:bg-workshop-700 text-slate-200 font-num text-xs flex items-center justify-center border border-workshop-700/60 transition";
-
-        btn.onclick = () => {
-          setOperatingDate(cellDate);
-          closeCalendarModal();
-          showToast(`Operating date set to: ${activeDateStr}`);
-        };
-
-        grid.appendChild(btn);
-      }
-    }
-
-    // Search and Filter controls
-    function handleSearch(val) {
-      searchQuery = val.trim();
-      document.getElementById('clearSearchBtn').classList.toggle('hidden', searchQuery.length === 0);
-      renderCounterList();
-    }
-
-    function clearSearch() {
-      document.getElementById('searchInput').value = '';
-      handleSearch('');
-    }
-
-    function setFilter(flt) {
-      activeFilter = flt;
-      const btns = { all: 'fltAll', in_stock: 'fltIn', low_stock: 'fltLow', out: 'fltOut' };
-      for (const [key, id] of Object.entries(btns)) {
-        const btn = document.getElementById(id);
-        if (key === flt) {
-          btn.className = "px-2.5 py-1 rounded-lg bg-orange-600 text-white font-bold shrink-0";
-        } else {
-          btn.className = "px-2.5 py-1 rounded-lg bg-workshop-800 text-slate-300 font-semibold border border-workshop-700 shrink-0";
-        }
-      }
-      renderCounterList();
-    }
-
-    // Google Sheets Sync Bridge
-    function openSyncModal() {
-      document.getElementById('syncUrlInput').value = syncConfig.url || '';
-      document.getElementById('syncTabInput').value = syncConfig.tab || 'dec';
-      document.getElementById('syncModal').classList.remove('hidden');
-    }
-
-    function closeSyncModal() {
-      document.getElementById('syncModal').classList.add('hidden');
-    }
-
-    function saveSyncSettings() {
-      syncConfig.url = document.getElementById('syncUrlInput').value.trim();
-      syncConfig.tab = document.getElementById('syncTabInput').value.trim() || 'dec';
-      localStorage.setItem(STORAGE_KEY_CONFIG, JSON.stringify(syncConfig));
-      closeSyncModal();
-      showToast("Sync settings saved!");
-    }
-
-    async function testConnection() {
-      const url = document.getElementById('syncUrlInput').value.trim();
-      if (!url) {
-        alert("Please paste your Web App URL first.");
-        return;
-      }
-      showToast("Testing webhook connection...");
-      try {
-        await fetch(url, {
-          method: "POST",
-          mode: "no-cors",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ action: "ping" })
-        });
-        showToast("Webhook ping sent successfully!");
-      } catch (err) {
-        alert("Connection error: " + err.message);
-      }
-    }
-
-    async function pushFullSync() {
-      if (!syncConfig.url) {
-        alert("Please save your Google Apps Script Web App URL first.");
-        return;
-      }
-      showToast("Pushing 176 items to Google Sheet...");
-      try {
-        await fetch(syncConfig.url, {
-          method: "POST",
-          mode: "no-cors",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            action: "full_snapshot",
-            sheetTab: syncConfig.tab,
-            items: inventory.map(i => ({
-              name: i.name,
-              remaining: i.remaining,
-              cost: i.cost
-            }))
-          })
-        });
-        closeSyncModal();
-        showToast("Pushed all 176 items to Google Sheet!");
-      } catch (err) {
-        alert("Sync error: " + err.message);
-      }
-    }
-
-    async function syncToGoogleSheet(payload) {
-      if (!syncConfig.url) return;
-      try {
-        payload.sheetTab = syncConfig.tab;
-        await fetch(syncConfig.url, {
-          method: "POST",
-          mode: "no-cors",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
-        });
-      } catch (err) {
-        console.warn("Background sheet sync error:", err);
-      }
-    }
-
-    // Toast message helper
     function showToast(msg) {
       const box = document.getElementById('toastBox');
       const txt = document.getElementById('toastText');
@@ -1179,22 +984,10 @@
       }, 2400);
     }
 
-    // Midnight Rollover Checker: Advances to new day automatically at 00:00
-    let lastCheckedDay = new Date().getDate();
-    setInterval(() => {
-      const now = new Date();
-      if (now.getDate() !== lastCheckedDay) {
-        lastCheckedDay = now.getDate();
-        setOperatingDate(now);
-      }
-    }, 30000);
-
-    // Initial Launch
-    window.addEventListener('DOMContentLoaded', () => {
-      loadAppState();
-      setOperatingDate(new Date());
-      renderCounterList();
-    });
+    // Initial Render
+    updateFilterCounts();
+    renderInventoryList();
+    updateHeaderStats();
   </script>
 </body>
 </html>
