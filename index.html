@@ -640,8 +640,8 @@
             Save & Connect
           </button>
           <button onclick="pushFullSync()" class="tap-active flex-1 bg-workshop-800 hover:bg-workshop-700 border border-slate-700 text-slate-200 font-bold py-2 rounded-xl text-xs flex items-center justify-center gap-1.5">
-            <i class="fa-solid fa-arrows-rotate text-[11px]"></i>
-            <span>Sync All Stock</span>
+            <i class="fa-solid fa-cloud-arrow-up text-[11px] text-orange-400"></i>
+            <span>Push All Items to Sheet</span>
           </button>
         </div>
 
@@ -654,70 +654,149 @@
         <!-- Step-by-Step Instructions Toggle -->
         <details class="bg-workshop-950 border border-workshop-800 rounded-xl p-2.5">
           <summary class="font-bold text-[11px] text-orange-400 cursor-pointer flex items-center justify-between">
-            <span>Show Google Apps Script Code</span>
+            <span>Show Google Apps Script Code (Auto-Builds Blank Sheet)</span>
             <i class="fa-solid fa-code text-xs"></i>
           </summary>
           <div class="mt-2 text-[10px] text-slate-300 space-y-1.5 leading-relaxed">
-            <p>1. Open your <b>A.M Analyser</b> Google Sheet on computer.</p>
-            <p>2. Go to <b>Extensions &gt; Apps Script</b> and paste this code:</p>
-            <textarea readonly onclick="this.select()" class="w-full h-36 bg-black text-emerald-400 font-mono text-[9px] p-2 rounded-lg border border-slate-800 select-all">
+            <p>1. Open a blank tab in your Google Sheet.</p>
+            <p>2. Go to <b>Extensions &gt; Apps Script</b> and paste this code (it auto-populates everything):</p>
+            <textarea readonly onclick="this.select()" class="w-full h-44 bg-black text-emerald-400 font-mono text-[9px] p-2 rounded-lg border border-slate-800 select-all">
 function doPost(e) {
   try {
     var data = JSON.parse(e.postData.contents);
     var ss = SpreadsheetApp.getActiveSpreadsheet();
     var sheet = ss.getActiveSheet();
+    
+    // Quick test ping
     if (data.action === "ping") {
-      return ContentService.createTextOutput(JSON.stringify({status: "ok", message: "Connected successfully!"})).setMimeType(ContentService.MimeType.JSON);
+      return ContentService.createTextOutput(JSON.stringify({status: "ok", message: "Connected!"})).setMimeType(ContentService.MimeType.JSON);
     }
+    
+    // ACTION 1: FULL AUTO-INITIALIZATION / EXPORT OF ALL DATA TO A BLANK SHEET
+    if (data.action === "full_snapshot" || data.action === "bulk_sync") {
+      var items = data.items || [];
+      sheet.clearContents();
+      
+      // Standard Auto Analyser headers
+      var defaultHeaders = ["Item Name", "Remaining stock", "Cost price", "Initial stock", "New Stock", "Total stock"];
+      sheet.getRange(1, 1, 1, defaultHeaders.length).setValues([defaultHeaders])
+        .setFontWeight("bold")
+        .setBackground("#1e293b")
+        .setFontColor("#ffffff")
+        .setHorizontalAlignment("center");
+      
+      if (items.length > 0) {
+        var rows = [];
+        for (var i = 0; i < items.length; i++) {
+          var itm = items[i];
+          rows.push([
+            itm.name,
+            Number(itm.remaining) || 0,
+            Number(itm.cost) || 0,
+            Number(itm.remaining) || 0, // initial
+            0,                          // new stock
+            Number(itm.remaining) || 0  // total
+          ]);
+        }
+        sheet.getRange(2, 1, rows.length, defaultHeaders.length).setValues(rows);
+        sheet.setFrozenRows(1);
+        sheet.autoResizeColumns(1, defaultHeaders.length);
+      }
+      return ContentService.createTextOutput(JSON.stringify({status: "success", count: items.length})).setMimeType(ContentService.MimeType.JSON);
+    }
+    
+    // ACTION 2: INDIVIDUAL ITEM REGISTRATION OR EDIT (NEW PART ADDED IN APP)
+    if (data.action === "upsert_item") {
+      var values = sheet.getDataRange().getValues();
+      var foundRow = -1;
+      for (var r = 1; r < values.length; r++) {
+        if (values[r][0] && values[r][0].toString().trim().toLowerCase() === data.name.trim().toLowerCase()) {
+          foundRow = r + 1;
+          break;
+        }
+      }
+      if (foundRow !== -1) {
+        sheet.getRange(foundRow, 2).setValue(Number(data.remaining));
+        sheet.getRange(foundRow, 3).setValue(Number(data.cost));
+      } else {
+        var newRow = sheet.getLastRow() + 1;
+        sheet.getRange(newRow, 1).setValue(data.name);
+        sheet.getRange(newRow, 2).setValue(Number(data.remaining));
+        sheet.getRange(newRow, 3).setValue(Number(data.cost));
+        sheet.getRange(newRow, 4).setValue(Number(data.remaining));
+        sheet.getRange(newRow, 5).setValue(0);
+        sheet.getRange(newRow, 6).setValue(Number(data.remaining));
+      }
+      return ContentService.createTextOutput(JSON.stringify({status: "success"})).setMimeType(ContentService.MimeType.JSON);
+    }
+
+    // ACTION 3: DAILY SALE (OUT) OR INWARD (IN)
     var itemName = data.itemName;
-    var type = data.type; // "OUT" or "IN"
+    var type = data.type;
     var qty = Number(data.quantity);
-    var dateHeader = data.dateLabel; // e.g. "6-Nov"
+    var dateHeader = data.dateLabel;
+    
     var values = sheet.getDataRange().getValues();
     var headers = values[0];
     var colDate = -1, colRemaining = -1, colNewStock = -1;
+    
     for (var c = 0; c < headers.length; c++) {
       var h = headers[c].toString().trim().toLowerCase();
       if (h === dateHeader.toLowerCase()) colDate = c;
       if (h.indexOf("remaining") !== -1) colRemaining = c;
       if (h.indexOf("new stock") !== -1) colNewStock = c;
     }
+    
+    // Auto-create date column if selling today
+    if (colDate === -1 && type === "OUT") {
+      colDate = headers.length;
+      sheet.getRange(1, colDate + 1).setValue(dateHeader)
+        .setFontWeight("bold")
+        .setHorizontalAlignment("center")
+        .setBackground("#fef3c7");
+    }
+    
+    // Find item row
     var targetRow = -1;
     for (var r = 1; r < values.length; r++) {
-      if (values[r][0].toString().trim().toLowerCase() === itemName.trim().toLowerCase()) {
+      if (values[r][0] && values[r][0].toString().trim().toLowerCase() === itemName.trim().toLowerCase()) {
         targetRow = r + 1;
         break;
       }
     }
-    if (targetRow !== -1) {
-      if (type === "OUT") {
-        if (colDate !== -1) {
-          var curDay = Number(sheet.getRange(targetRow, colDate + 1).getValue()) || 0;
-          sheet.getRange(targetRow, colDate + 1).setValue(curDay + qty);
-        }
-        if (colRemaining !== -1) {
-          var curRem = Number(sheet.getRange(targetRow, colRemaining + 1).getValue()) || 0;
-          sheet.getRange(targetRow, colRemaining + 1).setValue(Math.max(0, curRem - qty));
-        }
-      } else if (type === "IN") {
-        if (colRemaining !== -1) {
-          var curRem = Number(sheet.getRange(targetRow, colRemaining + 1).getValue()) || 0;
-          sheet.getRange(targetRow, colRemaining + 1).setValue(curRem + qty);
-        }
-        if (colNewStock !== -1) {
-          var curNew = Number(sheet.getRange(targetRow, colNewStock + 1).getValue()) || 0;
-          sheet.getRange(targetRow, colNewStock + 1).setValue(curNew + qty);
-        }
-      }
-      return ContentService.createTextOutput(JSON.stringify({status: "success"})).setMimeType(ContentService.MimeType.JSON);
+    
+    // Auto-add item to bottom if not found
+    if (targetRow === -1) {
+      targetRow = sheet.getLastRow() + 1;
+      sheet.getRange(targetRow, 1).setValue(itemName);
+      if (data.unitCost) sheet.getRange(targetRow, 3).setValue(data.unitCost);
     }
-    return ContentService.createTextOutput(JSON.stringify({status: "not_found"})).setMimeType(ContentService.MimeType.JSON);
+    
+    if (type === "OUT") {
+      if (colDate !== -1) {
+        var curDay = Number(sheet.getRange(targetRow, colDate + 1).getValue()) || 0;
+        sheet.getRange(targetRow, colDate + 1).setValue(curDay + qty);
+      }
+      if (colRemaining !== -1) {
+        var curRem = Number(sheet.getRange(targetRow, colRemaining + 1).getValue()) || 0;
+        sheet.getRange(targetRow, colRemaining + 1).setValue(Math.max(0, curRem - qty));
+      }
+    } else if (type === "IN") {
+      if (colRemaining !== -1) {
+        var curRem = Number(sheet.getRange(targetRow, colRemaining + 1).getValue()) || 0;
+        sheet.getRange(targetRow, colRemaining + 1).setValue(curRem + qty);
+      }
+      if (colNewStock !== -1) {
+        var curNew = Number(sheet.getRange(targetRow, colNewStock + 1).getValue()) || 0;
+        sheet.getRange(targetRow, colNewStock + 1).setValue(curNew + qty);
+      }
+    }
+    return ContentService.createTextOutput(JSON.stringify({status: "success"})).setMimeType(ContentService.MimeType.JSON);
   } catch (err) {
     return ContentService.createTextOutput(JSON.stringify({status: "error", message: err.toString()})).setMimeType(ContentService.MimeType.JSON);
   }
 }</textarea>
-            <p>3. Click <b>Deploy &gt; New deployment &gt; Web app</b>.</p>
-            <p>4. Set <i>Who has access</i> to <b>Anyone</b>, click Deploy, and paste the URL above.</p>
+            <p>3. Deploy as Web App (Who has access: <b>Anyone</b>) and paste the URL above.</p>
           </div>
         </details>
 
@@ -1176,14 +1255,14 @@ function doPost(e) {
       }
     }
 
-    // PUSH FULL INVENTORY VALUATION SYNC
+    // PUSH FULL INVENTORY VALUATION SYNC (POPULATES EVEN A COMPLETELY BLANK SHEET)
     async function pushFullSync() {
       if (!appsScriptUrl) {
         showToast('Configure Web App URL first', 'rose');
         return;
       }
 
-      showToast('Pushing stock snapshot to Google Sheet...', 'emerald');
+      showToast('Sending all parts & stocks to Google Sheet...', 'emerald');
       try {
         await fetch(appsScriptUrl, {
           method: 'POST',
@@ -1197,7 +1276,7 @@ function doPost(e) {
         });
 
         playBeep(true);
-        showToast('Full stock snapshot transmitted!', 'emerald');
+        showToast('All items & stock synced into Google Sheet!', 'emerald');
       } catch (e) {
         showToast('Sync request failed to transmit', 'rose');
       }
@@ -1826,8 +1905,58 @@ function doPost(e) {
 
       saveStorage();
       closeModal('editItemModal');
+
+      // Auto-sync edited part details directly to Google Sheet
+      syncTransactionToGoogleSheet({
+        action: 'upsert_item',
+        name: item.name,
+        cost: item.cost,
+        remaining: item.remaining,
+        timestamp: Date.now()
+      });
+
       playBeep(true);
-      showToast('Item details updated successfully', 'emerald');
+      showToast('Item updated & synced to Sheet!', 'emerald');
+      renderAll();
+    }
+
+    // ADD NEW CUSTOM PART
+    function saveNewItem() {
+      const name = document.getElementById('newItemName').value.trim().toUpperCase();
+      const cost = parseFloat(document.getElementById('newItemCost').value) || 0;
+      const stock = parseInt(document.getElementById('newItemStock').value) || 0;
+
+      if (!name) {
+        showToast('Please enter part name or code', 'rose');
+        return;
+      }
+
+      const newItem = {
+        id: 'itm_' + Date.now(),
+        name: name,
+        cost: cost,
+        remaining: stock
+      };
+
+      inventory.unshift(newItem);
+      saveStorage();
+
+      document.getElementById('newItemName').value = '';
+      document.getElementById('newItemCost').value = '';
+      document.getElementById('newItemStock').value = '5';
+      closeModal('newItemModal');
+
+      // Auto-sync brand new part directly to Google Sheet
+      syncTransactionToGoogleSheet({
+        action: 'upsert_item',
+        name: newItem.name,
+        cost: newItem.cost,
+        remaining: newItem.remaining,
+        timestamp: Date.now()
+      });
+
+      playBeep(true);
+      showToast('New part registered & added to Sheet!', 'emerald');
       renderAll();
     }
 
