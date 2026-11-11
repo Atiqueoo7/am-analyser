@@ -2,10 +2,21 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>A.M Analyser - Live Workshop Preview</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>A.M Analyser - Auto Parts & Lubricants</title>
+  
+  <!-- PWA Web App Meta Tags -->
+  <meta name="theme-color" content="#ea580c">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="A.M Analyser">
+  
+  <!-- Embedded W3C Compliant Web App Manifest -->
+  <link rel="manifest" href="data:application/manifest+json;utf-8,%7B%22name%22%3A%22A.M%20Analyser%22%2C%22short_name%22%3A%22AM%20Analyser%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23020617%22%2C%22theme_color%22%3A%22%23ea580c%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22https%3A%2F%2Fplacehold.co%2F192x192%2Fea580c%2Fffffff%3Ftext%3DAM%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image%2Fpng%22%7D%2C%7B%22src%22%3A%22https%3A%2F%2Fplacehold.co%2F512x512%2Fea580c%2Fffffff%3Ftext%3DAM%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fpng%22%7D%5D%7D">
+
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
   <script>
     tailwind.config = {
       theme: {
@@ -26,29 +37,47 @@
       }
     }
   </script>
+  
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Roboto+Mono:wght@500;700&display=swap');
-    body { font-family: 'Inter', sans-serif; }
+    body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
     .font-num { font-family: 'Roboto Mono', monospace; }
+    .scrollbar-none::-webkit-scrollbar { display: none; }
+    .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen p-2 md:p-6 flex flex-col items-center">
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col items-center selection:bg-orange-500 selection:text-white">
 
-  <!-- Main Phone Container -->
-  <main class="w-full max-w-md bg-workshop-900 border border-workshop-700 rounded-3xl shadow-2xl overflow-hidden flex flex-col min-h-[820px] relative">
+  <!-- Mobile App Frame Container -->
+  <div class="w-full max-w-md bg-workshop-900 min-h-screen flex flex-col relative shadow-2xl border-x border-workshop-800">
     
-    <!-- Phone Top Status Bar -->
-    <div class="bg-workshop-950 px-4 pt-3 pb-2 flex items-center justify-between text-xs text-slate-400 border-b border-workshop-800">
-      <span class="font-mono font-bold text-slate-300">09:41</span>
-      <div class="flex items-center gap-2 text-slate-400 text-[11px]">
-        <i class="fa-solid fa-wifi text-emerald-400"></i>
-        <i class="fa-solid fa-cloud-check text-cyan-400"></i>
-        <i class="fa-solid fa-battery-full text-slate-300"></i>
+    <!-- PWA Install Banner -->
+    <div id="pwaInstallBanner" class="hidden bg-gradient-to-r from-orange-600 to-amber-600 px-4 py-2.5 flex items-center justify-between shadow-lg z-50 text-xs">
+      <div class="flex items-center gap-2">
+        <i class="fa-solid fa-mobile-screen-button text-white text-base"></i>
+        <span class="font-bold text-white tracking-tight">Install A.M Analyser App</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <button onclick="promptAppInstall()" class="bg-white text-orange-600 font-extrabold px-3 py-1 rounded-lg shadow-sm text-xs active:scale-95 transition">
+          Install
+        </button>
+        <button onclick="dismissInstallBanner()" class="text-white/80 hover:text-white text-xs p-1">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
       </div>
     </div>
 
-    <!-- Phone App Header -->
-    <header class="p-4 bg-workshop-900 border-b border-workshop-800 space-y-3">
+    <!-- Top Status Bar -->
+    <div class="bg-workshop-950 px-4 pt-3 pb-2 flex items-center justify-between text-xs text-slate-400 border-b border-workshop-800">
+      <span class="font-mono font-bold text-slate-300">A.M AUTOMOBILES</span>
+      <div class="flex items-center gap-2 text-[11px]">
+        <i class="fa-solid fa-wrench text-orange-400"></i>
+        <span class="text-slate-400">Workshop & Lubricants</span>
+      </div>
+    </div>
+
+    <!-- App Header & Navigation Controls -->
+    <header class="p-3.5 bg-workshop-900 border-b border-workshop-800 space-y-3 sticky top-0 z-30 shadow-md">
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-2.5">
           <div class="w-9 h-9 rounded-xl bg-orange-600 flex items-center justify-center text-white font-black text-sm shadow-md shadow-orange-600/30">
@@ -56,31 +85,39 @@
           </div>
           <div>
             <h1 class="text-base font-black text-white leading-tight">A.M Analyser</h1>
-            <span class="text-[10px] text-slate-400 font-medium">Auto Parts & Lubricants</span>
+            <span class="text-[10px] text-slate-400 font-medium">Auto Parts Counter</span>
           </div>
         </div>
-        <button onclick="showToast('Cloud sync connected and active!')" class="w-9 h-9 rounded-xl bg-workshop-800 hover:bg-workshop-700 border border-workshop-700 text-cyan-400 flex items-center justify-center transition active:scale-95 shadow-sm" title="Sync Status">
-          <i class="fa-solid fa-cloud"></i>
-        </button>
+        
+        <div class="flex items-center gap-2">
+          <!-- Sync Status Dot & Offline Queue Indicator -->
+          <button onclick="openSyncModal()" id="syncStatusBadge" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-workshop-800 border border-workshop-700 text-[11px] font-mono transition active:scale-95 shadow-sm" title="Google Sheet Sync Status">
+            <span id="syncStatusDot" class="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-sm shadow-emerald-400/50"></span>
+            <span id="syncStatusText" class="text-emerald-400 font-semibold">Synced</span>
+          </button>
+        </div>
       </div>
 
       <!-- Operating Date Selector Bar -->
       <div class="flex items-center justify-between bg-workshop-950/90 p-2 rounded-2xl border border-workshop-700 shadow-inner">
         <div class="flex items-center gap-2.5 min-w-0">
+          <!-- Calendar Trigger Button -->
           <button type="button" onclick="openCalendarModal()" id="btnHeaderCalendar"
             class="w-9 h-9 rounded-xl bg-orange-600/20 hover:bg-orange-600 text-orange-400 hover:text-white flex items-center justify-center border border-orange-500/40 shadow-sm transition active:scale-95 shrink-0" 
             title="Open Calendar to Pick Any Date">
             <i class="fa-solid fa-calendar-days text-sm"></i>
           </button>
           
+          <!-- Touchable Date Label -->
           <button type="button" onclick="openCalendarModal()" class="text-left truncate group">
             <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block group-hover:text-orange-400 transition">Operating Date</span>
             <span id="currentDateBadge" class="text-xs font-bold text-amber-300 font-num tracking-tight group-hover:text-amber-200 transition">
-              Today (07-Nov-2026)
+              Today
             </span>
           </button>
         </div>
 
+        <!-- Quick Day Toggles -->
         <div class="flex items-center gap-1 shrink-0">
           <button type="button" onclick="setQuickDate('yesterday')" id="quickYestBtn" class="text-[10px] bg-workshop-800 hover:bg-workshop-700 active:scale-95 px-2 py-1.5 rounded-lg text-slate-300 font-semibold border border-workshop-700 transition">
             Yesterday
@@ -91,8 +128,8 @@
         </div>
       </div>
 
-      <!-- Live Auto-Resetting Daily Stats Cards -->
-      <div class="grid grid-cols-2 gap-2.5 pt-1">
+      <!-- Auto-Resetting Daily Stats Cards -->
+      <div class="grid grid-cols-2 gap-2.5 pt-0.5">
         <div class="bg-workshop-950/70 border border-workshop-700/80 p-2.5 rounded-xl">
           <span id="labelSalesTitle" class="text-[10px] font-bold text-slate-400 uppercase tracking-wide block truncate">Today's Sales</span>
           <span id="statSalesAmount" class="text-base font-black text-emerald-400 font-num">₹0</span>
@@ -103,22 +140,21 @@
         </div>
       </div>
 
-      <!-- Search Input & Sorting Selector -->
+      <!-- Search & Sorting Selector Row -->
       <div class="flex items-center gap-2">
         <div class="relative flex-1">
           <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-xs"></i>
-          <input type="text" id="searchInput" oninput="handleSearch(this.value)" placeholder="Search 176 parts..." 
+          <input type="text" id="searchInput" oninput="handleSearch(this.value)" placeholder="Search 176 items..." 
             class="w-full bg-workshop-950 border border-workshop-700 rounded-xl pl-8 pr-7 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-orange-500 font-sans">
           <button onclick="clearSearch()" id="clearSearchBtn" class="hidden absolute right-2.5 top-2 text-slate-400 hover:text-white text-xs">
             <i class="fa-solid fa-xmark"></i>
           </button>
         </div>
 
-        <!-- Sort Dropdown -->
         <div class="relative shrink-0">
           <select id="sortSelect" onchange="handleSortChange(this.value)" 
             class="bg-workshop-950 text-slate-200 border border-workshop-700 rounded-xl px-2 py-2 text-xs font-semibold focus:outline-none focus:border-orange-500 appearance-none pr-6 cursor-pointer">
-            <option value="default">Sort: Default</option>
+            <option value="default">Default</option>
             <option value="stock_desc">Stock: High → Low</option>
             <option value="stock_asc">Stock: Low → High</option>
             <option value="price_desc">Price: High → Low</option>
@@ -135,71 +171,80 @@
           All (176)
         </button>
         <button onclick="setFilter('in_stock')" id="fltIn" class="px-2.5 py-1 rounded-lg bg-workshop-800 text-slate-300 font-semibold border border-workshop-700 shrink-0 transition">
-          In Stock (<span id="countInStock">59</span>)
+          In Stock (<span id="countInStock">0</span>)
         </button>
         <button onclick="setFilter('low_stock')" id="fltLow" class="px-2.5 py-1 rounded-lg bg-workshop-800 text-slate-300 font-semibold border border-workshop-700 shrink-0 transition">
-          Low ≤5 (<span id="countLowStock">7</span>)
+          Low ≤5 (<span id="countLowStock">0</span>)
         </button>
         <button onclick="setFilter('out')" id="fltOut" class="px-2.5 py-1 rounded-lg bg-workshop-800 text-slate-300 font-semibold border border-workshop-700 shrink-0 transition">
-          Out of Stock (<span id="countOutStock">117</span>)
+          Out of Stock (<span id="countOutStock">0</span>)
         </button>
       </div>
     </header>
 
-    <!-- TAB 1: Counter Items List -->
-    <section id="tabCounter" class="tab-content flex-1 overflow-y-auto p-3 space-y-2.5">
-      <div id="itemsContainer" class="space-y-2.5">
-        <!-- Rendered by JS -->
-      </div>
-    </section>
-
-    <!-- TAB 2: Daily Activity Logs -->
-    <section id="tabLogs" class="tab-content hidden flex-1 overflow-y-auto p-3 space-y-3">
-      <div class="flex items-center justify-between bg-workshop-950/80 p-2.5 rounded-2xl border border-workshop-700/80">
-        <div>
-          <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Activity Log</span>
-          <h3 id="dailyLogsDateTitle" class="text-xs font-bold text-amber-300 font-mono">Today's Activity</h3>
+    <!-- Scrollable Screen Content -->
+    <div class="flex-1 overflow-y-auto pb-24">
+      
+      <!-- TAB 1: COUNTER OUT -->
+      <section id="tabCounter" class="p-3 space-y-2.5">
+        <div id="counterItemsList" class="space-y-2.5">
+          <!-- Rendered dynamically by JavaScript -->
         </div>
-        <button onclick="openCalendarModal()" class="px-2.5 py-1.5 rounded-lg bg-workshop-800 hover:bg-workshop-700 border border-workshop-700 text-orange-400 text-xs font-semibold flex items-center gap-1.5 transition active:scale-95">
-          <i class="fa-solid fa-calendar-days text-[11px]"></i>
-          <span>Change Date</span>
-        </button>
-      </div>
+      </section>
 
-      <div class="grid grid-cols-2 gap-2 text-center text-xs">
-        <div class="bg-workshop-950/60 border border-workshop-800 p-2 rounded-xl">
-          <span class="text-[10px] text-slate-400 block font-semibold">Total Revenue</span>
-          <span id="logSummaryRevenue" class="text-sm font-black text-emerald-400 font-mono">₹0</span>
+      <!-- TAB 2: DAILY LOGS -->
+      <section id="tabLogs" class="hidden p-3 space-y-3">
+        <div class="flex items-center justify-between bg-workshop-950/80 p-2.5 rounded-2xl border border-workshop-700/80">
+          <div>
+            <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Activity Summary</span>
+            <h3 id="dailyLogsDateTitle" class="text-xs font-bold text-amber-300 font-mono">Today's Activity</h3>
+          </div>
+          <button onclick="openCalendarModal()" class="px-2.5 py-1.5 rounded-lg bg-workshop-800 hover:bg-workshop-700 border border-workshop-700 text-orange-400 text-xs font-semibold flex items-center gap-1.5 transition active:scale-95">
+            <i class="fa-solid fa-calendar-days text-[11px]"></i>
+            <span>Change Date</span>
+          </button>
         </div>
-        <div class="bg-workshop-950/60 border border-workshop-800 p-2 rounded-xl">
-          <span class="text-[10px] text-slate-400 block font-semibold">Pieces Handled</span>
-          <span id="logSummaryPcs" class="text-sm font-black text-amber-400 font-mono">0 pcs</span>
+
+        <div class="grid grid-cols-2 gap-2 text-center text-xs">
+          <div class="bg-workshop-950/60 border border-workshop-800 p-2 rounded-xl">
+            <span class="text-[10px] text-slate-400 block font-semibold">Total Revenue</span>
+            <span id="logSummaryRevenue" class="text-sm font-black text-emerald-400 font-mono">₹0</span>
+          </div>
+          <div class="bg-workshop-950/60 border border-workshop-800 p-2 rounded-xl">
+            <span class="text-[10px] text-slate-400 block font-semibold">Pieces Handled</span>
+            <span id="logSummaryPcs" class="text-sm font-black text-amber-400 font-mono">0 pcs</span>
+          </div>
         </div>
-      </div>
 
-      <div id="logsContainer" class="space-y-2"></div>
-    </section>
-
-    <!-- TAB 3: Master Inventory View -->
-    <section id="tabInventory" class="tab-content hidden flex-1 overflow-y-auto p-3 space-y-3">
-      <div class="flex items-center justify-between bg-workshop-950/80 p-2.5 rounded-2xl border border-workshop-700/80">
-        <div>
-          <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Master Catalog</span>
-          <h3 class="text-xs font-bold text-white">Full Inventory (176 Parts)</h3>
+        <div id="logsContainer" class="space-y-2">
+          <!-- Populated dynamically -->
         </div>
-        <button onclick="showToast('Inventory synced to Google Sheet!')" class="px-2.5 py-1.5 rounded-lg bg-orange-600 hover:bg-orange-500 text-white text-xs font-bold flex items-center gap-1 shadow-sm transition active:scale-95">
-          <i class="fa-solid fa-cloud-arrow-up text-[10px]"></i>
-          <span>Push to Sheet</span>
-        </button>
-      </div>
+      </section>
 
-      <div id="masterInventoryContainer" class="space-y-2"></div>
-    </section>
+      <!-- TAB 3: INVENTORY MASTER -->
+      <section id="tabInventory" class="hidden p-3 space-y-3">
+        <div class="flex items-center justify-between bg-workshop-950/80 p-2.5 rounded-2xl border border-workshop-700/80">
+          <div>
+            <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Master Catalog</span>
+            <h3 class="text-xs font-bold text-white">Full Inventory (176 Parts)</h3>
+          </div>
+          <button onclick="pushAllItemsToSheet()" class="px-2.5 py-1.5 rounded-lg bg-orange-600 hover:bg-orange-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition active:scale-95">
+            <i class="fa-solid fa-cloud-arrow-up text-[10px]"></i>
+            <span>Push All to Sheet</span>
+          </button>
+        </div>
 
-    <!-- Phone Bottom Navigation Bar -->
-    <nav class="bg-workshop-950 border-t border-workshop-800 px-4 py-2 flex items-center justify-around text-xs shrink-0 select-none">
+        <div id="masterInventoryContainer" class="space-y-2">
+          <!-- Populated dynamically -->
+        </div>
+      </section>
+
+    </div>
+
+    <!-- Fixed Bottom Tab Bar -->
+    <nav class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-workshop-950/95 backdrop-blur-md border-t border-workshop-800 px-4 py-2 flex items-center justify-around text-xs z-40 select-none shadow-2xl">
       <button onclick="switchTab('counter')" id="navBtnCounter" class="flex flex-col items-center gap-0.5 text-orange-400 font-bold transition active:scale-95">
-        <i class="fa-solid fa-cart-shopping text-sm"></i>
+        <i class="fa-solid fa-arrow-up-from-bracket text-sm"></i>
         <span class="text-[10px]">Counter</span>
       </button>
       <button onclick="switchTab('logs')" id="navBtnLogs" class="flex flex-col items-center gap-0.5 text-slate-400 hover:text-slate-200 font-medium transition active:scale-95">
@@ -212,64 +257,60 @@
       </button>
     </nav>
 
-    <!-- CALENDAR MODAL -->
-    <div id="calendarModal" class="hidden absolute inset-0 bg-slate-950/85 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <!-- CALENDAR MODAL (Full Month Selection) -->
+    <div id="calendarModal" class="hidden fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 flex items-center justify-center p-4">
       <div class="bg-workshop-900 border border-workshop-700 rounded-3xl w-full max-w-xs p-4 space-y-3.5 shadow-2xl">
         <div class="flex items-center justify-between border-b border-workshop-700 pb-2.5">
           <div class="flex items-center gap-2">
             <i class="fa-solid fa-calendar-days text-orange-400 text-sm"></i>
             <h3 class="font-bold text-xs uppercase tracking-wider text-white">Select Operating Date</h3>
           </div>
-          <button onclick="closeCalendarModal()" class="text-slate-400 hover:text-white text-sm">
+          <button onclick="closeCalendarModal()" class="text-slate-400 hover:text-white text-sm p-1">
             <i class="fa-solid fa-xmark"></i>
           </button>
         </div>
 
-        <!-- Month Navigation -->
         <div class="flex items-center justify-between px-1">
           <button onclick="navMonth(-1)" class="w-8 h-8 rounded-lg bg-workshop-800 hover:bg-workshop-700 text-slate-300 font-bold flex items-center justify-center text-xs">
             <i class="fa-solid fa-chevron-left"></i>
           </button>
-          <span id="calMonthYearLabel" class="text-xs font-bold text-amber-300 font-num">November 2026</span>
+          <span id="calMonthYearLabel" class="text-xs font-bold text-amber-300 font-num">Month Year</span>
           <button onclick="navMonth(1)" class="w-8 h-8 rounded-lg bg-workshop-800 hover:bg-workshop-700 text-slate-300 font-bold flex items-center justify-center text-xs">
             <i class="fa-solid fa-chevron-right"></i>
           </button>
         </div>
 
-        <!-- Weekday Headers -->
         <div class="grid grid-cols-7 gap-1 text-center text-[10px] font-bold text-slate-500 uppercase">
           <span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span>
         </div>
 
-        <!-- Days Grid -->
         <div id="calDaysGrid" class="grid grid-cols-7 gap-1 text-xs"></div>
 
-        <!-- Quick Jump Button -->
         <div class="pt-2 border-t border-workshop-800">
           <button onclick="setQuickDate('today'); closeCalendarModal();" 
             class="w-full bg-workshop-800 hover:bg-orange-600 text-slate-200 hover:text-white py-2 rounded-xl text-xs font-bold transition">
-            Jump to Today (07-Nov-2026)
+            Jump to Today
           </button>
         </div>
       </div>
     </div>
 
     <!-- INWARD STOCK MODAL -->
-    <div id="inwardModal" class="hidden absolute inset-0 bg-slate-950/85 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div id="inwardModal" class="hidden fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 flex items-center justify-center p-4">
       <div class="bg-workshop-900 border border-workshop-700 rounded-3xl w-full max-w-xs p-4 space-y-4 shadow-2xl">
         <div class="flex items-center justify-between border-b border-workshop-700 pb-2">
           <div class="flex items-center gap-2">
             <i class="fa-solid fa-box-open text-cyan-400"></i>
             <h3 class="font-bold text-xs uppercase tracking-wider text-white">Inward Stock (+)</h3>
           </div>
-          <button onclick="closeInwardModal()" class="text-slate-400 hover:text-white text-sm">
+          <button onclick="closeInwardModal()" class="text-slate-400 hover:text-white text-sm p-1">
             <i class="fa-solid fa-xmark"></i>
           </button>
         </div>
 
         <div>
           <span id="inwardItemName" class="text-xs font-bold text-slate-200 block truncate">Item</span>
-          <span id="inwardItemStock" class="text-[11px] text-slate-400 font-num">Current: 0 pcs</span>
+          <span id="inwardItemStock" class="text-[11px] text-slate-400 font-num">Current Stock: 0 pcs</span>
         </div>
 
         <div class="flex items-center justify-center gap-3">
@@ -284,25 +325,68 @@
           <button onclick="setInwardQuick(25)" class="py-1.5 bg-workshop-800 hover:bg-workshop-700 rounded-lg text-slate-300 font-bold">+25</button>
         </div>
 
-        <button onclick="confirmInward()" class="w-full bg-cyan-600 hover:bg-cyan-500 py-2.5 rounded-xl text-white font-bold text-xs transition">
-          Confirm Inward & Sync
+        <button onclick="confirmInward()" class="w-full bg-cyan-600 hover:bg-cyan-500 py-2.5 rounded-xl text-white font-bold text-xs transition active:scale-95 shadow-md">
+          Confirm Inward & Sync to Sheet
         </button>
       </div>
     </div>
 
-  </main>
+    <!-- GOOGLE SHEETS SETTINGS MODAL -->
+    <div id="syncModal" class="hidden fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div class="bg-workshop-900 border border-workshop-700 rounded-3xl w-full max-w-xs p-4 space-y-4 shadow-2xl">
+        <div class="flex items-center justify-between border-b border-workshop-700 pb-2">
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-cloud text-orange-400"></i>
+            <h3 class="font-bold text-xs uppercase tracking-wider text-white">Google Sheet Connection</h3>
+          </div>
+          <button onclick="closeSyncModal()" class="text-slate-400 hover:text-white text-sm p-1">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
 
-  <!-- Live Toast Notification Container -->
-  <div id="toastBox" class="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 pointer-events-none transition-all duration-300 opacity-0 translate-y-3">
-    <div id="toastText" class="bg-slate-900/95 border border-slate-700 text-white px-4 py-2 rounded-xl text-xs font-semibold shadow-2xl flex items-center gap-2">
-      <i class="fa-solid fa-circle-check text-emerald-400"></i>
-      <span>Message</span>
+        <div class="space-y-3 text-xs">
+          <div>
+            <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wide block mb-1">Apps Script Web App URL (/exec)</label>
+            <input type="text" id="sheetUrlInput" placeholder="https://script.google.com/macros/s/.../exec"
+              class="w-full bg-workshop-950 border border-workshop-700 rounded-xl px-2.5 py-2 text-white font-mono text-[11px] focus:outline-none focus:border-orange-500">
+          </div>
+
+          <div>
+            <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wide block mb-1">Sheet Tab Name</label>
+            <input type="text" id="sheetTabInput" value="dec" placeholder="dec"
+              class="w-full bg-workshop-950 border border-workshop-700 rounded-xl px-2.5 py-2 text-white font-mono text-xs focus:outline-none focus:border-orange-500">
+          </div>
+
+          <div class="flex items-center justify-between pt-1 text-[11px] font-mono">
+            <span class="text-slate-400">Queue Buffer:</span>
+            <span id="modalQueueCount" class="text-amber-400 font-bold">0 actions pending</span>
+          </div>
+        </div>
+
+        <div class="space-y-2 pt-2 border-t border-workshop-800">
+          <button onclick="saveSheetSettings()" class="w-full bg-orange-600 hover:bg-orange-500 py-2 rounded-xl text-white font-bold text-xs transition active:scale-95">
+            Save Settings & Test Ping
+          </button>
+          <button onclick="triggerQueueFlush()" class="w-full bg-workshop-800 hover:bg-workshop-700 py-2 rounded-xl text-cyan-400 font-bold text-xs border border-workshop-700 transition active:scale-95">
+            Flush Pending Queue Now
+          </button>
+        </div>
+      </div>
     </div>
+
+    <!-- TOAST NOTIFICATION CONTAINER -->
+    <div id="toastBox" class="fixed bottom-16 left-1/2 -translate-x-1/2 z-50 pointer-events-none transition-all duration-300 opacity-0 translate-y-3">
+      <div id="toastText" class="bg-slate-900/95 border border-slate-700 text-white px-4 py-2 rounded-xl text-xs font-semibold shadow-2xl flex items-center gap-2">
+        <i class="fa-solid fa-circle-check text-emerald-400"></i>
+        <span>Notification</span>
+      </div>
+    </div>
+
   </div>
 
   <script>
-    // Full 176 Catalog
-    const INITIAL_CATALOG = [
+    // EXACT 176 INVENTORY ITEMS
+    const DEFAULT_CATALOG = [
       { id: "itm_1", name: "B AF121612 OIL FILTER", remaining: 125, cost: 180 },
       { id: "itm_2", name: "B 24151182 BRAKE SHOES SPRING", remaining: 100, cost: 25 },
       { id: "itm_3", name: "B JH511207 RACKER ARM", remaining: 75, cost: 320 },
@@ -481,38 +565,133 @@
       { id: "itm_176", name: "B 39193815 NUT HEXAGON", remaining: -10, cost: 20 }
     ];
 
-    let inventory = JSON.parse(JSON.stringify(INITIAL_CATALOG));
-
-    // Sales by date
-    let salesHistory = {
-      "06-Nov": { "itm_1": 3, "itm_13": 2, "itm_39": 1 },
-      "07-Nov": {}
-    };
-
-    let inwardHistory = { "itm_1": 25 };
+    const STORAGE_KEY_INVENTORY = 'am_stock_v9';
+    const STORAGE_KEY_LOGS = 'am_logs_v9';
+    const STORAGE_KEY_QUEUE = 'am_queue_v9';
+    const STORAGE_KEY_URL = 'am_sheet_url';
+    const STORAGE_KEY_TAB = 'am_sheet_tab';
 
     const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
     const MONTHS_SHORT = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
     // App State
-    let activeDateStr = "07-Nov";
-    let activeDateFullLabel = "Today (07-Nov-2026)";
-    let calYear = 2026;
-    let calMonth = 10; // November
+    let inventory = [];
+    let salesLogs = [];
+    let offlineQueue = [];
+    let sheetUrl = "";
+    let sheetTab = "dec";
+    let isFlushing = false;
+
+    let workingDate = new Date();
+    let calYear = workingDate.getFullYear();
+    let calMonth = workingDate.getMonth();
+
     let activeFilter = 'all';
     let activeSort = 'default';
     let searchQuery = '';
     let selectedInwardId = null;
-    let currentActiveTab = 'counter';
+
+    // PWA Install Event Handler
+    let deferredPrompt = null;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      document.getElementById('pwaInstallBanner').classList.remove('hidden');
+    });
+
+    function promptAppInstall() {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then((choiceResult) => {
+        if (choiceResult.outcome === 'accepted') {
+          showToast('A.M Analyser installed successfully!');
+        }
+        deferredPrompt = null;
+        document.getElementById('pwaInstallBanner').classList.add('hidden');
+      });
+    }
+
+    function dismissInstallBanner() {
+      document.getElementById('pwaInstallBanner').classList.add('hidden');
+    }
+
+    // Register Inline Service Worker Blob
+    if ('serviceWorker' in navigator) {
+      const swCode = `
+        const CACHE_NAME = 'am-analyser-v9';
+        self.addEventListener('install', (e) => { self.skipWaiting(); });
+        self.addEventListener('activate', (e) => { e.waitUntil(clients.claim()); });
+        self.addEventListener('fetch', (e) => {
+          if (e.request.method === 'GET' && e.request.url.startsWith('http')) {
+            e.respondWith(
+              fetch(e.request).catch(() => caches.match(e.request))
+            );
+          }
+        });
+      `;
+      const blob = new Blob([swCode], { type: 'application/javascript' });
+      navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(() => {});
+    }
+
+    // Storage Management
+    function loadStorage() {
+      try {
+        const storedInv = localStorage.getItem(STORAGE_KEY_INVENTORY);
+        if (storedInv) {
+          inventory = JSON.parse(storedInv);
+        } else {
+          inventory = JSON.parse(JSON.stringify(DEFAULT_CATALOG));
+        }
+
+        const storedLogs = localStorage.getItem(STORAGE_KEY_LOGS);
+        salesLogs = storedLogs ? JSON.parse(storedLogs) : [];
+
+        const storedQueue = localStorage.getItem(STORAGE_KEY_QUEUE);
+        offlineQueue = storedQueue ? JSON.parse(storedQueue) : [];
+
+        sheetUrl = localStorage.getItem(STORAGE_KEY_URL) || "";
+        sheetTab = localStorage.getItem(STORAGE_KEY_TAB) || "dec";
+      } catch (err) {
+        inventory = JSON.parse(JSON.stringify(DEFAULT_CATALOG));
+        salesLogs = [];
+        offlineQueue = [];
+      }
+    }
+
+    function saveStorage() {
+      try {
+        localStorage.setItem(STORAGE_KEY_INVENTORY, JSON.stringify(inventory));
+        localStorage.setItem(STORAGE_KEY_LOGS, JSON.stringify(salesLogs));
+        localStorage.setItem(STORAGE_KEY_QUEUE, JSON.stringify(offlineQueue));
+        localStorage.setItem(STORAGE_KEY_URL, sheetUrl);
+        localStorage.setItem(STORAGE_KEY_TAB, sheetTab);
+      } catch (err) {}
+    }
+
+    // Date Utilities
+    function formatSheetDate(d) {
+      const day = d.getDate() < 10 ? '0' + d.getDate() : d.getDate();
+      return `${day}-${MONTHS_SHORT[d.getMonth()]}`;
+    }
+
+    function formatDisplayDate(d) {
+      const today = new Date();
+      const isToday = (d.toDateString() === today.toDateString());
+      const yesterday = new Date();
+      yesterday.setDate(today.getDate() - 1);
+      const isYesterday = (d.toDateString() === yesterday.toDateString());
+
+      const dStr = `${d.getDate() < 10 ? '0' + d.getDate() : d.getDate()}-${MONTHS_SHORT[d.getMonth()]}-${d.getFullYear()}`;
+      if (isToday) return `Today (${dStr})`;
+      if (isYesterday) return `Yesterday (${dStr})`;
+      return `${dStr} (Custom)`;
+    }
 
     // Tab Navigation
     function switchTab(tabId) {
-      currentActiveTab = tabId;
-
       const tabCounter = document.getElementById('tabCounter');
       const tabLogs = document.getElementById('tabLogs');
       const tabInventory = document.getElementById('tabInventory');
-
       const btnCounter = document.getElementById('navBtnCounter');
       const btnLogs = document.getElementById('navBtnLogs');
       const btnInventory = document.getElementById('navBtnInventory');
@@ -528,7 +707,7 @@
       if (tabId === 'counter') {
         if (tabCounter) tabCounter.classList.remove('hidden');
         if (btnCounter) btnCounter.className = "flex flex-col items-center gap-0.5 text-orange-400 font-bold transition active:scale-95";
-        renderInventoryList();
+        renderCounterList();
       } else if (tabId === 'logs') {
         if (tabLogs) tabLogs.classList.remove('hidden');
         if (btnLogs) btnLogs.className = "flex flex-col items-center gap-0.5 text-orange-400 font-bold transition active:scale-95";
@@ -540,36 +719,151 @@
       }
     }
 
-    // Step Sale Qty Counter (+ / -)
-    function stepQty(itemId, delta) {
+    // Google Sheets Queue & Push Engine
+    function enqueueSheetAction(record) {
+      offlineQueue.push(record);
+      saveStorage();
+      updateSyncStatusUI();
+      triggerQueueFlush();
+    }
+
+    function updateSyncStatusUI() {
+      const dot = document.getElementById('syncStatusDot');
+      const txt = document.getElementById('syncStatusText');
+      const countEl = document.getElementById('modalQueueCount');
+
+      if (countEl) countEl.innerText = `${offlineQueue.length} actions pending`;
+
+      if (!sheetUrl) {
+        dot.className = "w-2.5 h-2.5 rounded-full bg-rose-500 shadow-sm shadow-rose-500/50";
+        txt.innerText = "No URL";
+        txt.className = "text-rose-400 font-semibold";
+        return;
+      }
+
+      if (offlineQueue.length > 0) {
+        dot.className = "w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse shadow-sm shadow-amber-400/50";
+        txt.innerText = `${offlineQueue.length} Pending`;
+        txt.className = "text-amber-300 font-semibold";
+      } else {
+        dot.className = "w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-sm shadow-emerald-400/50";
+        txt.innerText = "Synced";
+        txt.className = "text-emerald-400 font-semibold";
+      }
+    }
+
+    async function triggerQueueFlush() {
+      if (isFlushing || offlineQueue.length === 0 || !sheetUrl) return;
+      if (!navigator.onLine) {
+        updateSyncStatusUI();
+        return;
+      }
+
+      isFlushing = true;
+      const dot = document.getElementById('syncStatusDot');
+      const txt = document.getElementById('syncStatusText');
+      if (dot) dot.className = "w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse shadow-sm shadow-amber-400/50";
+      if (txt) {
+        txt.innerText = "Syncing...";
+        txt.className = "text-amber-300 font-bold";
+      }
+
+      while (offlineQueue.length > 0) {
+        const item = offlineQueue[0];
+        const payload = {
+          action: item.type === 'IN' ? 'inward' : 'sale',
+          itemName: item.itemName,
+          type: item.type,
+          quantity: item.quantity,
+          unitCost: item.unitCost,
+          dateLabel: item.dateLabel,
+          sheetTab: sheetTab
+        };
+
+        try {
+          // Send via text/plain in no-cors to prevent preflight OPTIONS blocks
+          await fetch(sheetUrl, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify(payload)
+          });
+
+          // Successfully passed to browser network stack
+          offlineQueue.shift();
+          saveStorage();
+        } catch (err) {
+          break; // Stop loop and retry later
+        }
+      }
+
+      isFlushing = false;
+      updateSyncStatusUI();
+    }
+
+    async function pushAllItemsToSheet() {
+      if (!sheetUrl) {
+        openSyncModal();
+        showToast("Please enter your Apps Script Web App URL first!");
+        return;
+      }
+
+      showToast("Pushing all 176 items to Google Sheet...");
+      const payload = {
+        action: "bulk_sync",
+        sheetTab: sheetTab,
+        items: inventory.map(i => ({ name: i.name, remaining: i.remaining, cost: i.cost }))
+      };
+
+      try {
+        await fetch(sheetUrl, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify(payload)
+        });
+        showToast("Snapshot sent! Check your Google Sheet.");
+      } catch (err) {
+        showToast("Network error. Added to queue.");
+      }
+    }
+
+    // Step Quantity in Counter (+ / -)
+    function stepCounterQty(itemId, delta) {
       const item = inventory.find(i => i.id === itemId);
       if (!item || item.remaining <= 0) return;
 
       const input = document.getElementById(`qty_${itemId}`);
       if (!input) return;
 
-      let currentVal = parseInt(input.value, 10) || 1;
-      let nextVal = currentVal + delta;
+      let currentVal = parseInt(input.value, 10);
+      let nextVal;
+
+      if (isNaN(currentVal) || input.value.trim() === '') {
+        nextVal = delta > 0 ? 1 : 1;
+      } else {
+        nextVal = currentVal + delta;
+      }
 
       if (nextVal < 1) nextVal = 1;
       if (nextVal > item.remaining) {
         nextVal = item.remaining;
-        showToast(`Stock limit reached: only ${item.remaining} available!`);
+        showToast(`Stock limit: only ${item.remaining} pcs available!`);
       }
 
       input.value = nextVal;
     }
 
-    // Validate Typed Quantity
-    function validateInput(itemId, val) {
+    function validateSaleInput(itemId, val) {
       const item = inventory.find(i => i.id === itemId);
       if (!item) return;
 
       const input = document.getElementById(`qty_${itemId}`);
-      let num = parseInt(val, 10);
+      if (val === '' || val === undefined) return; // Allow user to type freely
 
+      let num = parseInt(val, 10);
       if (isNaN(num) || num < 1) {
-        input.value = 1;
+        input.value = '';
         return;
       }
 
@@ -579,7 +873,7 @@
       }
     }
 
-    // Out / Sell Execution
+    // Execute Out / Sell Action
     function executeSale(itemId) {
       const item = inventory.find(i => i.id === itemId);
       if (!item) return;
@@ -590,31 +884,47 @@
       }
 
       const input = document.getElementById(`qty_${itemId}`);
-      const qty = parseInt(input.value, 10) || 1;
+      let qty = 1; // Default to 1 pc if left blank
+      if (input && input.value.trim() !== '') {
+        const parsed = parseInt(input.value, 10);
+        if (!isNaN(parsed) && parsed > 0) {
+          qty = parsed;
+        }
+      }
 
       if (qty > item.remaining) {
         showToast(`Only ${item.remaining} pcs in stock!`);
         return;
       }
 
+      // Decrement stock
       item.remaining -= qty;
 
-      if (!salesHistory[activeDateStr]) {
-        salesHistory[activeDateStr] = {};
-      }
-      const existing = salesHistory[activeDateStr][itemId] || 0;
-      salesHistory[activeDateStr][itemId] = existing + qty;
+      const logRecord = {
+        id: 'log_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+        itemId: item.id,
+        itemName: item.name,
+        type: 'OUT',
+        quantity: qty,
+        unitCost: item.cost,
+        dateLabel: formatSheetDate(workingDate),
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      };
 
-      input.value = item.remaining > 0 ? 1 : 0;
+      salesLogs.unshift(logRecord);
+      enqueueSheetAction(logRecord);
+      saveStorage();
+
+      if (input) input.value = '';
 
       updateFilterCounts();
-      renderInventoryList();
+      renderCounterList();
       updateHeaderStats();
 
       showToast(`Sold ${qty} pcs of ${item.name}!`);
     }
 
-    // Inward Stock Modal Handlers
+    // Inward Modal & Action
     function openInward(itemId) {
       const item = inventory.find(i => i.id === itemId);
       if (!item) return;
@@ -648,48 +958,68 @@
 
       const qty = parseInt(document.getElementById('inwardQtyInput').value, 10) || 1;
       item.remaining += qty;
-      inwardHistory[item.id] = (inwardHistory[item.id] || 0) + qty;
+
+      const logRecord = {
+        id: 'log_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+        itemId: item.id,
+        itemName: item.name,
+        type: 'IN',
+        quantity: qty,
+        unitCost: item.cost,
+        dateLabel: formatSheetDate(workingDate),
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      };
+
+      salesLogs.unshift(logRecord);
+      enqueueSheetAction(logRecord);
+      saveStorage();
 
       closeInwardModal();
       updateFilterCounts();
-      renderInventoryList();
+      renderCounterList();
+      updateHeaderStats();
+
       showToast(`Added +${qty} pcs to ${item.name}!`);
     }
 
-    // Header Stats Calculator (Strictly for activeDateStr)
+    // Daily Header Stats (Calculates strictly for workingDate)
     function updateHeaderStats() {
-      const daySales = salesHistory[activeDateStr] || {};
-      let totalPcs = 0;
-      let totalAmount = 0;
+      const targetLabel = formatSheetDate(workingDate);
+      let dayRev = 0;
+      let daySoldPcs = 0;
 
-      for (const [id, count] of Object.entries(daySales)) {
-        const item = inventory.find(i => i.id === id);
-        if (item) {
-          totalPcs += count;
-          totalAmount += (count * item.cost);
+      salesLogs.forEach(l => {
+        if (l.dateLabel === targetLabel && l.type === 'OUT') {
+          daySoldPcs += l.quantity;
+          dayRev += (l.quantity * l.unitCost);
         }
-      }
+      });
 
-      document.getElementById('statSalesAmount').innerText = `₹${Math.round(totalAmount).toLocaleString('en-IN')}`;
-      document.getElementById('statItemsSold').innerText = `${totalPcs} pcs`;
+      document.getElementById('statSalesAmount').innerText = `₹${Math.round(dayRev).toLocaleString('en-IN')}`;
+      document.getElementById('statItemsSold').innerText = `${daySoldPcs} pcs`;
 
-      const isToday = (activeDateStr === "07-Nov");
-      document.getElementById('labelSalesTitle').innerText = isToday ? "Today's Sales" : `${activeDateStr} Sales`;
-      document.getElementById('labelItemsTitle').innerText = isToday ? "Today's Sold" : `Sold (${activeDateStr})`;
-      document.getElementById('currentDateBadge').innerText = activeDateFullLabel;
+      const today = new Date();
+      const isToday = (workingDate.toDateString() === today.toDateString());
+
+      document.getElementById('labelSalesTitle').innerText = isToday ? "Today's Sales" : `${targetLabel} Sales`;
+      document.getElementById('labelItemsTitle').innerText = isToday ? "Today's Sold" : `Sold (${targetLabel})`;
+      document.getElementById('currentDateBadge').innerText = formatDisplayDate(workingDate);
     }
 
-    // Set Date Shortcuts (Today / Yesterday)
     function setQuickDate(type) {
-      if (type === 'today') {
-        activeDateStr = "07-Nov";
-        activeDateFullLabel = "Today (07-Nov-2026)";
-      } else {
-        activeDateStr = "06-Nov";
-        activeDateFullLabel = "Yesterday (06-Nov-2026)";
+      const d = new Date();
+      if (type === 'yesterday') {
+        d.setDate(d.getDate() - 1);
       }
+      workingDate = d;
+      calYear = workingDate.getFullYear();
+      calMonth = workingDate.getMonth();
+
       updateHeaderStats();
-      showToast(`Operating date switched to ${activeDateFullLabel}`);
+      if (!document.getElementById('tabLogs').classList.contains('hidden')) {
+        renderDailyLogs();
+      }
+      showToast(`Operating date set: ${formatDisplayDate(workingDate)}`);
     }
 
     // Calendar Picker Modal Logic
@@ -725,8 +1055,8 @@
 
       for (let d = 1; d <= daysInMonth; d++) {
         const btn = document.createElement('button');
-        const formatted = `${d < 10 ? '0' + d : d}-${MONTHS_SHORT[calMonth]}`;
-        const isSelected = (activeDateStr === formatted);
+        const targetDate = new Date(calYear, calMonth, d);
+        const isSelected = (targetDate.toDateString() === workingDate.toDateString());
 
         btn.type = "button";
         btn.innerText = d;
@@ -735,18 +1065,20 @@
           : "h-8 rounded-lg bg-workshop-800 hover:bg-workshop-700 text-slate-200 font-num text-xs flex items-center justify-center border border-workshop-700/60 transition";
 
         btn.onclick = () => {
-          activeDateStr = formatted;
-          activeDateFullLabel = (formatted === "07-Nov") ? "Today (07-Nov-2026)" : `${formatted} (Custom)`;
+          workingDate = targetDate;
           closeCalendarModal();
           updateHeaderStats();
-          showToast(`Operating date set to: ${formatted}`);
+          if (!document.getElementById('tabLogs').classList.contains('hidden')) {
+            renderDailyLogs();
+          }
+          showToast(`Operating date set: ${formatSheetDate(workingDate)}`);
         };
 
         grid.appendChild(btn);
       }
     }
 
-    // Dynamic Filter Badges Calculator
+    // Filter Badges & Search
     function updateFilterCounts() {
       const inCount = inventory.filter(i => i.remaining > 0).length;
       const lowCount = inventory.filter(i => i.remaining > 0 && i.remaining <= 5).length;
@@ -755,25 +1087,6 @@
       document.getElementById('countInStock').innerText = inCount;
       document.getElementById('countLowStock').innerText = lowCount;
       document.getElementById('countOutStock').innerText = outCount;
-    }
-
-    // Sort Dropdown Change Handler
-    function handleSortChange(sortVal) {
-      activeSort = sortVal;
-      renderInventoryList();
-      showToast(`Sorted: ${document.getElementById('sortSelect').selectedOptions[0].text}`);
-    }
-
-    // Search and Filter Controls
-    function handleSearch(val) {
-      searchQuery = val.trim();
-      document.getElementById('clearSearchBtn').classList.toggle('hidden', searchQuery.length === 0);
-      renderInventoryList();
-    }
-
-    function clearSearch() {
-      document.getElementById('searchInput').value = '';
-      handleSearch('');
     }
 
     function setFilter(flt) {
@@ -787,12 +1100,30 @@
           btn.className = "px-2.5 py-1 rounded-lg bg-workshop-800 text-slate-300 font-semibold border border-workshop-700 shrink-0 transition";
         }
       }
-      renderInventoryList();
+      renderCounterList();
     }
 
-    // Render Items in Counter List
-    function renderInventoryList() {
-      const container = document.getElementById('itemsContainer');
+    function handleSearch(val) {
+      searchQuery = val.trim();
+      document.getElementById('clearSearchBtn').classList.toggle('hidden', searchQuery.length === 0);
+      renderCounterList();
+    }
+
+    function clearSearch() {
+      document.getElementById('searchInput').value = '';
+      handleSearch('');
+    }
+
+    function handleSortChange(sortVal) {
+      activeSort = sortVal;
+      renderCounterList();
+    }
+
+    // Render Counter Items List
+    function renderCounterList() {
+      const container = document.getElementById('counterItemsList');
+      if (!container) return;
+
       let filtered = inventory.filter(item => {
         if (searchQuery) {
           const matchName = item.name.toLowerCase().includes(searchQuery.toLowerCase());
@@ -804,7 +1135,6 @@
         return true;
       });
 
-      // Apply Sorting
       if (activeSort === 'stock_desc') {
         filtered.sort((a, b) => b.remaining - a.remaining);
       } else if (activeSort === 'stock_asc') {
@@ -821,7 +1151,7 @@
         container.innerHTML = `
           <div class="p-8 text-center text-slate-500 text-xs">
             <i class="fa-solid fa-magnifying-glass text-2xl mb-2 block"></i>
-            No items match your filter criteria.
+            No parts match your filter criteria.
           </div>
         `;
         return;
@@ -859,19 +1189,20 @@
 
             <div class="flex items-center gap-2 pt-1 border-t border-workshop-800">
               <div class="flex items-center bg-workshop-900 border border-workshop-700 rounded-xl overflow-hidden shrink-0">
-                <button type="button" onclick="stepQty('${item.id}', -1)" ${isOutOfStock ? 'disabled' : ''} 
+                <button type="button" onclick="stepCounterQty('${item.id}', -1)" ${isOutOfStock ? 'disabled' : ''} 
                   class="w-8 h-8 flex items-center justify-center text-slate-300 hover:bg-workshop-800 active:scale-95 text-xs font-bold disabled:opacity-40">
                   <i class="fa-solid fa-minus"></i>
                 </button>
-                <input type="number" id="qty_${item.id}" value="${isOutOfStock ? 0 : 1}" min="1" max="${item.remaining}" 
-                  oninput="validateInput('${item.id}', this.value)" ${isOutOfStock ? 'disabled' : ''}
-                  class="w-10 text-center bg-transparent text-white font-num font-bold text-xs focus:outline-none disabled:text-slate-500">
-                <button type="button" onclick="stepQty('${item.id}', 1)" ${isOutOfStock ? 'disabled' : ''} 
+                <input type="number" id="qty_${item.id}" value="" placeholder="${isOutOfStock ? '0' : '1'}" min="1" max="${item.remaining}" 
+                  oninput="validateSaleInput('${item.id}', this.value)" ${isOutOfStock ? 'disabled' : ''}
+                  class="w-10 text-center bg-transparent text-white placeholder-slate-500 font-num font-bold text-xs focus:outline-none disabled:text-slate-500">
+                <button type="button" onclick="stepCounterQty('${item.id}', 1)" ${isOutOfStock ? 'disabled' : ''} 
                   class="w-8 h-8 flex items-center justify-center text-slate-300 hover:bg-workshop-800 active:scale-95 text-xs font-bold disabled:opacity-40">
                   <i class="fa-solid fa-plus"></i>
                 </button>
               </div>
 
+              <!-- Direct Single Quick Out/Sell Action Button -->
               <button type="button" onclick="executeSale('${item.id}')" ${isOutOfStock ? 'disabled' : ''} 
                 class="flex-1 py-2 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition active:scale-95 shadow-sm
                 ${isOutOfStock ? 'bg-workshop-800 text-slate-500 border border-workshop-700 cursor-not-allowed' : 'bg-orange-600 hover:bg-orange-500 text-white shadow-orange-600/30'}">
@@ -884,7 +1215,86 @@
       }).join('');
     }
 
-    // Render Master Inventory Screen
+    // Render Daily Logs (Consolidated Summary View)
+    function renderDailyLogs() {
+      const container = document.getElementById('logsContainer');
+      const title = document.getElementById('dailyLogsDateTitle');
+      const revEl = document.getElementById('logSummaryRevenue');
+      const pcsEl = document.getElementById('logSummaryPcs');
+      if (!container) return;
+
+      const dateLabel = formatSheetDate(workingDate);
+      if (title) title.innerText = `Activity for ${dateLabel}`;
+
+      const dayLogs = salesLogs.filter(l => l.dateLabel === dateLabel);
+
+      if (dayLogs.length === 0) {
+        if (revEl) revEl.innerText = "₹0";
+        if (pcsEl) pcsEl.innerText = "0 pcs";
+        container.innerHTML = `
+          <div class="p-8 text-center bg-workshop-950/40 rounded-2xl border border-workshop-800/80 text-slate-500 text-xs space-y-2">
+            <i class="fa-solid fa-clipboard-list text-3xl text-slate-600 block"></i>
+            <span>No activity recorded for ${dateLabel}.</span>
+          </div>
+        `;
+        return;
+      }
+
+      const grouped = {};
+      let totalPcs = 0;
+      let totalRev = 0;
+
+      dayLogs.forEach(entry => {
+        if (!grouped[entry.itemId]) {
+          grouped[entry.itemId] = {
+            itemName: entry.itemName,
+            unitCost: entry.unitCost,
+            totalOutQty: 0,
+            totalInQty: 0,
+            times: []
+          };
+        }
+        if (entry.type === 'OUT') {
+          grouped[entry.itemId].totalOutQty += entry.quantity;
+          totalPcs += entry.quantity;
+          totalRev += (entry.quantity * entry.unitCost);
+        } else {
+          grouped[entry.itemId].totalInQty += entry.quantity;
+        }
+        grouped[entry.itemId].times.push(`${entry.type} ${entry.quantity} @ ${entry.timestamp}`);
+      });
+
+      if (revEl) revEl.innerText = `₹${Math.round(totalRev).toLocaleString('en-IN')}`;
+      if (pcsEl) pcsEl.innerText = `${totalPcs} pcs`;
+
+      container.innerHTML = Object.values(grouped).map(g => {
+        const outSum = g.totalOutQty;
+        const inSum = g.totalInQty;
+        const itemTotalAmount = outSum * g.unitCost;
+
+        return `
+          <div class="bg-workshop-950/70 border border-workshop-700/80 rounded-2xl p-3 space-y-1.5 shadow-sm">
+            <div class="flex items-center justify-between gap-2">
+              <h4 class="text-xs font-bold text-slate-100 truncate">${g.itemName}</h4>
+              <span class="text-xs font-black text-emerald-400 font-num">₹${Math.round(itemTotalAmount).toLocaleString('en-IN')}</span>
+            </div>
+            
+            <div class="flex flex-wrap items-center gap-2 text-[11px] font-mono">
+              ${outSum > 0 ? `<span class="text-amber-400 font-bold">${outSum} pcs sold</span>` : ''}
+              ${inSum > 0 ? `<span class="text-cyan-400 font-bold">+${inSum} pcs inward</span>` : ''}
+              <span class="text-slate-600">&bull;</span>
+              <span class="text-slate-400">@ ₹${g.unitCost}</span>
+            </div>
+
+            <div class="text-[9px] text-slate-500 font-mono truncate">
+              ${g.times.join(' &bull; ')}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Render Master Inventory View
     function renderMasterInventory() {
       const container = document.getElementById('masterInventoryContainer');
       if (!container) return;
@@ -892,7 +1302,6 @@
       container.innerHTML = inventory.map((item, idx) => {
         const isOutOfStock = item.remaining <= 0;
         const isLowStock = item.remaining > 0 && item.remaining <= 5;
-        const inward = inwardHistory[item.id] || 0;
 
         return `
           <div class="bg-workshop-950/70 border border-workshop-700/80 rounded-2xl p-3 flex items-center justify-between gap-3 shadow-sm">
@@ -901,12 +1310,10 @@
                 <span class="text-[10px] text-slate-500 font-mono font-bold">#${idx + 1}</span>
                 <h4 class="text-xs font-bold text-slate-100 truncate">${item.name}</h4>
               </div>
-              <div class="flex flex-wrap items-center gap-2 mt-1 text-[11px] font-mono">
+              <div class="flex items-center gap-2 mt-1 text-[11px] font-mono">
                 <span class="text-emerald-400 font-bold">₹${item.cost}</span>
                 <span class="text-slate-600">&bull;</span>
                 <span class="text-slate-400">Stock: <b class="${isOutOfStock ? 'text-rose-400' : isLowStock ? 'text-amber-400' : 'text-slate-200'}">${item.remaining} pcs</b></span>
-                <span class="text-slate-600">&bull;</span>
-                <span class="text-cyan-400">+${inward} in</span>
               </div>
             </div>
             <button onclick="openInward('${item.id}')" class="px-2.5 py-1.5 rounded-lg bg-workshop-800 hover:bg-cyan-950 text-cyan-400 border border-workshop-700 text-xs font-bold shrink-0 transition active:scale-95">
@@ -917,61 +1324,43 @@
       }).join('');
     }
 
-    // Render Daily Activity Logs Screen
-    function renderDailyLogs() {
-      const container = document.getElementById('logsContainer');
-      const title = document.getElementById('dailyLogsDateTitle');
-      const revEl = document.getElementById('logSummaryRevenue');
-      const pcsEl = document.getElementById('logSummaryPcs');
-      if (!container) return;
+    // Sync Settings Modal
+    function openSyncModal() {
+      document.getElementById('sheetUrlInput').value = sheetUrl;
+      document.getElementById('sheetTabInput').value = sheetTab;
+      document.getElementById('modalQueueCount').innerText = `${offlineQueue.length} actions pending`;
+      document.getElementById('syncModal').classList.remove('hidden');
+    }
 
-      if (title) title.innerText = `Activity for ${activeDateStr}`;
+    function closeSyncModal() {
+      document.getElementById('syncModal').classList.add('hidden');
+    }
 
-      const daySales = salesHistory[activeDateStr] || {};
-      const entries = Object.entries(daySales).filter(([_, qty]) => qty > 0);
+    async function saveSheetSettings() {
+      sheetUrl = document.getElementById('sheetUrlInput').value.trim();
+      sheetTab = document.getElementById('sheetTabInput').value.trim() || "dec";
+      saveStorage();
+      closeSyncModal();
+      updateSyncStatusUI();
 
-      let totalPcs = 0;
-      let totalRev = 0;
-
-      if (entries.length === 0) {
-        if (revEl) revEl.innerText = "₹0";
-        if (pcsEl) pcsEl.innerText = "0 pcs";
-        container.innerHTML = `
-          <div class="p-8 text-center bg-workshop-950/40 rounded-2xl border border-workshop-800/80 text-slate-500 text-xs space-y-2">
-            <i class="fa-solid fa-clipboard-list text-3xl text-slate-600 block"></i>
-            <span>No sales recorded yet for ${activeDateStr}.</span>
-          </div>
-        `;
+      if (!sheetUrl) {
+        showToast("Settings saved (No URL entered).");
         return;
       }
 
-      container.innerHTML = entries.map(([id, qty]) => {
-        const item = inventory.find(i => i.id === id);
-        if (!item) return '';
-        const itemRev = qty * item.cost;
-        totalPcs += qty;
-        totalRev += itemRev;
-
-        return `
-          <div class="bg-workshop-950/70 border border-workshop-700/80 rounded-2xl p-3 flex items-center justify-between gap-3 shadow-sm">
-            <div class="min-w-0">
-              <h4 class="text-xs font-bold text-slate-100 truncate">${item.name}</h4>
-              <div class="flex items-center gap-2 mt-1 text-[11px] font-mono">
-                <span class="text-amber-400 font-bold">${qty} pcs sold</span>
-                <span class="text-slate-600">&bull;</span>
-                <span class="text-slate-400">@ ₹${item.cost}</span>
-              </div>
-            </div>
-            <div class="text-right shrink-0 font-mono">
-              <span class="text-xs font-black text-emerald-400 block">₹${itemRev.toLocaleString('en-IN')}</span>
-              <span class="text-[10px] text-slate-500">Recorded</span>
-            </div>
-          </div>
-        `;
-      }).join('');
-
-      if (revEl) revEl.innerText = `₹${totalRev.toLocaleString('en-IN')}`;
-      if (pcsEl) pcsEl.innerText = `${totalPcs} pcs`;
+      showToast("Testing connection with Google Sheets...");
+      try {
+        await fetch(sheetUrl, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action: "ping", sheetTab: sheetTab })
+        });
+        showToast("Connected to Google Sheets successfully!");
+        triggerQueueFlush();
+      } catch (err) {
+        showToast("Connection failed. Check your Web App URL.");
+      }
     }
 
     function showToast(msg) {
@@ -981,13 +1370,34 @@
       box.classList.remove('opacity-0', 'translate-y-3');
       setTimeout(() => {
         box.classList.add('opacity-0', 'translate-y-3');
-      }, 2400);
+      }, 2500);
     }
 
-    // Initial Render
-    updateFilterCounts();
-    renderInventoryList();
-    updateHeaderStats();
+    // Background Watchers for Midnight Rollover & Connectivity
+    window.addEventListener('online', () => {
+      showToast("Internet connected! Flushing queue...");
+      triggerQueueFlush();
+    });
+
+    window.addEventListener('focus', () => {
+      // Midnight check
+      const now = new Date();
+      if (workingDate.toDateString() !== now.toDateString() && document.getElementById('currentDateBadge').innerText.includes('Today')) {
+        workingDate = now;
+        updateHeaderStats();
+        renderCounterList();
+      }
+      triggerQueueFlush();
+    });
+
+    // App Initialization
+    window.onload = function() {
+      loadStorage();
+      updateFilterCounts();
+      renderCounterList();
+      updateHeaderStats();
+      updateSyncStatusUI();
+    };
   </script>
 </body>
 </html>
