@@ -438,10 +438,9 @@
               class="w-full bg-workshop-950 border border-workshop-700 rounded-xl px-2.5 py-2 text-white font-mono text-[11px] focus:outline-none focus:border-orange-500">
           </div>
 
-          <div>
-            <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wide block mb-1">Active Monthly Sheet Tab (Auto-Detected)</label>
-            <input type="text" id="sheetTabInput" value="nov" placeholder="nov"
-              class="w-full bg-workshop-950 border border-workshop-700 rounded-xl px-2.5 py-2 text-white font-mono text-xs lowercase focus:outline-none focus:border-orange-500">
+          <div class="bg-workshop-950/80 border border-workshop-800 rounded-xl p-2.5 text-[11px] text-slate-300 flex items-center justify-between">
+            <span>Auto-routed Month Tab:</span>
+            <span id="modalAutoMonthLabel" class="font-mono font-bold text-amber-400 uppercase">nov</span>
           </div>
 
           <div class="flex items-center justify-between pt-1 text-[11px] font-mono">
@@ -667,7 +666,6 @@
     const STORAGE_KEY_LOGS = 'am_logs_v14';
     const STORAGE_KEY_QUEUE = 'am_queue_v14';
     const STORAGE_KEY_URL = 'am_sheet_url';
-    const STORAGE_KEY_TAB = 'am_sheet_tab';
 
     const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
     const MONTHS_SHORT = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -677,10 +675,9 @@
     let salesLogs = [];
     let offlineQueue = [];
     let sheetUrl = "";
-    let workingDate = new Date();
-    let sheetTab = MONTHS_SHORT[workingDate.getMonth()].toLowerCase();
     let isFlushing = false;
 
+    let workingDate = new Date();
     let calYear = workingDate.getFullYear();
     let calMonth = workingDate.getMonth();
 
@@ -689,6 +686,11 @@
     let searchQuery = '';
     let selectedInwardId = null;
     let selectedUndoLogId = null;
+
+    // Automatically resolves the 3-letter lowercase sheet tab name from any Date (e.g., 'nov', 'dec', 'jan')
+    function getAutoMonthTab(d) {
+      return MONTHS_SHORT[d.getMonth()].toLowerCase();
+    }
 
     // PWA Install Event Handler
     let deferredPrompt = null;
@@ -734,7 +736,7 @@
       navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(() => {});
     }
 
-    // Storage Management (Wipes legacy keys cleanly while keeping Sheet URL)
+    // Storage Management
     function loadStorage() {
       try {
         ['v5', 'v8_nocart', 'v9', 'v10', 'v11', 'v12', 'v13'].forEach(ver => {
@@ -757,7 +759,6 @@
         offlineQueue = storedQueue ? JSON.parse(storedQueue) : [];
 
         sheetUrl = localStorage.getItem(STORAGE_KEY_URL) || "";
-        sheetTab = getMonthTabForDate(workingDate);
       } catch (err) {
         inventory = JSON.parse(JSON.stringify(DEFAULT_CATALOG));
         salesLogs = [];
@@ -771,27 +772,10 @@
         localStorage.setItem(STORAGE_KEY_LOGS, JSON.stringify(salesLogs));
         localStorage.setItem(STORAGE_KEY_QUEUE, JSON.stringify(offlineQueue));
         localStorage.setItem(STORAGE_KEY_URL, sheetUrl);
-        localStorage.setItem(STORAGE_KEY_TAB, sheetTab);
       } catch (err) {}
     }
 
-    // Date & Monthly Tab Utilities
-    function getMonthTabForDate(d) {
-      return MONTHS_SHORT[d.getMonth()].toLowerCase(); // e.g., 'nov', 'dec', 'jan'
-    }
-
-    function syncMonthTabWithDate(d, autoPull = false) {
-      const nextTab = getMonthTabForDate(d);
-      const tabChanged = (sheetTab !== nextTab);
-      sheetTab = nextTab;
-      saveStorage();
-      const tabInp = document.getElementById('sheetTabInput');
-      if (tabInp) tabInp.value = sheetTab;
-      if (tabChanged && autoPull && sheetUrl && navigator.onLine) {
-        pullFromSheet(true);
-      }
-    }
-
+    // Date Utilities
     function formatSheetDate(d) {
       const day = d.getDate() < 10 ? '0' + d.getDate() : d.getDate();
       return `${day}-${MONTHS_SHORT[d.getMonth()]}`;
@@ -875,7 +859,7 @@
       } else {
         if (dot) dot.className = "w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-sm shadow-emerald-400/50";
         if (txt) {
-          txt.innerText = `Synced (${sheetTab.toUpperCase()})`;
+          txt.innerText = "Synced";
           txt.className = "text-emerald-400 font-semibold";
         }
       }
@@ -899,13 +883,7 @@
 
       while (offlineQueue.length > 0) {
         const item = offlineQueue[0];
-        // Derive monthly tab from the item's dateLabel (e.g., "02-Dec" -> "dec")
-        let itemMonthTab = sheetTab;
-        if (item.dateLabel && item.dateLabel.includes('-')) {
-          const mPart = item.dateLabel.split('-')[1];
-          if (mPart && mPart.length >= 3) itemMonthTab = mPart.substring(0, 3).toLowerCase();
-        }
-
+        const targetMonthTab = item.sheetTab || getAutoMonthTab(workingDate);
         const payload = {
           action: item.type === 'IN' ? 'inward' : (item.type.startsWith('UNDO') ? 'undo' : 'sale'),
           itemName: item.itemName,
@@ -913,7 +891,7 @@
           quantity: item.quantity,
           unitCost: item.unitCost,
           dateLabel: item.dateLabel,
-          sheetTab: itemMonthTab
+          sheetTab: targetMonthTab
         };
 
         try {
@@ -935,7 +913,7 @@
       updateSyncStatusUI();
     }
 
-    // 2-Way Sync: Pull latest items, stock, prices & daily sales from Google Sheet into the app
+    // 2-Way Sync: Pull latest items, stock, prices & daily sales from the active month's sheet tab
     async function pullFromSheet(silent = false) {
       if (!sheetUrl) {
         if (!silent) {
@@ -953,6 +931,9 @@
         if (offlineQueue.length > 0) return;
       }
 
+      const activeMonthTab = getAutoMonthTab(workingDate);
+      const activeDateLabel = formatSheetDate(workingDate);
+
       const dot = document.getElementById('syncStatusDot');
       const txt = document.getElementById('syncStatusText');
       if (dot) dot.className = "w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse shadow-sm shadow-cyan-400/50";
@@ -962,7 +943,7 @@
       }
 
       try {
-        const pullEndpoint = `${sheetUrl}${sheetUrl.includes('?') ? '&' : '?'}action=pull&sheetTab=${encodeURIComponent(sheetTab)}&_t=${Date.now()}`;
+        const pullEndpoint = `${sheetUrl}${sheetUrl.includes('?') ? '&' : '?'}action=pull&sheetTab=${encodeURIComponent(activeMonthTab)}&dateLabel=${encodeURIComponent(activeDateLabel)}&_t=${Date.now()}`;
         const response = await fetch(pullEndpoint, { method: 'GET' });
         const result = await response.json();
 
@@ -1003,11 +984,15 @@
               };
             });
 
-            // Keep IN logs and OUT logs from other months intact; reconcile current pulled month's OUT logs
-            const pulledMonthSuffix = `-${sheetTab.toLowerCase()}`;
-            const preservedLogs = salesLogs.filter(l => l.type !== 'OUT' || !l.dateLabel.toLowerCase().endsWith(pulledMonthSuffix));
+            const pulledTabLower = (result.sheetTab || activeMonthTab).toLowerCase();
+            const preservedLogs = salesLogs.filter(l => {
+              if (l.type !== 'OUT') return true;
+              const logMonth = (l.dateLabel.split('-')[1] || '').toLowerCase();
+              return logMonth !== pulledTabLower;
+            });
+
             const localOutGrouped = {};
-            salesLogs.filter(l => l.type === 'OUT' && l.dateLabel.toLowerCase().endsWith(pulledMonthSuffix)).forEach(l => {
+            salesLogs.filter(l => l.type === 'OUT').forEach(l => {
               const comboKey = `${l.dateLabel}__${l.itemId}`;
               if (!localOutGrouped[comboKey]) localOutGrouped[comboKey] = [];
               localOutGrouped[comboKey].push(l);
@@ -1045,10 +1030,10 @@
           updateHeaderStats();
 
           if (!silent) {
-            showToast(`Pulled ${inventory.length} items & daily sales from '${sheetTab}'!`);
+            showToast(`Pulled ${inventory.length} items from '${result.sheetTab || activeMonthTab}' tab!`);
           }
         } else if (!silent) {
-          showToast(`Tab '${sheetTab}' is ready (no rows yet).`);
+          showToast(`No items found in '${activeMonthTab}' tab yet.`);
         }
       } catch (err) {
         if (!silent) {
@@ -1066,10 +1051,13 @@
         return;
       }
 
-      showToast(`Pushing ${inventory.length} items to '${sheetTab}' tab...`);
+      const activeMonthTab = getMonthTabForDate(workingDate);
+      sheetTab = activeMonthTab;
+      showToast(`Pushing ${inventory.length} items to '${activeMonthTab}' tab...`);
       const payload = {
         action: "bulk_sync",
-        sheetTab: sheetTab,
+        dateLabel: formatSheetDate(workingDate),
+        sheetTab: activeMonthTab,
         items: inventory.map(i => ({ name: i.name, remaining: i.remaining, cost: i.cost }))
       };
 
@@ -1080,7 +1068,7 @@
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
           body: JSON.stringify(payload)
         });
-        showToast(`Snapshot sent to '${sheetTab}' tab!`);
+        showToast(`Snapshot sent to '${activeMonthTab}' tab!`);
       } catch (err) {
         showToast("Network error. Added to queue.");
       }
@@ -1142,7 +1130,7 @@
       }
 
       const input = document.getElementById(`qty_${itemId}`);
-      let qty = 1; // Default to 1 pc if left blank
+      let qty = 1;
       if (input && input.value.trim() !== '') {
         const parsed = parseInt(input.value, 10);
         if (!isNaN(parsed) && parsed > 0) {
@@ -1155,7 +1143,6 @@
         return;
       }
 
-      // Decrement stock
       item.remaining -= qty;
 
       const logRecord = {
@@ -1166,6 +1153,7 @@
         quantity: qty,
         unitCost: item.cost,
         dateLabel: formatSheetDate(workingDate),
+        sheetTab: getAutoMonthTab(workingDate),
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       };
 
@@ -1225,6 +1213,7 @@
         quantity: qty,
         unitCost: item.cost,
         dateLabel: formatSheetDate(workingDate),
+        sheetTab: getAutoMonthTab(workingDate),
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       };
 
@@ -1235,6 +1224,7 @@
       closeInwardModal();
       updateFilterCounts();
       renderCounterList();
+      renderMasterInventory();
       updateHeaderStats();
 
       showToast(`Added +${qty} pcs to ${item.name}!`);
@@ -1292,6 +1282,7 @@
           quantity: stockVal,
           unitCost: newItem.cost,
           dateLabel: formatSheetDate(workingDate),
+          sheetTab: getAutoMonthTab(workingDate),
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         });
       } else {
@@ -1330,6 +1321,7 @@
     }
 
     function setQuickDate(type) {
+      const prevMonth = getAutoMonthTab(workingDate);
       const d = new Date();
       if (type === 'yesterday') {
         d.setDate(d.getDate() - 1);
@@ -1338,11 +1330,12 @@
       calYear = workingDate.getFullYear();
       calMonth = workingDate.getMonth();
 
-      syncMonthTabWithDate(workingDate, true);
       updateHeaderStats();
-      updateSyncStatusUI();
       if (!document.getElementById('tabLogs').classList.contains('hidden')) {
         renderDailyLogs();
+      }
+      if (getAutoMonthTab(workingDate) !== prevMonth && sheetUrl && navigator.onLine) {
+        pullFromSheet(true);
       }
       showToast(`Operating date set: ${formatDisplayDate(workingDate)}`);
     }
@@ -1390,15 +1383,17 @@
           : "h-8 rounded-lg bg-workshop-800 hover:bg-workshop-700 text-slate-200 font-num text-xs flex items-center justify-center border border-workshop-700/60 transition";
 
         btn.onclick = () => {
+          const prevMonth = getAutoMonthTab(workingDate);
           workingDate = targetDate;
           closeCalendarModal();
-          syncMonthTabWithDate(workingDate, true);
           updateHeaderStats();
-          updateSyncStatusUI();
           if (!document.getElementById('tabLogs').classList.contains('hidden')) {
             renderDailyLogs();
           }
-          showToast(`Operating date set: ${formatSheetDate(workingDate)} (${sheetTab.toUpperCase()} tab)`);
+          if (getAutoMonthTab(workingDate) !== prevMonth && sheetUrl && navigator.onLine) {
+            pullFromSheet(true);
+          }
+          showToast(`Operating date set: ${formatSheetDate(workingDate)} (${getAutoMonthTab(workingDate)} tab)`);
         };
 
         grid.appendChild(btn);
@@ -1726,6 +1721,7 @@
         quantity: Math.abs(diff),
         unitCost: logEntry.unitCost,
         dateLabel: logEntry.dateLabel,
+        sheetTab: logEntry.sheetTab || getAutoMonthTab(workingDate),
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       };
 
@@ -1778,7 +1774,7 @@
     // Sync Settings Modal
     function openSyncModal() {
       document.getElementById('sheetUrlInput').value = sheetUrl;
-      document.getElementById('sheetTabInput').value = sheetTab;
+      document.getElementById('modalAutoMonthLabel').innerText = getAutoMonthTab(workingDate);
       document.getElementById('modalQueueCount').innerText = `${offlineQueue.length} actions pending`;
       document.getElementById('syncModal').classList.remove('hidden');
     }
@@ -1789,7 +1785,6 @@
 
     async function saveSheetSettings() {
       sheetUrl = document.getElementById('sheetUrlInput').value.trim();
-      sheetTab = (document.getElementById('sheetTabInput').value.trim() || getMonthTabForDate(workingDate)).toLowerCase();
       saveStorage();
       closeSyncModal();
       updateSyncStatusUI();
@@ -1799,15 +1794,18 @@
         return;
       }
 
-      showToast("Testing connection with Google Sheets...");
+      const activeMonthTab = getAutoMonthTab(workingDate);
+      const activeDateLabel = formatSheetDate(workingDate);
+
+      showToast(`Testing connection with '${activeMonthTab}' tab...`);
       try {
         await fetch(sheetUrl, {
           method: 'POST',
           mode: 'no-cors',
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify({ action: "ping", sheetTab: sheetTab })
+          body: JSON.stringify({ action: "ping", dateLabel: activeDateLabel, sheetTab: activeMonthTab })
         });
-        showToast(`Connected to monthly tab '${sheetTab}'!`);
+        showToast("Connected to Google Sheets successfully!");
         triggerQueueFlush();
       } catch (err) {
         showToast("Connection failed. Check your Web App URL.");
@@ -1834,9 +1832,7 @@
       const now = new Date();
       if (workingDate.toDateString() !== now.toDateString() && document.getElementById('currentDateBadge').innerText.includes('Today')) {
         workingDate = now;
-        syncMonthTabWithDate(workingDate, true);
         updateHeaderStats();
-        updateSyncStatusUI();
         renderCounterList();
       }
       triggerQueueFlush();
@@ -1849,7 +1845,6 @@
       renderCounterList();
       updateHeaderStats();
       updateSyncStatusUI();
-      // Automatically sync latest additions/edits from Google Sheets in the background
       if (sheetUrl && navigator.onLine) {
         pullFromSheet(true);
       }
