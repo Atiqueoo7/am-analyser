@@ -439,9 +439,9 @@
           </div>
 
           <div>
-            <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wide block mb-1">Sheet Tab Name</label>
-            <input type="text" id="sheetTabInput" value="dec" placeholder="dec"
-              class="w-full bg-workshop-950 border border-workshop-700 rounded-xl px-2.5 py-2 text-white font-mono text-xs focus:outline-none focus:border-orange-500">
+            <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wide block mb-1">Active Monthly Sheet Tab (Auto-Detected)</label>
+            <input type="text" id="sheetTabInput" value="nov" placeholder="nov"
+              class="w-full bg-workshop-950 border border-workshop-700 rounded-xl px-2.5 py-2 text-white font-mono text-xs lowercase focus:outline-none focus:border-orange-500">
           </div>
 
           <div class="flex items-center justify-between pt-1 text-[11px] font-mono">
@@ -677,10 +677,10 @@
     let salesLogs = [];
     let offlineQueue = [];
     let sheetUrl = "";
-    let sheetTab = "dec";
+    let workingDate = new Date();
+    let sheetTab = MONTHS_SHORT[workingDate.getMonth()].toLowerCase();
     let isFlushing = false;
 
-    let workingDate = new Date();
     let calYear = workingDate.getFullYear();
     let calMonth = workingDate.getMonth();
 
@@ -757,7 +757,7 @@
         offlineQueue = storedQueue ? JSON.parse(storedQueue) : [];
 
         sheetUrl = localStorage.getItem(STORAGE_KEY_URL) || "";
-        sheetTab = localStorage.getItem(STORAGE_KEY_TAB) || "dec";
+        sheetTab = getMonthTabForDate(workingDate);
       } catch (err) {
         inventory = JSON.parse(JSON.stringify(DEFAULT_CATALOG));
         salesLogs = [];
@@ -775,7 +775,23 @@
       } catch (err) {}
     }
 
-    // Date Utilities
+    // Date & Monthly Tab Utilities
+    function getMonthTabForDate(d) {
+      return MONTHS_SHORT[d.getMonth()].toLowerCase(); // e.g., 'nov', 'dec', 'jan'
+    }
+
+    function syncMonthTabWithDate(d, autoPull = false) {
+      const nextTab = getMonthTabForDate(d);
+      const tabChanged = (sheetTab !== nextTab);
+      sheetTab = nextTab;
+      saveStorage();
+      const tabInp = document.getElementById('sheetTabInput');
+      if (tabInp) tabInp.value = sheetTab;
+      if (tabChanged && autoPull && sheetUrl && navigator.onLine) {
+        pullFromSheet(true);
+      }
+    }
+
     function formatSheetDate(d) {
       const day = d.getDate() < 10 ? '0' + d.getDate() : d.getDate();
       return `${day}-${MONTHS_SHORT[d.getMonth()]}`;
@@ -859,7 +875,7 @@
       } else {
         if (dot) dot.className = "w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-sm shadow-emerald-400/50";
         if (txt) {
-          txt.innerText = "Synced";
+          txt.innerText = `Synced (${sheetTab.toUpperCase()})`;
           txt.className = "text-emerald-400 font-semibold";
         }
       }
@@ -883,6 +899,13 @@
 
       while (offlineQueue.length > 0) {
         const item = offlineQueue[0];
+        // Derive monthly tab from the item's dateLabel (e.g., "02-Dec" -> "dec")
+        let itemMonthTab = sheetTab;
+        if (item.dateLabel && item.dateLabel.includes('-')) {
+          const mPart = item.dateLabel.split('-')[1];
+          if (mPart && mPart.length >= 3) itemMonthTab = mPart.substring(0, 3).toLowerCase();
+        }
+
         const payload = {
           action: item.type === 'IN' ? 'inward' : (item.type.startsWith('UNDO') ? 'undo' : 'sale'),
           itemName: item.itemName,
@@ -890,7 +913,7 @@
           quantity: item.quantity,
           unitCost: item.unitCost,
           dateLabel: item.dateLabel,
-          sheetTab: sheetTab
+          sheetTab: itemMonthTab
         };
 
         try {
@@ -912,7 +935,7 @@
       updateSyncStatusUI();
     }
 
-    // 2-Way Sync: Pull latest items, stock & prices from Google Sheet into the app
+    // 2-Way Sync: Pull latest items, stock, prices & daily sales from Google Sheet into the app
     async function pullFromSheet(silent = false) {
       if (!sheetUrl) {
         if (!silent) {
@@ -944,7 +967,6 @@
         const result = await response.json();
 
         if (result && result.status === "ok" && Array.isArray(result.items) && result.items.length > 0) {
-          // Preserve existing local item IDs where names match so daily log links remain intact
           const existingIdMap = {};
           inventory.forEach(itm => {
             existingIdMap[itm.name.trim().toLowerCase()] = itm.id;
@@ -960,17 +982,73 @@
             };
           });
 
+          // Sync Daily Sold columns from Google Sheet into app's Daily Logs & Header Stats
+          if (Array.isArray(result.dailySales)) {
+            const updatedIdMap = {};
+            inventory.forEach(itm => {
+              updatedIdMap[itm.name.trim().toLowerCase()] = itm.id;
+            });
+
+            const sheetLogMap = {};
+            result.dailySales.forEach(s => {
+              const normKey = s.itemName.trim().toLowerCase();
+              const itemId = updatedIdMap[normKey] || normKey;
+              const comboKey = `${s.dateLabel}__${itemId}`;
+              sheetLogMap[comboKey] = {
+                itemId: itemId,
+                itemName: s.itemName,
+                unitCost: Number(s.unitCost) || 0,
+                dateLabel: s.dateLabel,
+                quantity: Number(s.quantity) || 0
+              };
+            });
+
+            // Keep IN logs and OUT logs from other months intact; reconcile current pulled month's OUT logs
+            const pulledMonthSuffix = `-${sheetTab.toLowerCase()}`;
+            const preservedLogs = salesLogs.filter(l => l.type !== 'OUT' || !l.dateLabel.toLowerCase().endsWith(pulledMonthSuffix));
+            const localOutGrouped = {};
+            salesLogs.filter(l => l.type === 'OUT' && l.dateLabel.toLowerCase().endsWith(pulledMonthSuffix)).forEach(l => {
+              const comboKey = `${l.dateLabel}__${l.itemId}`;
+              if (!localOutGrouped[comboKey]) localOutGrouped[comboKey] = [];
+              localOutGrouped[comboKey].push(l);
+            });
+
+            const reconciledOutLogs = [];
+            for (const [comboKey, sheetEntry] of Object.entries(sheetLogMap)) {
+              const existingEntries = localOutGrouped[comboKey] || [];
+              const localSum = existingEntries.reduce((sum, e) => sum + e.quantity, 0);
+
+              if (localSum === sheetEntry.quantity && existingEntries.length > 0) {
+                reconciledOutLogs.push(...existingEntries);
+              } else {
+                reconciledOutLogs.push({
+                  id: 'sheet_log_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+                  itemId: sheetEntry.itemId,
+                  itemName: sheetEntry.itemName,
+                  type: 'OUT',
+                  quantity: sheetEntry.quantity,
+                  unitCost: sheetEntry.unitCost,
+                  dateLabel: sheetEntry.dateLabel,
+                  timestamp: 'Sheet Sync'
+                });
+              }
+            }
+
+            salesLogs = [...reconciledOutLogs, ...preservedLogs];
+          }
+
           saveStorage();
           updateFilterCounts();
           renderCounterList();
           renderMasterInventory();
+          renderDailyLogs();
           updateHeaderStats();
 
           if (!silent) {
-            showToast(`Pulled ${inventory.length} items from Google Sheet!`);
+            showToast(`Pulled ${inventory.length} items & daily sales from '${sheetTab}'!`);
           }
         } else if (!silent) {
-          showToast("No items found in Sheet tab.");
+          showToast(`Tab '${sheetTab}' is ready (no rows yet).`);
         }
       } catch (err) {
         if (!silent) {
@@ -988,7 +1066,7 @@
         return;
       }
 
-      showToast("Pushing all 182 items to Google Sheet...");
+      showToast(`Pushing ${inventory.length} items to '${sheetTab}' tab...`);
       const payload = {
         action: "bulk_sync",
         sheetTab: sheetTab,
@@ -1002,7 +1080,7 @@
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
           body: JSON.stringify(payload)
         });
-        showToast("Snapshot sent! Check your Google Sheet.");
+        showToast(`Snapshot sent to '${sheetTab}' tab!`);
       } catch (err) {
         showToast("Network error. Added to queue.");
       }
@@ -1202,11 +1280,9 @@
         cost: costVal
       };
 
-      // Add to top of inventory so it's immediately visible
       inventory.unshift(newItem);
       saveStorage();
 
-      // Queue an inward/create action so Google Sheets creates the new row automatically
       if (stockVal > 0) {
         enqueueSheetAction({
           id: 'new_' + Date.now(),
@@ -1219,7 +1295,6 @@
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         });
       } else {
-        // Push full snapshot if opening stock is 0 so the row still gets created in Sheets
         pushAllItemsToSheet();
       }
 
@@ -1263,7 +1338,9 @@
       calYear = workingDate.getFullYear();
       calMonth = workingDate.getMonth();
 
+      syncMonthTabWithDate(workingDate, true);
       updateHeaderStats();
+      updateSyncStatusUI();
       if (!document.getElementById('tabLogs').classList.contains('hidden')) {
         renderDailyLogs();
       }
@@ -1315,11 +1392,13 @@
         btn.onclick = () => {
           workingDate = targetDate;
           closeCalendarModal();
+          syncMonthTabWithDate(workingDate, true);
           updateHeaderStats();
+          updateSyncStatusUI();
           if (!document.getElementById('tabLogs').classList.contains('hidden')) {
             renderDailyLogs();
           }
-          showToast(`Operating date set: ${formatSheetDate(workingDate)}`);
+          showToast(`Operating date set: ${formatSheetDate(workingDate)} (${sheetTab.toUpperCase()} tab)`);
         };
 
         grid.appendChild(btn);
@@ -1611,14 +1690,13 @@
         return;
       }
 
-      const diff = oldQty - newQty; // Positive if reducing (e.g. 5 -> 4 means diff = +1)
+      const diff = oldQty - newQty;
 
       if (logEntry.type === 'OUT' && diff < 0 && item && Math.abs(diff) > item.remaining) {
         showToast(`Cannot increase: only ${item.remaining} pcs left in stock!`);
         return;
       }
 
-      // 1. Adjust local inventory stock by the exact difference
       if (item) {
         if (logEntry.type === 'OUT') {
           item.remaining += diff;
@@ -1627,14 +1705,12 @@
         }
       }
 
-      // 2. Update or remove the log entry
       if (newQty === 0) {
         salesLogs.splice(logIndex, 1);
       } else {
         logEntry.quantity = newQty;
       }
 
-      // 3. Queue difference sync action for Google Sheets
       let syncType = '';
       if (logEntry.type === 'OUT') {
         syncType = diff > 0 ? 'UNDO_OUT' : 'OUT';
@@ -1713,7 +1789,7 @@
 
     async function saveSheetSettings() {
       sheetUrl = document.getElementById('sheetUrlInput').value.trim();
-      sheetTab = document.getElementById('sheetTabInput').value.trim() || "dec";
+      sheetTab = (document.getElementById('sheetTabInput').value.trim() || getMonthTabForDate(workingDate)).toLowerCase();
       saveStorage();
       closeSyncModal();
       updateSyncStatusUI();
@@ -1731,7 +1807,7 @@
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
           body: JSON.stringify({ action: "ping", sheetTab: sheetTab })
         });
-        showToast("Connected to Google Sheets successfully!");
+        showToast(`Connected to monthly tab '${sheetTab}'!`);
         triggerQueueFlush();
       } catch (err) {
         showToast("Connection failed. Check your Web App URL.");
@@ -1758,7 +1834,9 @@
       const now = new Date();
       if (workingDate.toDateString() !== now.toDateString() && document.getElementById('currentDateBadge').innerText.includes('Today')) {
         workingDate = now;
+        syncMonthTabWithDate(workingDate, true);
         updateHeaderStats();
+        updateSyncStatusUI();
         renderCounterList();
       }
       triggerQueueFlush();
