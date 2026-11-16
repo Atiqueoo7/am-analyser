@@ -168,7 +168,7 @@
       <!-- Stock Status Filter Chips -->
       <div class="flex items-center gap-1.5 text-[10px] overflow-x-auto pb-0.5 scrollbar-none">
         <button onclick="setFilter('all')" id="fltAll" class="px-2.5 py-1 rounded-lg bg-orange-600 text-white font-bold shrink-0 transition">
-          All (182)
+          All (<span id="countAllStock">182</span>)
         </button>
         <button onclick="setFilter('in_stock')" id="fltIn" class="px-2.5 py-1 rounded-lg bg-workshop-800 text-slate-300 font-semibold border border-workshop-700 shrink-0 transition">
           In Stock (<span id="countInStock">0</span>)
@@ -223,15 +223,21 @@
 
       <!-- TAB 3: INVENTORY MASTER -->
       <section id="tabInventory" class="hidden p-3 space-y-3">
-        <div class="flex items-center justify-between bg-workshop-950/80 p-2.5 rounded-2xl border border-workshop-700/80">
-          <div>
+        <div class="flex items-center justify-between gap-2 bg-workshop-950/80 p-2.5 rounded-2xl border border-workshop-700/80">
+          <div class="min-w-0">
             <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Master Catalog</span>
-            <h3 class="text-xs font-bold text-white">Full Inventory (182 Parts)</h3>
+            <h3 id="masterCatalogTitle" class="text-xs font-bold text-white truncate">Inventory (182 Parts)</h3>
           </div>
-          <button onclick="pushAllItemsToSheet()" class="px-2.5 py-1.5 rounded-lg bg-orange-600 hover:bg-orange-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition active:scale-95">
-            <i class="fa-solid fa-cloud-arrow-up text-[10px]"></i>
-            <span>Push All to Sheet</span>
-          </button>
+          <div class="flex items-center gap-1.5 shrink-0">
+            <button onclick="pullFromSheet(false)" class="px-2.5 py-1.5 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold flex items-center gap-1 shadow-sm transition active:scale-95" title="Fetch new items & edits from Google Sheet">
+              <i class="fa-solid fa-cloud-arrow-down text-[10px]"></i>
+              <span>Pull</span>
+            </button>
+            <button onclick="pushAllItemsToSheet()" class="px-2.5 py-1.5 rounded-lg bg-orange-600 hover:bg-orange-500 text-white text-xs font-bold flex items-center gap-1 shadow-sm transition active:scale-95" title="Push phone stock to Google Sheet">
+              <i class="fa-solid fa-cloud-arrow-up text-[10px]"></i>
+              <span>Push</span>
+            </button>
+          </div>
         </div>
 
         <div id="masterInventoryContainer" class="space-y-2">
@@ -404,9 +410,14 @@
           <button onclick="saveSheetSettings()" class="w-full bg-orange-600 hover:bg-orange-500 py-2 rounded-xl text-white font-bold text-xs transition active:scale-95">
             Save Settings & Test Ping
           </button>
-          <button onclick="triggerQueueFlush()" class="w-full bg-workshop-800 hover:bg-workshop-700 py-2 rounded-xl text-cyan-400 font-bold text-xs border border-workshop-700 transition active:scale-95">
-            Flush Pending Queue Now
-          </button>
+          <div class="grid grid-cols-2 gap-2">
+            <button onclick="pullFromSheet(false); closeSyncModal();" class="bg-cyan-950/70 hover:bg-cyan-900/70 py-2 rounded-xl text-cyan-300 font-bold text-xs border border-cyan-800/60 transition active:scale-95">
+              <i class="fa-solid fa-cloud-arrow-down mr-1"></i> Pull from Sheet
+            </button>
+            <button onclick="triggerQueueFlush()" class="bg-workshop-800 hover:bg-workshop-700 py-2 rounded-xl text-amber-300 font-bold text-xs border border-workshop-700 transition active:scale-95">
+              <i class="fa-solid fa-rotate mr-1"></i> Flush Queue
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -857,6 +868,75 @@
       updateSyncStatusUI();
     }
 
+    // 2-Way Sync: Pull latest items, stock & prices from Google Sheet into the app
+    async function pullFromSheet(silent = false) {
+      if (!sheetUrl) {
+        if (!silent) {
+          openSyncModal();
+          showToast("Please enter your Apps Script Web App URL first!");
+        }
+        return;
+      }
+
+      if (offlineQueue.length > 0) {
+        if (!silent) {
+          showToast("Flushing pending offline sales first before pulling...");
+        }
+        await triggerQueueFlush();
+        if (offlineQueue.length > 0) return;
+      }
+
+      const dot = document.getElementById('syncStatusDot');
+      const txt = document.getElementById('syncStatusText');
+      if (dot) dot.className = "w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse shadow-sm shadow-cyan-400/50";
+      if (txt) {
+        txt.innerText = "Pulling...";
+        txt.className = "text-cyan-300 font-bold";
+      }
+
+      try {
+        const pullEndpoint = `${sheetUrl}${sheetUrl.includes('?') ? '&' : '?'}action=pull&sheetTab=${encodeURIComponent(sheetTab)}&_t=${Date.now()}`;
+        const response = await fetch(pullEndpoint, { method: 'GET' });
+        const result = await response.json();
+
+        if (result && result.status === "ok" && Array.isArray(result.items) && result.items.length > 0) {
+          // Preserve existing local item IDs where names match so daily log links remain intact
+          const existingIdMap = {};
+          inventory.forEach(itm => {
+            existingIdMap[itm.name.trim().toLowerCase()] = itm.id;
+          });
+
+          inventory = result.items.map((rowItem, index) => {
+            const normKey = rowItem.name.trim().toLowerCase();
+            return {
+              id: existingIdMap[normKey] || `itm_sheet_${index + 1}`,
+              name: rowItem.name,
+              remaining: Number(rowItem.remaining) || 0,
+              cost: Number(rowItem.cost) || 0
+            };
+          });
+
+          saveStorage();
+          updateFilterCounts();
+          renderCounterList();
+          renderMasterInventory();
+          updateHeaderStats();
+
+          if (!silent) {
+            showToast(`Pulled ${inventory.length} items from Google Sheet!`);
+          }
+        } else if (!silent) {
+          showToast("No items found in Sheet tab.");
+        }
+      } catch (err) {
+        if (!silent) {
+          showToast("Pull failed: Make sure Code.gs is deployed as a New Version.");
+        }
+      } finally {
+        updateSyncStatusUI();
+      }
+    }
+
     async function pushAllItemsToSheet() {
       if (!sheetUrl) {
         openSyncModal();
@@ -1136,13 +1216,21 @@
 
     // Filter Badges & Search
     function updateFilterCounts() {
+      const totalCount = inventory.length;
       const inCount = inventory.filter(i => i.remaining > 0).length;
       const lowCount = inventory.filter(i => i.remaining > 0 && i.remaining <= 5).length;
       const outCount = inventory.filter(i => i.remaining <= 0).length;
 
+      const allEl = document.getElementById('countAllStock');
+      if (allEl) allEl.innerText = totalCount;
       document.getElementById('countInStock').innerText = inCount;
       document.getElementById('countLowStock').innerText = lowCount;
       document.getElementById('countOutStock').innerText = outCount;
+
+      const searchInp = document.getElementById('searchInput');
+      if (searchInp) searchInp.placeholder = `Search ${totalCount} items...`;
+      const masterTitle = document.getElementById('masterCatalogTitle');
+      if (masterTitle) masterTitle.innerText = `Inventory (${totalCount} Parts)`;
     }
 
     function setFilter(flt) {
@@ -1571,6 +1659,10 @@
       renderCounterList();
       updateHeaderStats();
       updateSyncStatusUI();
+      // Automatically sync latest additions/edits from Google Sheets in the background
+      if (sheetUrl && navigator.onLine) {
+        pullFromSheet(true);
+      }
     };
   </script>
 </body>
