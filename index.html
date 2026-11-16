@@ -90,7 +90,7 @@
         </div>
         
         <div class="flex items-center gap-2">
-          <!-- Sync Status Dot & Offline Queue Indicator -->
+          <!-- Live Sync Status Indicator -->
           <button onclick="openSyncModal()" id="syncStatusBadge" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-workshop-800 border border-workshop-700 text-[11px] font-mono transition active:scale-95 shadow-sm" title="Google Sheet Sync Status">
             <span id="syncStatusDot" class="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-sm shadow-emerald-400/50"></span>
             <span id="syncStatusText" class="text-emerald-400 font-semibold">Synced</span>
@@ -182,13 +182,13 @@
       </div>
     </header>
 
-    <!-- Scrollable Screen Content -->
+    <!-- Scrollable Screen Content Area -->
     <div class="flex-1 overflow-y-auto pb-24">
       
       <!-- TAB 1: COUNTER OUT -->
       <section id="tabCounter" class="p-3 space-y-2.5">
         <div id="counterItemsList" class="space-y-2.5">
-          <!-- Rendered dynamically by JavaScript -->
+          <!-- Populated by JavaScript -->
         </div>
       </section>
 
@@ -328,6 +328,43 @@
         <button onclick="confirmInward()" class="w-full bg-cyan-600 hover:bg-cyan-500 py-2.5 rounded-xl text-white font-bold text-xs transition active:scale-95 shadow-md">
           Confirm Inward & Sync to Sheet
         </button>
+      </div>
+    </div>
+
+    <!-- EDIT / REDUCE TRANSACTION MODAL -->
+    <div id="undoModal" class="hidden fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div class="bg-workshop-900 border border-workshop-700 rounded-3xl w-full max-w-xs p-4 space-y-4 shadow-2xl">
+        <div class="flex items-center justify-between border-b border-workshop-700 pb-2">
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-pen-to-square text-amber-400"></i>
+            <h3 class="font-bold text-xs uppercase tracking-wider text-white">Edit / Reduce Entry</h3>
+          </div>
+          <button onclick="closeUndoModal()" class="text-slate-400 hover:text-white text-sm p-1">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <div class="space-y-1 text-xs">
+          <span id="undoItemName" class="font-bold text-slate-100 block truncate">Item Name</span>
+          <p id="undoDescription" class="text-slate-400 leading-relaxed text-[11px]">
+            Adjust piece count or set to 0 to remove completely:
+          </p>
+        </div>
+
+        <div class="flex items-center justify-center gap-3 py-1">
+          <button type="button" onclick="stepEditLogQty(-1)" class="w-10 h-10 rounded-xl bg-workshop-800 hover:bg-workshop-700 text-slate-200 text-lg font-bold border border-workshop-700 active:scale-95">-</button>
+          <input type="number" id="editLogQtyInput" min="0" class="w-20 text-center bg-workshop-950 border border-workshop-700 text-white font-num font-bold text-lg rounded-xl py-1.5 focus:outline-none focus:border-amber-500">
+          <button type="button" onclick="stepEditLogQty(1)" class="w-10 h-10 rounded-xl bg-workshop-800 hover:bg-workshop-700 text-slate-200 text-lg font-bold border border-workshop-700 active:scale-95">+</button>
+        </div>
+
+        <div class="flex items-center gap-2 pt-1">
+          <button type="button" onclick="removeFullLogEntry()" class="px-3 py-2.5 rounded-xl bg-rose-950/60 hover:bg-rose-600 text-rose-300 hover:text-white border border-rose-800/60 font-bold text-xs transition active:scale-95" title="Delete entire entry">
+            <i class="fa-solid fa-trash-can"></i>
+          </button>
+          <button type="button" onclick="confirmEditLogQty()" class="flex-1 bg-amber-600 hover:bg-amber-500 py-2.5 rounded-xl text-white font-bold text-xs transition active:scale-95 shadow-md shadow-amber-600/30">
+            Update Qty & Stock
+          </button>
+        </div>
       </div>
     </div>
 
@@ -596,6 +633,7 @@
     let activeSort = 'default';
     let searchQuery = '';
     let selectedInwardId = null;
+    let selectedUndoLogId = null;
 
     // PWA Install Event Handler
     let deferredPrompt = null;
@@ -626,7 +664,7 @@
     // Register Inline Service Worker Blob
     if ('serviceWorker' in navigator) {
       const swCode = `
-        const CACHE_NAME = 'am-analyser-v10';
+        const CACHE_NAME = 'am-analyser-v12';
         self.addEventListener('install', (e) => { self.skipWaiting(); });
         self.addEventListener('activate', (e) => { e.waitUntil(clients.claim()); });
         self.addEventListener('fetch', (e) => {
@@ -785,7 +823,7 @@
       while (offlineQueue.length > 0) {
         const item = offlineQueue[0];
         const payload = {
-          action: item.type === 'IN' ? 'inward' : 'sale',
+          action: item.type === 'IN' ? 'inward' : (item.type.startsWith('UNDO') ? 'undo' : 'sale'),
           itemName: item.itemName,
           type: item.type,
           quantity: item.quantity,
@@ -1214,7 +1252,6 @@
                 </button>
               </div>
 
-              <!-- Direct Single Quick Out/Sell Action Button -->
               <button type="button" onclick="executeSale('${item.id}')" ${isOutOfStock ? 'disabled' : ''} 
                 class="flex-1 py-2 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition active:scale-95 shadow-sm
                 ${isOutOfStock ? 'bg-workshop-800 text-slate-500 border border-workshop-700 cursor-not-allowed' : 'bg-orange-600 hover:bg-orange-500 text-white shadow-orange-600/30'}">
@@ -1227,7 +1264,7 @@
       }).join('');
     }
 
-    // Render Daily Logs (Consolidated Summary View)
+    // Render Daily Consolidated Logs with Edit/Reduce Buttons
     function renderDailyLogs() {
       const container = document.getElementById('logsContainer');
       const title = document.getElementById('dailyLogsDateTitle');
@@ -1263,7 +1300,7 @@
             unitCost: entry.unitCost,
             totalOutQty: 0,
             totalInQty: 0,
-            times: []
+            entries: []
           };
         }
         if (entry.type === 'OUT') {
@@ -1273,7 +1310,7 @@
         } else {
           grouped[entry.itemId].totalInQty += entry.quantity;
         }
-        grouped[entry.itemId].times.push(`${entry.type} ${entry.quantity} @ ${entry.timestamp}`);
+        grouped[entry.itemId].entries.push(entry);
       });
 
       if (revEl) revEl.innerText = `₹${Math.round(totalRev).toLocaleString('en-IN')}`;
@@ -1284,8 +1321,20 @@
         const inSum = g.totalInQty;
         const itemTotalAmount = outSum * g.unitCost;
 
+        const pillsHtml = g.entries.map(e => {
+          const isOut = e.type === 'OUT';
+          return `
+            <button type="button" onclick="openUndoModal('${e.id}')" 
+              class="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg text-[10px] font-mono border transition active:scale-95
+              ${isOut ? 'bg-workshop-900 border-workshop-700 text-slate-300 hover:border-amber-500/60' : 'bg-cyan-950/40 border-cyan-800/50 text-cyan-300 hover:border-cyan-500'}">
+              <span>${e.type} <b>${e.quantity}</b> @ ${e.timestamp}</span>
+              <i class="fa-solid fa-pen-to-square text-amber-400 text-[9px]" title="Edit or reduce quantity"></i>
+            </button>
+          `;
+        }).join('');
+
         return `
-          <div class="bg-workshop-950/70 border border-workshop-700/80 rounded-2xl p-3 space-y-1.5 shadow-sm">
+          <div class="bg-workshop-950/70 border border-workshop-700/80 rounded-2xl p-3 space-y-2 shadow-sm">
             <div class="flex items-center justify-between gap-2">
               <h4 class="text-xs font-bold text-slate-100 truncate">${g.itemName}</h4>
               <span class="text-xs font-black text-emerald-400 font-num">₹${Math.round(itemTotalAmount).toLocaleString('en-IN')}</span>
@@ -1298,12 +1347,120 @@
               <span class="text-slate-400">@ ₹${g.unitCost}</span>
             </div>
 
-            <div class="text-[9px] text-slate-500 font-mono truncate">
-              ${g.times.join(' &bull; ')}
+            <div class="flex flex-wrap gap-1.5 pt-1">
+              ${pillsHtml}
             </div>
           </div>
         `;
       }).join('');
+    }
+
+    // Edit / Reduce Mistaken Transaction Quantity Logic
+    function openUndoModal(logId) {
+      const logEntry = salesLogs.find(l => l.id === logId);
+      if (!logEntry) return;
+
+      selectedUndoLogId = logId;
+      document.getElementById('undoItemName').innerText = `${logEntry.itemName} (Was ${logEntry.quantity} pcs)`;
+      document.getElementById('undoDescription').innerText = `Reduce or adjust the piece count for ${logEntry.dateLabel}. The difference will automatically update your inventory and Google Sheet.`;
+      document.getElementById('editLogQtyInput').value = logEntry.quantity;
+
+      document.getElementById('undoModal').classList.remove('hidden');
+    }
+
+    function closeUndoModal() {
+      document.getElementById('undoModal').classList.add('hidden');
+      selectedUndoLogId = null;
+    }
+
+    function stepEditLogQty(delta) {
+      const input = document.getElementById('editLogQtyInput');
+      if (!input) return;
+      let val = (parseInt(input.value, 10) || 0) + delta;
+      if (val < 0) val = 0;
+      input.value = val;
+    }
+
+    function removeFullLogEntry() {
+      const input = document.getElementById('editLogQtyInput');
+      if (input) input.value = 0;
+      confirmEditLogQty();
+    }
+
+    function confirmEditLogQty() {
+      if (!selectedUndoLogId) return;
+      const logIndex = salesLogs.findIndex(l => l.id === selectedUndoLogId);
+      if (logIndex === -1) {
+        closeUndoModal();
+        return;
+      }
+
+      const logEntry = salesLogs[logIndex];
+      const item = inventory.find(i => i.id === logEntry.itemId);
+      const oldQty = logEntry.quantity;
+      const newQty = Math.max(0, parseInt(document.getElementById('editLogQtyInput').value, 10) || 0);
+
+      if (newQty === oldQty) {
+        closeUndoModal();
+        return;
+      }
+
+      const diff = oldQty - newQty; // Positive if reducing (e.g. 5 -> 4 means diff = +1)
+
+      if (logEntry.type === 'OUT' && diff < 0 && item && Math.abs(diff) > item.remaining) {
+        showToast(`Cannot increase: only ${item.remaining} pcs left in stock!`);
+        return;
+      }
+
+      // 1. Adjust local inventory stock by the exact difference
+      if (item) {
+        if (logEntry.type === 'OUT') {
+          item.remaining += diff;
+        } else if (logEntry.type === 'IN') {
+          item.remaining = Math.max(0, item.remaining - diff);
+        }
+      }
+
+      // 2. Update or remove the log entry
+      if (newQty === 0) {
+        salesLogs.splice(logIndex, 1);
+      } else {
+        logEntry.quantity = newQty;
+      }
+
+      // 3. Queue difference sync action for Google Sheets
+      let syncType = '';
+      if (logEntry.type === 'OUT') {
+        syncType = diff > 0 ? 'UNDO_OUT' : 'OUT';
+      } else {
+        syncType = diff > 0 ? 'UNDO_IN' : 'IN';
+      }
+
+      const deltaRecord = {
+        id: 'adj_' + Date.now(),
+        itemId: logEntry.itemId,
+        itemName: logEntry.itemName,
+        type: syncType,
+        quantity: Math.abs(diff),
+        unitCost: logEntry.unitCost,
+        dateLabel: logEntry.dateLabel,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      };
+
+      enqueueSheetAction(deltaRecord);
+      saveStorage();
+
+      closeUndoModal();
+      updateFilterCounts();
+      updateHeaderStats();
+      renderDailyLogs();
+      renderCounterList();
+
+      if (newQty === 0) {
+        showToast(`Removed entry & restored ${oldQty} pcs!`);
+      } else {
+        showToast(`Updated ${logEntry.itemName} to ${newQty} pcs!`);
+      }
     }
 
     // Render Master Inventory View
@@ -1392,7 +1549,6 @@
     });
 
     window.addEventListener('focus', () => {
-      // Midnight check
       const now = new Date();
       if (workingDate.toDateString() !== now.toDateString() && document.getElementById('currentDateBadge').innerText.includes('Today')) {
         workingDate = now;
