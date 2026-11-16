@@ -827,22 +827,34 @@
 
       container.innerHTML = list.map(item => {
         const idx = item.origIndex;
-        const badgeClass = item.remaining <= 0
-          ? 'bg-rose-500/15 text-rose-400 border-rose-500/30'
-          : item.remaining <= 5
-            ? 'bg-amber-500/15 text-amber-400 border-amber-500/30'
-            : 'bg-emerald-400/15 text-emerald-400 border-emerald-400/30';
+        const isOut = item.remaining <= 0;
+        const isLow = item.remaining > 0 && item.remaining <= 5;
+
+        const cardBorderClass = isOut
+          ? 'border-slate-800/80 border-l-4 border-l-rose-500/70 opacity-75'
+          : isLow
+            ? 'border-slate-800/90 border-l-4 border-l-amber-400'
+            : 'border-slate-800/90 border-l-4 border-l-emerald-400';
+
+        const stockBoxClass = isOut
+          ? 'bg-rose-500/15 text-rose-400 border-rose-500/35'
+          : isLow
+            ? 'bg-amber-500/15 text-amber-400 border-amber-500/35'
+            : 'bg-emerald-400/15 text-emerald-400 border-emerald-400/35';
+
+        const stockStatusLabel = isOut ? 'OUT' : isLow ? 'LOW' : 'IN STOCK';
 
         return `
-          <div class="bg-[#0f172a] border border-slate-800/90 rounded-2xl p-3.5 space-y-3">
-            <div class="flex items-start justify-between gap-2">
+          <div class="bg-[#0f172a] border ${cardBorderClass} rounded-2xl p-3.5 space-y-3 transition">
+            <div class="flex items-start justify-between gap-2.5">
               <div class="min-w-0">
                 <div class="text-sm font-extrabold text-white leading-snug break-words">${item.name}</div>
-                <div class="text-xs font-bold text-slate-400 mt-1">₹${item.price} / pc</div>
+                <div class="text-base font-black text-amber-400 tracking-tight tabular-nums mt-1">₹${item.price} <span class="text-xs font-bold text-amber-400/80">/ pc</span></div>
               </div>
-              <span class="px-2.5 py-1 rounded-lg border text-xs font-extrabold shrink-0 ${badgeClass}">
-                ${item.remaining} left
-              </span>
+              <div class="px-2.5 py-1.5 rounded-xl border text-right shrink-0 ${stockBoxClass}">
+                <div class="text-[9px] font-black uppercase tracking-wider opacity-85 leading-none">${stockStatusLabel}</div>
+                <div class="text-xs font-black tabular-nums mt-1 leading-none">${item.remaining} PCS</div>
+              </div>
             </div>
 
             <div class="flex items-center justify-between gap-2">
@@ -867,6 +879,29 @@
           </div>
         `;
       }).join('');
+    }
+
+    function updateLineTotal(idx) {
+      const inp = document.getElementById(`qty_${idx}`);
+      const badge = document.getElementById(`lineTotal_${idx}`);
+      if (!inp || !badge) return;
+      const qty = parseInt(inp.value, 10) || 0;
+      if (qty > 0 && inventory[idx]) {
+        const total = Math.round(qty * inventory[idx].price * 100) / 100;
+        badge.textContent = `Line: ₹${total.toLocaleString('en-IN')}`;
+        badge.classList.remove('hidden');
+      } else {
+        badge.classList.add('hidden');
+      }
+    }
+
+    function stepQty(idx, delta) {
+      const inp = document.getElementById(`qty_${idx}`);
+      if (!inp) return;
+      const cur = parseInt(inp.value, 10) || 0;
+      const next = Math.max(0, cur + delta);
+      inp.value = next === 0 ? '' : next;
+      updateLineTotal(idx);
     }
 
     function stepQty(idx, delta) {
