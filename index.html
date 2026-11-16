@@ -1,1854 +1,365 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>A.M Analyser - Auto Parts & Lubricants</title>
-  
-  <!-- PWA Web App Meta Tags -->
-  <meta name="theme-color" content="#ea580c">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="A.M Analyser">
-  
-  <!-- Embedded W3C Compliant Web App Manifest -->
-  <link rel="manifest" href="data:application/manifest+json;utf-8,%7B%22name%22%3A%22A.M%20Analyser%22%2C%22short_name%22%3A%22AM%20Analyser%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23020617%22%2C%22theme_color%22%3A%22%23ea580c%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22https%3A%2F%2Fplacehold.co%2F192x192%2Fea580c%2Fffffff%3Ftext%3DAM%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image%2Fpng%22%7D%2C%7B%22src%22%3A%22https%3A%2F%2Fplacehold.co%2F512x512%2Fea580c%2Fffffff%3Ftext%3DAM%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fpng%22%7D%5D%7D">
-
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#0f172a" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>A.M Analyser — Auto Parts Counter</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            workshop: {
-              700: '#334155',
-              800: '#1e293b',
-              900: '#0f172a',
-              950: '#020617'
-            }
-          },
-          fontFamily: {
-            sans: ['Inter', 'sans-serif'],
-            mono: ['Roboto Mono', 'monospace'],
-          }
-        }
-      }
-    }
-  </script>
-  
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Roboto+Mono:wght@500;700&display=swap');
-    body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
-    .font-num { font-family: 'Roboto Mono', monospace; }
-    .scrollbar-none::-webkit-scrollbar { display: none; }
-    .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
+    * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+    body {
+      background-color: #0b1120;
+      color: #f8fafc;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      overscroll-behavior-y: contain;
+    }
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+    input[type="number"] { -moz-appearance: textfield; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    @keyframes fadeSlideUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .toast-enter { animation: fadeSlideUp 0.2s ease-out forwards; }
   </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col items-center selection:bg-orange-500 selection:text-white">
+<body class="pb-24 select-none">
 
-  <!-- Mobile App Frame Container -->
-  <div class="w-full max-w-md bg-workshop-900 min-h-screen flex flex-col relative shadow-2xl border-x border-workshop-800">
-    
-    <!-- PWA Install Banner -->
-    <div id="pwaInstallBanner" class="hidden bg-gradient-to-r from-orange-600 to-amber-600 px-4 py-2.5 flex items-center justify-between shadow-lg z-50 text-xs">
-      <div class="flex items-center gap-2">
-        <i class="fa-solid fa-mobile-screen-button text-white text-base"></i>
-        <span class="font-bold text-white tracking-tight">Install A.M Analyser App</span>
-      </div>
-      <div class="flex items-center gap-2">
-        <button onclick="promptAppInstall()" class="bg-white text-orange-600 font-extrabold px-3 py-1 rounded-lg shadow-sm text-xs active:scale-95 transition">
-          Install
-        </button>
-        <button onclick="dismissInstallBanner()" class="text-white/80 hover:text-white text-xs p-1">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
-      </div>
+  <!-- Top Brand Header -->
+  <header class="sticky top-0 z-30 bg-[#0b1120]/95 backdrop-blur border-b border-slate-800/80">
+    <div class="max-w-xl mx-auto px-4 py-2 flex items-center justify-between text-[11px] font-semibold tracking-wider text-slate-400 border-b border-slate-800/60">
+      <span>A.M AUTOMOBILES</span>
+      <span class="text-orange-400">🔧 Workshop &amp; Lubricants</span>
     </div>
 
-    <!-- Top Status Bar -->
-    <div class="bg-workshop-950 px-4 pt-3 pb-2 flex items-center justify-between text-xs text-slate-400 border-b border-workshop-800">
-      <span class="font-mono font-bold text-slate-300">A.M AUTOMOBILES</span>
-      <div class="flex items-center gap-2 text-[11px]">
-        <i class="fa-solid fa-wrench text-orange-400"></i>
-        <span class="text-slate-400">Workshop & Lubricants</span>
-      </div>
-    </div>
-
-    <!-- App Header & Navigation Controls -->
-    <header class="p-3.5 bg-workshop-900 border-b border-workshop-800 space-y-3 sticky top-0 z-30 shadow-md">
-      <div class="flex items-center justify-between">
-        <div class="flex items-center gap-2.5">
-          <div class="w-9 h-9 rounded-xl bg-orange-600 flex items-center justify-center text-white font-black text-sm shadow-md shadow-orange-600/30">
-            AM
-          </div>
-          <div>
-            <h1 class="text-base font-black text-white leading-tight">A.M Analyser</h1>
-            <span class="text-[10px] text-slate-400 font-medium">Auto Parts Counter</span>
-          </div>
+    <div class="max-w-xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-orange-500 flex items-center justify-center font-black text-white text-base shadow-lg shadow-orange-500/25">
+          AM
         </div>
-        
-        <div class="flex items-center gap-2">
-          <!-- Live Sync Status Indicator -->
-          <button onclick="openSyncModal()" id="syncStatusBadge" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-workshop-800 border border-workshop-700 text-[11px] font-mono transition active:scale-95 shadow-sm" title="Google Sheet Sync Status">
-            <span id="syncStatusDot" class="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-sm shadow-emerald-400/50"></span>
-            <span id="syncStatusText" class="text-emerald-400 font-semibold">Synced</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- Operating Date Selector Bar -->
-      <div class="flex items-center justify-between bg-workshop-950/90 p-2 rounded-2xl border border-workshop-700 shadow-inner">
-        <div class="flex items-center gap-2.5 min-w-0">
-          <!-- Calendar Trigger Button -->
-          <button type="button" onclick="openCalendarModal()" id="btnHeaderCalendar"
-            class="w-9 h-9 rounded-xl bg-orange-600/20 hover:bg-orange-600 text-orange-400 hover:text-white flex items-center justify-center border border-orange-500/40 shadow-sm transition active:scale-95 shrink-0" 
-            title="Open Calendar to Pick Any Date">
-            <i class="fa-solid fa-calendar-days text-sm"></i>
-          </button>
-          
-          <!-- Touchable Date Label -->
-          <button type="button" onclick="openCalendarModal()" class="text-left truncate group">
-            <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block group-hover:text-orange-400 transition">Operating Date</span>
-            <span id="currentDateBadge" class="text-xs font-bold text-amber-300 font-num tracking-tight group-hover:text-amber-200 transition">
-              Today
-            </span>
-          </button>
-        </div>
-
-        <!-- Quick Day Toggles -->
-        <div class="flex items-center gap-1 shrink-0">
-          <button type="button" onclick="setQuickDate('yesterday')" id="quickYestBtn" class="text-[10px] bg-workshop-800 hover:bg-workshop-700 active:scale-95 px-2 py-1.5 rounded-lg text-slate-300 font-semibold border border-workshop-700 transition">
-            Yesterday
-          </button>
-          <button type="button" onclick="setQuickDate('today')" id="quickTodayBtn" class="text-[10px] bg-orange-600 hover:bg-orange-500 active:scale-95 px-2.5 py-1.5 rounded-lg text-white font-bold transition shadow-sm shadow-orange-600/30">
-            Today
-          </button>
-        </div>
-      </div>
-
-      <!-- Auto-Resetting Daily Stats Cards -->
-      <div class="grid grid-cols-2 gap-2.5 pt-0.5">
-        <div class="bg-workshop-950/70 border border-workshop-700/80 p-2.5 rounded-xl">
-          <span id="labelSalesTitle" class="text-[10px] font-bold text-slate-400 uppercase tracking-wide block truncate">Today's Sales</span>
-          <span id="statSalesAmount" class="text-base font-black text-emerald-400 font-num">₹0</span>
-        </div>
-        <div class="bg-workshop-950/70 border border-workshop-700/80 p-2.5 rounded-xl">
-          <span id="labelItemsTitle" class="text-[10px] font-bold text-slate-400 uppercase tracking-wide block truncate">Today's Sold</span>
-          <span id="statItemsSold" class="text-base font-black text-amber-400 font-num">0 pcs</span>
-        </div>
-      </div>
-
-      <!-- Search & Sorting Selector Row -->
-      <div class="flex items-center gap-2">
-        <div class="relative flex-1">
-          <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-xs"></i>
-          <input type="text" id="searchInput" oninput="handleSearch(this.value)" placeholder="Search 182 items..." 
-            class="w-full bg-workshop-950 border border-workshop-700 rounded-xl pl-8 pr-7 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-orange-500 font-sans">
-          <button onclick="clearSearch()" id="clearSearchBtn" class="hidden absolute right-2.5 top-2 text-slate-400 hover:text-white text-xs">
-            <i class="fa-solid fa-xmark"></i>
-          </button>
-        </div>
-
-        <div class="relative shrink-0">
-          <select id="sortSelect" onchange="handleSortChange(this.value)" 
-            class="bg-workshop-950 text-slate-200 border border-workshop-700 rounded-xl px-2 py-2 text-xs font-semibold focus:outline-none focus:border-orange-500 appearance-none pr-6 cursor-pointer">
-            <option value="default">Default</option>
-            <option value="stock_desc">Stock: High → Low</option>
-            <option value="stock_asc">Stock: Low → High</option>
-            <option value="price_desc">Price: High → Low</option>
-            <option value="price_asc">Price: Low → High</option>
-            <option value="name_asc">Name: A → Z</option>
-          </select>
-          <i class="fa-solid fa-chevron-down absolute right-2 top-3 text-[10px] text-slate-400 pointer-events-none"></i>
-        </div>
-      </div>
-
-      <!-- Stock Status Filter Chips -->
-      <div class="flex items-center gap-1.5 text-[10px] overflow-x-auto pb-0.5 scrollbar-none">
-        <button onclick="setFilter('all')" id="fltAll" class="px-2.5 py-1 rounded-lg bg-orange-600 text-white font-bold shrink-0 transition">
-          All (<span id="countAllStock">182</span>)
-        </button>
-        <button onclick="setFilter('in_stock')" id="fltIn" class="px-2.5 py-1 rounded-lg bg-workshop-800 text-slate-300 font-semibold border border-workshop-700 shrink-0 transition">
-          In Stock (<span id="countInStock">0</span>)
-        </button>
-        <button onclick="setFilter('low_stock')" id="fltLow" class="px-2.5 py-1 rounded-lg bg-workshop-800 text-slate-300 font-semibold border border-workshop-700 shrink-0 transition">
-          Low ≤5 (<span id="countLowStock">0</span>)
-        </button>
-        <button onclick="setFilter('out')" id="fltOut" class="px-2.5 py-1 rounded-lg bg-workshop-800 text-slate-300 font-semibold border border-workshop-700 shrink-0 transition">
-          Out of Stock (<span id="countOutStock">0</span>)
-        </button>
-      </div>
-    </header>
-
-    <!-- Scrollable Screen Content Area -->
-    <div class="flex-1 overflow-y-auto pb-24">
-      
-      <!-- TAB 1: COUNTER OUT -->
-      <section id="tabCounter" class="p-3 space-y-2.5">
-        <div id="counterItemsList" class="space-y-2.5">
-          <!-- Populated by JavaScript -->
-        </div>
-      </section>
-
-      <!-- TAB 2: DAILY LOGS -->
-      <section id="tabLogs" class="hidden p-3 space-y-3">
-        <div class="flex items-center justify-between bg-workshop-950/80 p-2.5 rounded-2xl border border-workshop-700/80">
-          <div>
-            <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Activity Summary</span>
-            <h3 id="dailyLogsDateTitle" class="text-xs font-bold text-amber-300 font-mono">Today's Activity</h3>
-          </div>
-          <button onclick="openCalendarModal()" class="px-2.5 py-1.5 rounded-lg bg-workshop-800 hover:bg-workshop-700 border border-workshop-700 text-orange-400 text-xs font-semibold flex items-center gap-1.5 transition active:scale-95">
-            <i class="fa-solid fa-calendar-days text-[11px]"></i>
-            <span>Change Date</span>
-          </button>
-        </div>
-
-        <div class="grid grid-cols-2 gap-2 text-center text-xs">
-          <div class="bg-workshop-950/60 border border-workshop-800 p-2 rounded-xl">
-            <span class="text-[10px] text-slate-400 block font-semibold">Total Revenue</span>
-            <span id="logSummaryRevenue" class="text-sm font-black text-emerald-400 font-mono">₹0</span>
-          </div>
-          <div class="bg-workshop-950/60 border border-workshop-800 p-2 rounded-xl">
-            <span class="text-[10px] text-slate-400 block font-semibold">Pieces Handled</span>
-            <span id="logSummaryPcs" class="text-sm font-black text-amber-400 font-mono">0 pcs</span>
-          </div>
-        </div>
-
-        <div id="logsContainer" class="space-y-2">
-          <!-- Populated dynamically -->
-        </div>
-      </section>
-
-      <!-- TAB 3: INVENTORY MASTER -->
-      <section id="tabInventory" class="hidden p-3 space-y-3">
-        <div class="flex items-center justify-between gap-2 bg-workshop-950/80 p-2.5 rounded-2xl border border-workshop-700/80">
-          <div class="min-w-0">
-            <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Master Catalog</span>
-            <h3 id="masterCatalogTitle" class="text-xs font-bold text-white truncate">Inventory (182 Parts)</h3>
-          </div>
-          <div class="flex items-center gap-1.5 shrink-0">
-            <button onclick="openNewItemModal()" class="px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center gap-1 shadow-sm transition active:scale-95" title="Add a brand new item">
-              <i class="fa-solid fa-plus text-[10px]"></i>
-              <span>New</span>
-            </button>
-            <button onclick="pullFromSheet(false)" class="px-2.5 py-1.5 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold flex items-center gap-1 shadow-sm transition active:scale-95" title="Fetch new items & edits from Google Sheet">
-              <i class="fa-solid fa-cloud-arrow-down text-[10px]"></i>
-              <span>Pull</span>
-            </button>
-            <button onclick="pushAllItemsToSheet()" class="px-2.5 py-1.5 rounded-lg bg-orange-600 hover:bg-orange-500 text-white text-xs font-bold flex items-center gap-1 shadow-sm transition active:scale-95" title="Push phone stock to Google Sheet">
-              <i class="fa-solid fa-cloud-arrow-up text-[10px]"></i>
-              <span>Push</span>
-            </button>
-          </div>
-        </div>
-
-        <div id="masterInventoryContainer" class="space-y-2">
-          <!-- Populated dynamically -->
-        </div>
-      </section>
-
-    </div>
-
-    <!-- Fixed Bottom Tab Bar -->
-    <nav class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-workshop-950/95 backdrop-blur-md border-t border-workshop-800 px-4 py-2 flex items-center justify-around text-xs z-40 select-none shadow-2xl">
-      <button onclick="switchTab('counter')" id="navBtnCounter" class="flex flex-col items-center gap-0.5 text-orange-400 font-bold transition active:scale-95">
-        <i class="fa-solid fa-arrow-up-from-bracket text-sm"></i>
-        <span class="text-[10px]">Counter</span>
-      </button>
-      <button onclick="switchTab('logs')" id="navBtnLogs" class="flex flex-col items-center gap-0.5 text-slate-400 hover:text-slate-200 font-medium transition active:scale-95">
-        <i class="fa-solid fa-list-check text-sm"></i>
-        <span class="text-[10px]">Daily Logs</span>
-      </button>
-      <button onclick="switchTab('inventory')" id="navBtnInventory" class="flex flex-col items-center gap-0.5 text-slate-400 hover:text-slate-200 font-medium transition active:scale-95">
-        <i class="fa-solid fa-boxes-stacked text-sm"></i>
-        <span class="text-[10px]">Inventory</span>
-      </button>
-    </nav>
-
-    <!-- CALENDAR MODAL (Full Month Selection) -->
-    <div id="calendarModal" class="hidden fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div class="bg-workshop-900 border border-workshop-700 rounded-3xl w-full max-w-xs p-4 space-y-3.5 shadow-2xl">
-        <div class="flex items-center justify-between border-b border-workshop-700 pb-2.5">
-          <div class="flex items-center gap-2">
-            <i class="fa-solid fa-calendar-days text-orange-400 text-sm"></i>
-            <h3 class="font-bold text-xs uppercase tracking-wider text-white">Select Operating Date</h3>
-          </div>
-          <button onclick="closeCalendarModal()" class="text-slate-400 hover:text-white text-sm p-1">
-            <i class="fa-solid fa-xmark"></i>
-          </button>
-        </div>
-
-        <div class="flex items-center justify-between px-1">
-          <button onclick="navMonth(-1)" class="w-8 h-8 rounded-lg bg-workshop-800 hover:bg-workshop-700 text-slate-300 font-bold flex items-center justify-center text-xs">
-            <i class="fa-solid fa-chevron-left"></i>
-          </button>
-          <span id="calMonthYearLabel" class="text-xs font-bold text-amber-300 font-num">Month Year</span>
-          <button onclick="navMonth(1)" class="w-8 h-8 rounded-lg bg-workshop-800 hover:bg-workshop-700 text-slate-300 font-bold flex items-center justify-center text-xs">
-            <i class="fa-solid fa-chevron-right"></i>
-          </button>
-        </div>
-
-        <div class="grid grid-cols-7 gap-1 text-center text-[10px] font-bold text-slate-500 uppercase">
-          <span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span>
-        </div>
-
-        <div id="calDaysGrid" class="grid grid-cols-7 gap-1 text-xs"></div>
-
-        <div class="pt-2 border-t border-workshop-800">
-          <button onclick="setQuickDate('today'); closeCalendarModal();" 
-            class="w-full bg-workshop-800 hover:bg-orange-600 text-slate-200 hover:text-white py-2 rounded-xl text-xs font-bold transition">
-            Jump to Today
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- INWARD STOCK MODAL -->
-    <div id="inwardModal" class="hidden fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div class="bg-workshop-900 border border-workshop-700 rounded-3xl w-full max-w-xs p-4 space-y-4 shadow-2xl">
-        <div class="flex items-center justify-between border-b border-workshop-700 pb-2">
-          <div class="flex items-center gap-2">
-            <i class="fa-solid fa-box-open text-cyan-400"></i>
-            <h3 class="font-bold text-xs uppercase tracking-wider text-white">Inward Stock (+)</h3>
-          </div>
-          <button onclick="closeInwardModal()" class="text-slate-400 hover:text-white text-sm p-1">
-            <i class="fa-solid fa-xmark"></i>
-          </button>
-        </div>
-
         <div>
-          <span id="inwardItemName" class="text-xs font-bold text-slate-200 block truncate">Item</span>
-          <span id="inwardItemStock" class="text-[11px] text-slate-400 font-num">Current Stock: 0 pcs</span>
+          <h1 class="text-lg font-extrabold tracking-tight text-white leading-none">A.M Analyser</h1>
+          <p class="text-xs text-slate-400 mt-1">Auto Parts Counter</p>
         </div>
+      </div>
 
-        <div class="flex items-center justify-center gap-3">
-          <button onclick="adjustInwardQty(-1)" class="w-10 h-10 rounded-xl bg-workshop-800 hover:bg-workshop-700 text-slate-200 text-lg font-bold border border-workshop-700">-</button>
-          <input type="number" id="inwardQtyInput" value="5" min="1" class="w-20 text-center bg-workshop-950 border border-workshop-700 text-white font-num font-bold text-lg rounded-xl py-1.5 focus:outline-none">
-          <button onclick="adjustInwardQty(1)" class="w-10 h-10 rounded-xl bg-workshop-800 hover:bg-workshop-700 text-slate-200 text-lg font-bold border border-workshop-700">+</button>
+      <!-- Sync Status Pill -->
+      <button onclick="openSettingsModal()" id="syncPill"
+        class="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-900 border border-slate-700/80 text-xs font-semibold text-slate-200 active:scale-95 transition">
+        <span id="syncDot" class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
+        <span id="syncText">No URL</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="max-w-xl mx-auto px-4 pt-3 space-y-3.5">
+
+    <!-- Operating Date Card -->
+    <section class="bg-slate-900/90 border border-slate-800 rounded-2xl p-3.5 flex items-center justify-between gap-2">
+      <label class="flex items-center gap-3 cursor-pointer flex-1 min-w-0 relative">
+        <div class="w-10 h-10 rounded-xl bg-orange-500/15 border border-orange-500/30 flex items-center justify-center text-orange-400 shrink-0">
+          📅
         </div>
-
-        <div class="grid grid-cols-3 gap-2 text-xs">
-          <button onclick="setInwardQuick(5)" class="py-1.5 bg-workshop-800 hover:bg-workshop-700 rounded-lg text-slate-300 font-bold">+5</button>
-          <button onclick="setInwardQuick(10)" class="py-1.5 bg-workshop-800 hover:bg-workshop-700 rounded-lg text-slate-300 font-bold">+10</button>
-          <button onclick="setInwardQuick(25)" class="py-1.5 bg-workshop-800 hover:bg-workshop-700 rounded-lg text-slate-300 font-bold">+25</button>
+        <div class="min-w-0">
+          <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Operating Date</div>
+          <div id="operatingDateLabel" class="text-sm font-extrabold text-amber-400 truncate">Today</div>
         </div>
+        <input type="date" id="datePickerInput" onchange="onDatePickerChange(this.value)"
+          class="absolute inset-0 opacity-0 w-full h-full cursor-pointer" />
+      </label>
 
-        <button onclick="confirmInward()" class="w-full bg-cyan-600 hover:bg-cyan-500 py-2.5 rounded-xl text-white font-bold text-xs transition active:scale-95 shadow-md">
-          Confirm Inward & Sync to Sheet
+      <div class="flex items-center gap-1.5 shrink-0">
+        <button onclick="setOperatingOffset(-1)" id="btnYesterday"
+          class="px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-800 text-slate-300 border border-slate-700 active:scale-95 transition">
+          Yesterday
+        </button>
+        <button onclick="setOperatingOffset(0)" id="btnToday"
+          class="px-3 py-1.5 rounded-lg text-xs font-bold bg-orange-500 text-white shadow shadow-orange-500/30 active:scale-95 transition">
+          Today
+        </button>
+      </div>
+    </section>
+
+    <!-- Sales KPI Cards -->
+    <section class="grid grid-cols-2 gap-3">
+      <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-3.5">
+        <div id="kpiSalesTitle" class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Today's Sales</div>
+        <div id="kpiSalesAmount" class="text-xl font-black text-emerald-400 mt-1">₹0</div>
+      </div>
+      <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-3.5">
+        <div id="kpiSoldTitle" class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Today's Sold</div>
+        <div id="kpiSoldPcs" class="text-xl font-black text-amber-400 mt-1">0 pcs</div>
+      </div>
+    </section>
+
+    <!-- Search & Sort Controls -->
+    <section class="flex items-center gap-2">
+      <div class="relative flex-1">
+        <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm">🔍</span>
+        <input type="text" id="searchInput" oninput="renderActiveTab()"
+          placeholder="Search 182 items..."
+          class="w-full bg-slate-900 border border-slate-800 rounded-xl pl-9 pr-8 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-orange-500" />
+        <button id="clearSearchBtn" onclick="clearSearch()"
+          class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white text-xs font-bold px-1.5 py-0.5">
+          ✕
+        </button>
+      </div>
+
+      <select id="sortSelect" onchange="renderActiveTab()"
+        class="bg-slate-900 border border-slate-800 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-200 focus:outline-none focus:border-orange-500">
+        <option value="default">Default</option>
+        <option value="stock_desc">Stock: High → Low</option>
+        <option value="stock_asc">Stock: Low → High</option>
+        <option value="name_asc">Name: A → Z</option>
+        <option value="price_desc">Price: High → Low</option>
+      </select>
+    </section>
+
+    <!-- Filter Chips -->
+    <section id="filterChips" class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
+      <button onclick="setStockFilter('all')" data-filter="all"
+        class="filter-chip px-3 py-1.5 rounded-lg text-xs font-bold bg-orange-500 text-white shrink-0">
+        All (182)
+      </button>
+      <button onclick="setStockFilter('instock')" data-filter="instock"
+        class="filter-chip px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-900 border border-slate-800 text-slate-300 shrink-0">
+        In Stock (0)
+      </button>
+      <button onclick="setStockFilter('low')" data-filter="low"
+        class="filter-chip px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-900 border border-slate-800 text-slate-300 shrink-0">
+        Low ≤5 (0)
+      </button>
+      <button onclick="setStockFilter('out')" data-filter="out"
+        class="filter-chip px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-900 border border-slate-800 text-slate-300 shrink-0">
+        Out of Stock (0)
+      </button>
+    </section>
+
+    <!-- TAB 1: COUNTER SELL VIEW -->
+    <section id="viewCounter" class="space-y-2.5"></section>
+
+    <!-- TAB 2: INVENTORY MASTER VIEW -->
+    <section id="viewInventory" class="hidden space-y-3">
+      <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-3.5 flex items-center justify-between gap-2">
+        <div>
+          <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Master Catalog</div>
+          <div id="inventoryHeaderCount" class="text-sm font-extrabold text-white mt-0.5">Inventory (182 Parts)</div>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <button onclick="openNewItemModal()"
+            class="px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-extrabold active:scale-95 transition">
+            + New
+          </button>
+          <button onclick="pullFromSheet(true)"
+            class="px-3 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-extrabold active:scale-95 transition">
+            ☁ Pull
+          </button>
+          <button onclick="pushAllItemsToSheet()"
+            class="px-3 py-2 rounded-xl bg-orange-500 hover:bg-orange-400 text-white text-xs font-extrabold active:scale-95 transition">
+            ☁ Push
+          </button>
+        </div>
+      </div>
+
+      <div id="inventoryList" class="space-y-2.5"></div>
+    </section>
+
+    <!-- TAB 3: DAILY LOGS VIEW -->
+    <section id="viewLogs" class="hidden space-y-3">
+      <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-3.5 flex items-center justify-between">
+        <div>
+          <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Transaction Ledger</div>
+          <div id="logsDateHeader" class="text-sm font-extrabold text-white mt-0.5">Logs</div>
+        </div>
+        <button onclick="flushOfflineQueue()"
+          class="px-3 py-1.5 rounded-xl bg-slate-800 border border-slate-700 text-xs font-bold text-slate-200 active:scale-95">
+          Sync Queue (<span id="queueCountBadge">0</span>)
+        </button>
+      </div>
+
+      <div id="dailyLogsList" class="space-y-2.5"></div>
+    </section>
+
+  </main>
+
+  <!-- Bottom Navigation Bar -->
+  <nav class="fixed bottom-0 inset-x-0 z-30 bg-[#0b1120]/95 backdrop-blur border-t border-slate-800">
+    <div class="max-w-xl mx-auto grid grid-cols-3 h-16">
+      <button onclick="switchTab('counter')" id="navCounter"
+        class="flex flex-col items-center justify-center gap-1 text-orange-400 font-extrabold text-xs">
+        <span class="text-lg leading-none">⚡</span>
+        <span>Counter Sell</span>
+      </button>
+      <button onclick="switchTab('inventory')" id="navInventory"
+        class="flex flex-col items-center justify-center gap-1 text-slate-400 font-bold text-xs">
+        <span class="text-lg leading-none">📦</span>
+        <span>Inventory</span>
+      </button>
+      <button onclick="switchTab('logs')" id="navLogs"
+        class="flex flex-col items-center justify-center gap-1 text-slate-400 font-bold text-xs">
+        <span class="text-lg leading-none">🧾</span>
+        <span>Daily Logs</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Toast Notification -->
+  <div id="toastBox" class="fixed bottom-20 inset-x-0 z-50 flex justify-center pointer-events-none px-4 hidden">
+    <div id="toastInner" class="toast-enter bg-slate-800 border border-slate-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-2xl"></div>
+  </div>
+
+  <!-- MODAL 1: Google Sheet Settings -->
+  <div id="settingsModal" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md p-5 space-y-4">
+      <div class="flex items-center justify-between">
+        <h2 class="text-base font-extrabold text-white">Google Sheet Connection</h2>
+        <button onclick="closeModal('settingsModal')" class="text-slate-400 hover:text-white text-lg font-bold">✕</button>
+      </div>
+      <div class="space-y-2">
+        <label class="text-xs font-bold text-slate-400">Apps Script Web App URL (/exec)</label>
+        <input type="url" id="webAppUrlInput" placeholder="https://script.google.com/macros/s/.../exec"
+          class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-orange-500" />
+      </div>
+      <div class="grid grid-cols-2 gap-2">
+        <button onclick="pullFromSheet(true)"
+          class="py-2.5 rounded-xl bg-cyan-600 text-white text-xs font-extrabold active:scale-95">
+          ☁ Pull from Sheet
+        </button>
+        <button onclick="pushAllItemsToSheet()"
+          class="py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white text-xs font-extrabold active:scale-95">
+          ☁ Push All to Sheet
+        </button>
+      </div>
+      <button onclick="saveWebAppUrl()"
+        class="w-full py-3 rounded-xl bg-orange-500 text-white text-xs font-extrabold shadow-lg shadow-orange-500/25 active:scale-95">
+        Save Settings &amp; Test Ping
+      </button>
+    </div>
+  </div>
+
+  <!-- MODAL 2: Inward Stock Modal -->
+  <div id="inwardModal" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-sm p-5 space-y-4">
+      <div class="flex items-center justify-between">
+        <h2 class="text-base font-extrabold text-white">Add Inward Stock</h2>
+        <button onclick="closeModal('inwardModal')" class="text-slate-400 hover:text-white text-lg font-bold">✕</button>
+      </div>
+      <div>
+        <div id="inwardItemName" class="text-sm font-bold text-orange-400"></div>
+        <div id="inwardCurrentStock" class="text-xs text-slate-400 mt-0.5"></div>
+      </div>
+      <div class="space-y-1.5">
+        <label class="text-xs font-bold text-slate-400">Quantity Received (pcs)</label>
+        <input type="number" id="inwardQtyInput" inputmode="numeric" placeholder="Enter qty"
+          class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-3 text-base font-extrabold text-white focus:outline-none focus:border-emerald-500" />
+      </div>
+      <button onclick="confirmInwardStock()"
+        class="w-full py-3 rounded-xl bg-emerald-600 text-white text-xs font-extrabold active:scale-95">
+        Confirm Inward Stock
+      </button>
+    </div>
+  </div>
+
+  <!-- MODAL 3: Add New Item Modal -->
+  <div id="newItemModal" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-sm p-5 space-y-4">
+      <div class="flex items-center justify-between">
+        <h2 class="text-base font-extrabold text-white">Add New Part to Catalog</h2>
+        <button onclick="closeModal('newItemModal')" class="text-slate-400 hover:text-white text-lg font-bold">✕</button>
+      </div>
+      <div class="space-y-3">
+        <div>
+          <label class="text-xs font-bold text-slate-400">Part Code &amp; Name</label>
+          <input type="text" id="newPartNameInput" placeholder="e.g. B AF121612 OIL FILTER"
+            class="w-full mt-1 bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm font-bold text-white uppercase focus:outline-none focus:border-emerald-500" />
+        </div>
+        <div class="grid grid-cols-2 gap-2.5">
+          <div>
+            <label class="text-xs font-bold text-slate-400">Opening Stock</label>
+            <input type="number" id="newPartStockInput" inputmode="numeric" placeholder="0"
+              class="w-full mt-1 bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm font-extrabold text-white focus:outline-none focus:border-emerald-500" />
+          </div>
+          <div>
+            <label class="text-xs font-bold text-slate-400">Cost Price (₹)</label>
+            <input type="number" id="newPartPriceInput" inputmode="decimal" step="0.01" placeholder="0"
+              class="w-full mt-1 bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm font-extrabold text-white focus:outline-none focus:border-emerald-500" />
+          </div>
+        </div>
+      </div>
+      <button onclick="saveNewCatalogItem()"
+        class="w-full py-3 rounded-xl bg-emerald-600 text-white text-xs font-extrabold active:scale-95">
+        Save Item &amp; Sync to Sheet
+      </button>
+    </div>
+  </div>
+
+  <!-- MODAL 4: Edit / Reduce Daily Log Qty Modal -->
+  <div id="editLogModal" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-sm p-5 space-y-4">
+      <div class="flex items-center justify-between">
+        <h2 class="text-base font-extrabold text-white">Edit / Reduce Sold Quantity</h2>
+        <button onclick="closeModal('editLogModal')" class="text-slate-400 hover:text-white text-lg font-bold">✕</button>
+      </div>
+      <div>
+        <div id="editLogItemName" class="text-sm font-bold text-orange-400"></div>
+        <div id="editLogMeta" class="text-xs text-slate-400 mt-0.5"></div>
+      </div>
+      <div class="flex items-center justify-center gap-3">
+        <button onclick="adjustEditLogQty(-1)"
+          class="w-12 h-12 rounded-xl bg-slate-800 border border-slate-700 text-xl font-black text-white active:scale-95">
+          −
+        </button>
+        <input type="number" id="editLogQtyInput" inputmode="numeric"
+          class="w-24 h-12 text-center bg-slate-950 border border-slate-700 rounded-xl text-xl font-black text-amber-400 focus:outline-none focus:border-orange-500" />
+        <button onclick="adjustEditLogQty(1)"
+          class="w-12 h-12 rounded-xl bg-slate-800 border border-slate-700 text-xl font-black text-white active:scale-95">
+          +
+        </button>
+      </div>
+      <p class="text-[11px] text-slate-400 text-center">Set to 0 to reverse the entire transaction and restore stock.</p>
+      <div class="grid grid-cols-2 gap-2">
+        <button onclick="reverseLogCompletely()"
+          class="py-3 rounded-xl bg-rose-600/20 border border-rose-500/40 text-rose-300 text-xs font-extrabold active:scale-95">
+          ↺ Remove Entry
+        </button>
+        <button onclick="confirmEditLogQty()"
+          class="py-3 rounded-xl bg-orange-500 text-white text-xs font-extrabold active:scale-95">
+          Update Qty &amp; Stock
         </button>
       </div>
     </div>
-
-    <!-- ADD NEW ITEM MODAL -->
-    <div id="newItemModal" class="hidden fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div class="bg-workshop-900 border border-workshop-700 rounded-3xl w-full max-w-xs p-4 space-y-4 shadow-2xl">
-        <div class="flex items-center justify-between border-b border-workshop-700 pb-2">
-          <div class="flex items-center gap-2">
-            <i class="fa-solid fa-circle-plus text-emerald-400"></i>
-            <h3 class="font-bold text-xs uppercase tracking-wider text-white">Add New Part / Item</h3>
-          </div>
-          <button onclick="closeNewItemModal()" class="text-slate-400 hover:text-white text-sm p-1">
-            <i class="fa-solid fa-xmark"></i>
-          </button>
-        </div>
-
-        <div class="space-y-3 text-xs">
-          <div>
-            <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wide block mb-1">Part Code & Item Name *</label>
-            <input type="text" id="newItemNameInput" placeholder="e.g. B 36AA4099 CLUTCH CABLE"
-              class="w-full bg-workshop-950 border border-workshop-700 rounded-xl px-3 py-2 text-white font-sans text-xs uppercase focus:outline-none focus:border-emerald-500">
-          </div>
-
-          <div class="grid grid-cols-2 gap-2.5">
-            <div>
-              <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wide block mb-1">Opening Stock</label>
-              <input type="number" id="newItemStockInput" value="0" min="0"
-                class="w-full bg-workshop-950 border border-workshop-700 rounded-xl px-3 py-2 text-white font-num font-bold text-xs focus:outline-none focus:border-emerald-500">
-            </div>
-            <div>
-              <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wide block mb-1">Cost Price (₹) *</label>
-              <input type="number" id="newItemCostInput" placeholder="0" min="0" step="0.01"
-                class="w-full bg-workshop-950 border border-workshop-700 rounded-xl px-3 py-2 text-white font-num font-bold text-xs focus:outline-none focus:border-emerald-500">
-            </div>
-          </div>
-        </div>
-
-        <button onclick="confirmAddNewItem()" class="w-full bg-emerald-600 hover:bg-emerald-500 py-2.5 rounded-xl text-white font-bold text-xs transition active:scale-95 shadow-md shadow-emerald-600/30">
-          Save Item & Sync to Sheet
-        </button>
-      </div>
-    </div>
-
-    <!-- EDIT / REDUCE TRANSACTION MODAL -->
-    <div id="undoModal" class="hidden fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div class="bg-workshop-900 border border-workshop-700 rounded-3xl w-full max-w-xs p-4 space-y-4 shadow-2xl">
-        <div class="flex items-center justify-between border-b border-workshop-700 pb-2">
-          <div class="flex items-center gap-2">
-            <i class="fa-solid fa-pen-to-square text-amber-400"></i>
-            <h3 class="font-bold text-xs uppercase tracking-wider text-white">Edit / Reduce Entry</h3>
-          </div>
-          <button onclick="closeUndoModal()" class="text-slate-400 hover:text-white text-sm p-1">
-            <i class="fa-solid fa-xmark"></i>
-          </button>
-        </div>
-
-        <div class="space-y-1 text-xs">
-          <span id="undoItemName" class="font-bold text-slate-100 block truncate">Item Name</span>
-          <p id="undoDescription" class="text-slate-400 leading-relaxed text-[11px]">
-            Adjust piece count or set to 0 to remove completely:
-          </p>
-        </div>
-
-        <div class="flex items-center justify-center gap-3 py-1">
-          <button type="button" onclick="stepEditLogQty(-1)" class="w-10 h-10 rounded-xl bg-workshop-800 hover:bg-workshop-700 text-slate-200 text-lg font-bold border border-workshop-700 active:scale-95">-</button>
-          <input type="number" id="editLogQtyInput" min="0" class="w-20 text-center bg-workshop-950 border border-workshop-700 text-white font-num font-bold text-lg rounded-xl py-1.5 focus:outline-none focus:border-amber-500">
-          <button type="button" onclick="stepEditLogQty(1)" class="w-10 h-10 rounded-xl bg-workshop-800 hover:bg-workshop-700 text-slate-200 text-lg font-bold border border-workshop-700 active:scale-95">+</button>
-        </div>
-
-        <div class="flex items-center gap-2 pt-1">
-          <button type="button" onclick="removeFullLogEntry()" class="px-3 py-2.5 rounded-xl bg-rose-950/60 hover:bg-rose-600 text-rose-300 hover:text-white border border-rose-800/60 font-bold text-xs transition active:scale-95" title="Delete entire entry">
-            <i class="fa-solid fa-trash-can"></i>
-          </button>
-          <button type="button" onclick="confirmEditLogQty()" class="flex-1 bg-amber-600 hover:bg-amber-500 py-2.5 rounded-xl text-white font-bold text-xs transition active:scale-95 shadow-md shadow-amber-600/30">
-            Update Qty & Stock
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- GOOGLE SHEETS SETTINGS MODAL -->
-    <div id="syncModal" class="hidden fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div class="bg-workshop-900 border border-workshop-700 rounded-3xl w-full max-w-xs p-4 space-y-4 shadow-2xl">
-        <div class="flex items-center justify-between border-b border-workshop-700 pb-2">
-          <div class="flex items-center gap-2">
-            <i class="fa-solid fa-cloud text-orange-400"></i>
-            <h3 class="font-bold text-xs uppercase tracking-wider text-white">Google Sheet Connection</h3>
-          </div>
-          <button onclick="closeSyncModal()" class="text-slate-400 hover:text-white text-sm p-1">
-            <i class="fa-solid fa-xmark"></i>
-          </button>
-        </div>
-
-        <div class="space-y-3 text-xs">
-          <div>
-            <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wide block mb-1">Apps Script Web App URL (/exec)</label>
-            <input type="text" id="sheetUrlInput" placeholder="https://script.google.com/macros/s/.../exec"
-              class="w-full bg-workshop-950 border border-workshop-700 rounded-xl px-2.5 py-2 text-white font-mono text-[11px] focus:outline-none focus:border-orange-500">
-          </div>
-
-          <div class="bg-workshop-950/80 border border-workshop-800 rounded-xl p-2.5 text-[11px] text-slate-300 flex items-center justify-between">
-            <span>Auto-routed Month Tab:</span>
-            <span id="modalAutoMonthLabel" class="font-mono font-bold text-amber-400 uppercase">nov</span>
-          </div>
-
-          <div class="flex items-center justify-between pt-1 text-[11px] font-mono">
-            <span class="text-slate-400">Queue Buffer:</span>
-            <span id="modalQueueCount" class="text-amber-400 font-bold">0 actions pending</span>
-          </div>
-        </div>
-
-        <div class="space-y-2 pt-2 border-t border-workshop-800">
-          <button onclick="saveSheetSettings()" class="w-full bg-orange-600 hover:bg-orange-500 py-2 rounded-xl text-white font-bold text-xs transition active:scale-95">
-            Save Settings & Test Ping
-          </button>
-          <div class="grid grid-cols-2 gap-2">
-            <button onclick="pullFromSheet(false); closeSyncModal();" class="bg-cyan-950/70 hover:bg-cyan-900/70 py-2 rounded-xl text-cyan-300 font-bold text-xs border border-cyan-800/60 transition active:scale-95">
-              <i class="fa-solid fa-cloud-arrow-down mr-1"></i> Pull from Sheet
-            </button>
-            <button onclick="triggerQueueFlush()" class="bg-workshop-800 hover:bg-workshop-700 py-2 rounded-xl text-amber-300 font-bold text-xs border border-workshop-700 transition active:scale-95">
-              <i class="fa-solid fa-rotate mr-1"></i> Flush Queue
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- TOAST NOTIFICATION CONTAINER -->
-    <div id="toastBox" class="fixed bottom-16 left-1/2 -translate-x-1/2 z-50 pointer-events-none transition-all duration-300 opacity-0 translate-y-3">
-      <div id="toastText" class="bg-slate-900/95 border border-slate-700 text-white px-4 py-2 rounded-xl text-xs font-semibold shadow-2xl flex items-center gap-2">
-        <i class="fa-solid fa-circle-check text-emerald-400"></i>
-        <span>Notification</span>
-      </div>
-    </div>
-
   </div>
 
   <script>
-    // MASTER DEFAULT INVENTORY (182 Items - Locked Default Catalog)
+    const STORAGE_INV_KEY = 'am_stock_v15';
+    const STORAGE_LOG_KEY = 'am_logs_v15';
+    const STORAGE_QUEUE_KEY = 'am_queue_v15';
+    const STORAGE_URL_KEY = 'am_webapp_url';
+
+    const MONTHS_SHORT = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
+    const MONTHS_CAP = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+    // Master 182-Item Default Catalog
     const DEFAULT_CATALOG = [
-      { id: "itm_1", name: "B AF121612 OIL FILTER", remaining: 125, cost: 180 },
-      { id: "itm_2", name: "B 24151182 BRAKE SHOES SPRING", remaining: 80, cost: 25 },
-      { id: "itm_3", name: "B JH511207 RACKER ARM", remaining: 70, cost: 320 },
-      { id: "itm_4", name: "B AA101473 CLUTCH HUB 4/S", remaining: 105, cost: 350 },
-      { id: "itm_5", name: "MILEX CLUTCH CABLE COMP", remaining: 100, cost: 65 },
-      { id: "itm_6", name: "B 36AF0030 KIT PAPER FILT", remaining: 50, cost: 75 },
-      { id: "itm_7", name: "B AA101207 HOUSING CLUTCH", remaining: 71, cost: 300 },
-      { id: "itm_8", name: "SU 2003 BLaDE FUSES 10AMPD", remaining: 0, cost: 3.5 },
-      { id: "itm_9", name: "B AA191092 CLUTCH CABEL COM", remaining: 40, cost: 380 },
-      { id: "itm_10", name: "B 24151268 BRAKE SHOES", remaining: 36, cost: 285 },
-      { id: "itm_11", name: "B 24151173 BRAKE SHOES SPRING", remaining: 20, cost: 25 },
-      { id: "itm_12", name: "GTX ESSENTIAL 20W50 500ML", remaining: 33, cost: 190 },
-      { id: "itm_13", name: "B P-PLUS 2.1LTR", remaining: 71, cost: 820 },
-      { id: "itm_14", name: "MAHLE OIL FILTER COMP", remaining: 30, cost: 85 },
-      { id: "itm_15", name: "B 24151171 BRAKE LINING", remaining: 53, cost: 285 },
-      { id: "itm_16", name: "MILEX GEAR CABLE COMPACT", remaining: 80, cost: 40 },
-      { id: "itm_17", name: "DOT.3 BREAK FLUID 100 ML", remaining: 20, cost: 35 },
-      { id: "itm_18", name: "PREMIUM LONG LIFE 200 G", remaining: 20, cost: 100 },
-      { id: "itm_19", name: "JL351218 PLUG BS6", remaining: 25, cost: 170 },
-      { id: "itm_20", name: "DOT. 3 BREAK FLUID 250 ML", remaining: 20, cost: 80 },
-      { id: "itm_21", name: "WAXPAL WHEEL BEARING GREASE 200 GMS", remaining: 20, cost: 80 },
-      { id: "itm_22", name: "B AM101174 TIMING CHAIN", remaining: 21, cost: 315 },
-      { id: "itm_23", name: "B 36AT0003 GAS GOLD FILTER", remaining: 15, cost: 55 },
-      { id: "itm_24", name: "B 31101020 ARM RACKER", remaining: 20, cost: 160 },
-      { id: "itm_25", name: "B 22151106 BRAKE DRUM", remaining: 28, cost: 1230 },
-      { id: "itm_26", name: "B 36RA0002 CLUCH PLATE", remaining: 29, cost: 550 },
-      { id: "itm_27", name: "B 24181153 LOCK SET", remaining: 19, cost: 930 },
-      { id: "itm_28", name: "B DF101055 TEPIT SCREW", remaining: 0, cost: 14 },
-      { id: "itm_29", name: "MILEX CLUTCH CABLE BS7", remaining: 20, cost: 60 },
-      { id: "itm_30", name: "B 36AA4007 CLUTCH RIVIT", remaining: 40, cost: 90 },
-      { id: "itm_31", name: "B AZ511010 PLUG SLEEVE", remaining: 20, cost: 110 },
-      { id: "itm_32", name: "B DK101064 CHAIN CAM 100", remaining: 15, cost: 225 },
-      { id: "itm_33", name: "B AA101471 CLUTCH WHEEL 4", remaining: 40, cost: 210 },
-      { id: "itm_34", name: "B 36AA4025 CLUTCH PLATE", remaining: 38, cost: 520 },
-      { id: "itm_35", name: "B AA101844 HEAD SEAL COMP", remaining: 20, cost: 70 },
-      { id: "itm_36", name: "B 36AA4050 ENG PAKIG KIT", remaining: 18, cost: 480 },
-      { id: "itm_37", name: "B AM121213 AIR FILTER BS", remaining: 17, cost: 330 },
-      { id: "itm_38", name: "B AA191093 GEAR CABEL COM", remaining: 16, cost: 275 },
-      { id: "itm_39", name: "MOTUL CNG POUCH 1LTR", remaining: 5, cost: 345 },
-      { id: "itm_40", name: "B AA191103 CLUCH CABLE", remaining: 12, cost: 380 },
-      { id: "itm_41", name: "GTX 20W50 1LTR", remaining: 8, cost: 520 },
-      { id: "itm_42", name: "B AP111023 NEUTRAL SWITCH", remaining: 10, cost: 90 },
-      { id: "itm_43", name: "RTV GASKET SEALANT CLR 25GMS", remaining: 10, cost: 40 },
-      { id: "itm_44", name: "B AA121336 OIL PUMP ASS", remaining: 10, cost: 240 },
-      { id: "itm_45", name: "GTX ESSENTIAL 20W50 1LTR", remaining: 7, cost: 350 },
-      { id: "itm_46", name: "B AA101481 CLUCH RELEASE", remaining: 10, cost: 90 },
-      { id: "itm_47", name: "B 36AA4105 CYL BLOCK PIST", remaining: 10, cost: 3700 },
-      { id: "itm_48", name: "ISK REAR WHEEL BEARING KIT", remaining: 18, cost: 1150 },
-      { id: "itm_49", name: "B AA111082 ARMATURE", remaining: 15, cost: 990 },
-      { id: "itm_50", name: "GU BT MRT", remaining: 6, cost: 30 },
-      { id: "itm_51", name: "SINGLE STEP COMPOUD", remaining: 6, cost: 220 },
-      { id: "itm_52", name: "B 24171094 REAR SHOKER", remaining: 6, cost: 720 },
-      { id: "itm_53", name: "PAVANA REAR DOOR LOCK R/E", remaining: 5, cost: 115 },
-      { id: "itm_54", name: "B DS101277 TENSIONER ASSY", remaining: 0, cost: 165 },
-      { id: "itm_55", name: "WAX PAL RUBBING 200GMD", remaining: 0, cost: 120 },
-      { id: "itm_56", name: "ANTI RUST LUBSPRAY", remaining: 0, cost: 120 },
-      { id: "itm_57", name: "B AF201262 RELAY STARTER", remaining: 0, cost: 540 },
-      { id: "itm_58", name: "B AA102166 CLUCH HUB", remaining: 0, cost: 310 },
-      { id: "itm_59", name: "VARROC STATER MOTER ASSY", remaining: 4, cost: 3200 },
-      { id: "itm_60", name: "GO GREEN ENERGY +20E50 2.1 L", remaining: 0, cost: 710 },
-      { id: "itm_61", name: "B JN351604 STARTER RELY", remaining: 0, cost: 390 },
-      { id: "itm_62", name: "B AN101123 BORE KIT 205CC", remaining: 4, cost: 2850 },
-      { id: "itm_63", name: "3M PLW 100 ML", remaining: 0, cost: 170 },
-      { id: "itm_64", name: "B AA161337 CROSS BAR BS4", remaining: 0, cost: 1050 },
-      { id: "itm_65", name: "B 36AF0038 KIT SECONDERY", remaining: 0, cost: 200 },
-      { id: "itm_66", name: "VARROC ROTAT ASSY AN09", remaining: 0, cost: 1150 },
-      { id: "itm_67", name: "MILEX ACC CABLE COMPACT", remaining: 0, cost: 40 },
-      { id: "itm_68", name: "B AZ521003 HEAD GASKET BS", remaining: 0, cost: 115 },
-      { id: "itm_69", name: "B 24151175 STRUT LH COMP", remaining: 0, cost: 106 },
-      { id: "itm_70", name: "VARROC HALF BENDEX PINIUM", remaining: 0, cost: 670 },
-      { id: "itm_71", name: "ISK CONE SET ST006", remaining: 20, cost: 540 },
-      { id: "itm_72", name: "SPHEEROL CVPERF 80K 0.50KG", remaining: 0, cost: 290 },
-      { id: "itm_73", name: "B AT161215 ACC CABLE", remaining: 0, cost: 210 },
-      { id: "itm_74", name: "AT161222 CLUCH CABLE BS6", remaining: 0, cost: 325 },
-      { id: "itm_75", name: "B AA201012 RELAY STARTER", remaining: 0, cost: 360 },
-      { id: "itm_76", name: "B 24151179 STRUT LH COMP", remaining: 0, cost: 105 },
-      { id: "itm_77", name: "TRANS MAX AXLE 140 500ML", remaining: 20, cost: 190 },
-      { id: "itm_78", name: "SU 1633 MOBILE C ,3.4AMPS 12V", remaining: 0, cost: 150 },
-      { id: "itm_79", name: "B AN101257 CHAIN GIDE", remaining: 0, cost: 110 },
-      { id: "itm_80", name: "B AB171044 FRONT SHOCKER", remaining: 0, cost: 750 },
-      { id: "itm_81", name: "SU 4101 H4 LED HL BULB 12V", remaining: 4, cost: 580 },
-      { id: "itm_82", name: "B 24151164 WHEEL CYLENDER", remaining: 0, cost: 380 },
-      { id: "itm_83", name: "B 36AA4144 BRAKE SHOE SET", remaining: 0, cost: 390 },
-      { id: "itm_84", name: "B 36AA4042 ENG PAK KIT 20", remaining: 0, cost: 480 },
-      { id: "itm_85", name: "B 39218106 DOWEL PIN BUSH", remaining: 0, cost: 11 },
-      { id: "itm_86", name: "MOTOMAX BIKE POLISH LIQUID 50ML", remaining: 0, cost: 35 },
-      { id: "itm_87", name: "VARROC CLUCH LEVAR", remaining: 0, cost: 70 },
-      { id: "itm_88", name: "B 24151172 BRAKE SHOE PAT", remaining: 0, cost: 20 },
-      { id: "itm_89", name: "MOTOMAX BIKE LIQUID 100ML", remaining: 0, cost: 60 },
-      { id: "itm_90", name: "B AA101569 TIMING CHAIN", remaining: 0, cost: 180 },
-      { id: "itm_91", name: "POTP4360/55 12v", remaining: 0, cost: 100 },
-      { id: "itm_92", name: "PAVANA START BUTTON R/E", remaining: 0, cost: 60 },
-      { id: "itm_93", name: "B AA101472 CLUTCH STEEL PLATE", remaining: 0, cost: 130 },
-      { id: "itm_94", name: "PREMIUM LONGLIFE", remaining: 6, cost: 225 },
-      { id: "itm_95", name: "SPHEEROL ESSENTIAL GREASE 500G", remaining: 6, cost: 195 },
-      { id: "itm_96", name: "MOTO MAX INSTA SHINE", remaining: 0, cost: 16 },
-      { id: "itm_97", name: "MOTOMAX RAT REPALENT", remaining: 0, cost: 150 },
-      { id: "itm_98", name: "B JZ551417 CLUCH PLET 4S", remaining: 0, cost: 65 },
-      { id: "itm_99", name: "ISK CONE SET ST009", remaining: 0, cost: 550 },
-      { id: "itm_100", name: "VARROC WHEEL CUP SMALl", remaining: 0, cost: 270 },
-      { id: "itm_101", name: "B AF111049 HT COIL BS6", remaining: 0, cost: 480 },
-      { id: "itm_102", name: "VARROC ARMATUR ASSY W/COT", remaining: 0, cost: 1050 },
-      { id: "itm_103", name: "B DK101755 RACKER ARM", remaining: 0, cost: 295 },
-      { id: "itm_104", name: "B 24151266 FRONT WHEEL AXAL", remaining: 0, cost: 710 },
-      { id: "itm_105", name: "B AA101033 CRANK SHAFT", remaining: 2, cost: 3200 },
-      { id: "itm_106", name: "B 36AA4080 BORE KIT 175CC", remaining: 0, cost: 2300 },
-      { id: "itm_107", name: "B AA101864 ASSY CAM SHAFT", remaining: 0, cost: 835 },
-      { id: "itm_108", name: "B AA102003 CAM SHAFT", remaining: 0, cost: 750 },
-      { id: "itm_109", name: "B AA191094 GEAR CABEL COM", remaining: 0, cost: 275 },
-      { id: "itm_110", name: "B AB101067 CROSS", remaining: 0, cost: 275 },
-      { id: "itm_111", name: "B AL241023 WIPER SET LATE", remaining: 0, cost: 250 },
-      { id: "itm_112", name: "B 36AA4020 CHAIN TENSIONER", remaining: 0, cost: 200 },
-      { id: "itm_113", name: "B AA191091 ACC CABEL COM", remaining: 0, cost: 190 },
-      { id: "itm_114", name: "SPHEEROL CV PERF 40K GREASE 500G", remaining: 0, cost: 190 },
-      { id: "itm_115", name: "MILEX CLUTCH CABEL COM", remaining: 0, cost: 180 },
-      { id: "itm_116", name: "MILEX GEAR CABEL COM", remaining: 0, cost: 135 },
-      { id: "itm_117", name: "MILEX ACC CABEL COM", remaining: 0, cost: 115 },
-      { id: "itm_118", name: "24151097 MC. KIT", remaining: 0, cost: 270 },
-      { id: "itm_119", name: "ST OIL FILTER COM", remaining: 0, cost: 85 },
-      { id: "itm_120", name: "POT HS145/40 2W12V 260", remaining: 0, cost: 85 },
-      { id: "itm_121", name: "B AA101210 CLUTCH PLATE", remaining: 0, cost: 70 },
-      { id: "itm_122", name: "MOTAMAX 2K RUBBING COMPUND 100GM", remaining: 0, cost: 60 },
-      { id: "itm_123", name: "BOSH HALOGEN BULB SXL(16)", remaining: 0, cost: 50 },
-      { id: "itm_124", name: "B AB171016 FRONT SHOCKER", remaining: 0, cost: 40 },
-      { id: "itm_125", name: "B AB181012 BALLS N/M BIG", remaining: 0, cost: 40 },
-      { id: "itm_126", name: "B 39100006 PIN HOLLOW DOW", remaining: 0, cost: 3.5 },
-      { id: "itm_127", name: "TW SHINER SPONGE", remaining: 0, cost: 25 },
-      { id: "itm_128", name: "TW 1STP POLISH COMPND", remaining: 0, cost: 160 },
-      { id: "itm_129", name: "su 1302 3 pin metal horn relay 12v", remaining: 0, cost: 120 },
-      { id: "itm_130", name: "su 1304 dual relay 12v", remaining: 0, cost: 160 },
-      { id: "itm_131", name: "su 1201 melody maker 4 wire 12 v", remaining: 0, cost: 140 },
-      { id: "itm_132", name: "su 3947w parking light white 12 v", remaining: 0, cost: 55 },
-      { id: "itm_133", name: "SH wire 4MM DXL", remaining: 0, cost: 20 },
-      { id: "itm_134", name: "B DK101237 WASHER COPPER", remaining: 0, cost: 6.5 },
-      { id: "itm_135", name: "B AA201239 HORN DC", remaining: 0, cost: 200 },
-      { id: "itm_136", name: "GABRIEL FRENT SHOKER N/M", remaining: 0, cost: 560 },
-      { id: "itm_137", name: "VARROC BENDEX ASSY", remaining: 0, cost: 1150 },
-      { id: "itm_138", name: "MK CLUTCH PLATE 4STOK 205", remaining: 0, cost: 220 },
-      { id: "itm_139", name: "B AF181010 LOCK SET RR 4S", remaining: 0, cost: 950 },
-      { id: "itm_140", name: "GTX 20W50 500ML", remaining: 0, cost: 250 },
-      { id: "itm_141", name: "PoT H4 P43 100/90 12V", remaining: 0, cost: 100 },
-      { id: "itm_142", name: "B 36AA4119 HEAD ASSY", remaining: 0, cost: 4125 },
-      { id: "itm_143", name: "B 36 AA4116 HEAD ASSY", remaining: 0, cost: 3600 },
-      { id: "itm_144", name: "2K2 RC 100 GMS", remaining: 0, cost: 120 },
-      { id: "itm_145", name: "WAXPAL LIQUID POLISH", remaining: 0, cost: 145 },
-      { id: "itm_146", name: "B AA101666 CAM SHAFT ASSY", remaining: 5, cost: 900 },
-      { id: "itm_147", name: "B AM110003 IGNITER DCSTAR", remaining: 0, cost: 1400 },
-      { id: "itm_148", name: "B JP591065 SENSOR OXYGEN", remaining: 0, cost: 2170 },
-      { id: "itm_149", name: "B 24151174 BRAKE TATA L /", remaining: 0, cost: 275 },
-      { id: "itm_150", name: "WAXPOL SCOOTET POLISH 50 GMS", remaining: 0, cost: 65 },
-      { id: "itm_151", name: "C CABLE USB TO C TYPE", remaining: 0, cost: 150 },
-      { id: "itm_152", name: "B AM101172 CHINE GUIDE BS", remaining: 0, cost: 105 },
-      { id: "itm_153", name: "B 36AA4118 HEAD ASSY", remaining: 0, cost: 4200 },
-      { id: "itm_154", name: "B AA151047 FR HUB", remaining: 0, cost: 1250 },
-      { id: "itm_155", name: "B AT161220 GEAR CABLE", remaining: 0, cost: 235 },
-      { id: "itm_156", name: "GEVO LUGS 780G", remaining: 0, cost: 10 },
-      { id: "itm_157", name: "ISK CONE SET-004", remaining: 0, cost: 510 },
-      { id: "itm_158", name: "MILEX GEAR CABLE O/M", remaining: 0, cost: 26 },
-      { id: "itm_159", name: "OSRAM HEADLIGHT BULB", remaining: 0, cost: 95 },
-      { id: "itm_160", name: "PAVANA OIL PUMP 3WH R/E", remaining: 0, cost: 140 },
-      { id: "itm_161", name: "ROOTS CHARGER 3PIN", remaining: 0, cost: 150 },
-      { id: "itm_162", name: "SH BT ACE", remaining: 0, cost: 45 },
-      { id: "itm_163", name: "SU 1705 H4 BULB HOLDER 5MM", remaining: 0, cost: 60 },
-      { id: "itm_164", name: "SU 1801 PP SWITCH", remaining: 0, cost: 45 },
-      { id: "itm_165", name: "SU 2007 BLADE FUSES 30AMPS", remaining: 0, cost: 3.5 },
-      { id: "itm_166", name: "B AF201036 REGULATOR", remaining: 0, cost: 1460 },
-      { id: "itm_167", name: "VARROC MGRT-RING", remaining: 0, cost: 360 },
-      { id: "itm_168", name: "SU 1630 MICRO CHARGER 12V 24V", remaining: 0, cost: 140 },
-      { id: "itm_169", name: "SU 7501 SPEAKER WIRE 91M", remaining: 0, cost: 16 },
-      { id: "itm_170", name: "SU 1630 MICRO CHARGER 12V-24V", remaining: 0, cost: 140 },
-      { id: "itm_171", name: "FIVIQICK 0.45 GMS", remaining: 0, cost: 4.75 },
-      { id: "itm_172", name: "su 2828 led parking light white 12v", remaining: 10, cost: 60 },
-      { id: "itm_173", name: "B AF121568 INJECTOR", remaining: 0, cost: 2800 },
-      { id: "itm_174", name: "B 24151163 CYL ASSY WHEEL", remaining: 0, cost: 350 },
-      { id: "itm_175", name: "B AA101210 CLUCH PLATE 1", remaining: -5, cost: 45 },
-      { id: "itm_176", name: "B 39193815 NUT HEXAGON", remaining: -10, cost: 20 },
-      { id: "itm_177", name: "B AA111094 SHAFY GEAT", remaining: 10, cost: 1500 },
-      { id: "itm_178", name: "B 24151168 ASSEMBLY AUTO", remaining: 10, cost: 80 },
-      { id: "itm_179", name: "B DU101223 OIL NUT O/S", remaining: 100, cost: 25 },
-      { id: "itm_180", name: "OSRAM P43 60/55 12V", remaining: 20, cost: 75 },
-      { id: "itm_181", name: "SU 1712 2W FUSE BOX", remaining: 3, cost: 30 },
-      { id: "itm_182", name: "POT CABLE TAG 400MM BL", remaining: 100, cost: 3 }
-    ];
-
-    const STORAGE_KEY_INVENTORY = 'am_stock_v14';
-    const STORAGE_KEY_LOGS = 'am_logs_v14';
-    const STORAGE_KEY_QUEUE = 'am_queue_v14';
-    const STORAGE_KEY_URL = 'am_sheet_url';
-
-    const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-    const MONTHS_SHORT = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-
-    // App State
-    let inventory = [];
-    let salesLogs = [];
-    let offlineQueue = [];
-    let sheetUrl = "";
-    let isFlushing = false;
-
-    let workingDate = new Date();
-    let calYear = workingDate.getFullYear();
-    let calMonth = workingDate.getMonth();
-
-    let activeFilter = 'all';
-    let activeSort = 'default';
-    let searchQuery = '';
-    let selectedInwardId = null;
-    let selectedUndoLogId = null;
-
-    // Automatically resolves the 3-letter lowercase sheet tab name from any Date (e.g., 'nov', 'dec', 'jan')
-    function getAutoMonthTab(d) {
-      return MONTHS_SHORT[d.getMonth()].toLowerCase();
-    }
-
-    // PWA Install Event Handler
-    let deferredPrompt = null;
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      deferredPrompt = e;
-      const banner = document.getElementById('pwaInstallBanner');
-      if (banner) banner.classList.remove('hidden');
-    });
-
-    function promptAppInstall() {
-      if (!deferredPrompt) return;
-      deferredPrompt.prompt();
-      deferredPrompt.userChoice.then((choiceResult) => {
-        if (choiceResult.outcome === 'accepted') {
-          showToast('A.M Analyser installed successfully!');
-        }
-        deferredPrompt = null;
-        document.getElementById('pwaInstallBanner').classList.add('hidden');
-      });
-    }
-
-    function dismissInstallBanner() {
-      const banner = document.getElementById('pwaInstallBanner');
-      if (banner) banner.classList.add('hidden');
-    }
-
-    // Register Inline Service Worker Blob
-    if ('serviceWorker' in navigator) {
-      const swCode = `
-        const CACHE_NAME = 'am-analyser-v14';
-        self.addEventListener('install', (e) => { self.skipWaiting(); });
-        self.addEventListener('activate', (e) => { e.waitUntil(clients.claim()); });
-        self.addEventListener('fetch', (e) => {
-          if (e.request.method === 'GET' && e.request.url.startsWith('http')) {
-            e.respondWith(
-              fetch(e.request).catch(() => caches.match(e.request))
-            );
-          }
-        });
-      `;
-      const blob = new Blob([swCode], { type: 'application/javascript' });
-      navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(() => {});
-    }
-
-    // Storage Management
-    function loadStorage() {
-      try {
-        ['v5', 'v8_nocart', 'v9', 'v10', 'v11', 'v12', 'v13'].forEach(ver => {
-          localStorage.removeItem(`am_stock_${ver}`);
-          localStorage.removeItem(`am_logs_${ver}`);
-          localStorage.removeItem(`am_queue_${ver}`);
-        });
-
-        const storedInv = localStorage.getItem(STORAGE_KEY_INVENTORY);
-        if (storedInv) {
-          inventory = JSON.parse(storedInv);
-        } else {
-          inventory = JSON.parse(JSON.stringify(DEFAULT_CATALOG));
-        }
-
-        const storedLogs = localStorage.getItem(STORAGE_KEY_LOGS);
-        salesLogs = storedLogs ? JSON.parse(storedLogs) : [];
-
-        const storedQueue = localStorage.getItem(STORAGE_KEY_QUEUE);
-        offlineQueue = storedQueue ? JSON.parse(storedQueue) : [];
-
-        sheetUrl = localStorage.getItem(STORAGE_KEY_URL) || "";
-      } catch (err) {
-        inventory = JSON.parse(JSON.stringify(DEFAULT_CATALOG));
-        salesLogs = [];
-        offlineQueue = [];
-      }
-    }
-
-    function saveStorage() {
-      try {
-        localStorage.setItem(STORAGE_KEY_INVENTORY, JSON.stringify(inventory));
-        localStorage.setItem(STORAGE_KEY_LOGS, JSON.stringify(salesLogs));
-        localStorage.setItem(STORAGE_KEY_QUEUE, JSON.stringify(offlineQueue));
-        localStorage.setItem(STORAGE_KEY_URL, sheetUrl);
-      } catch (err) {}
-    }
-
-    // Date Utilities
-    function formatSheetDate(d) {
-      const day = d.getDate() < 10 ? '0' + d.getDate() : d.getDate();
-      return `${day}-${MONTHS_SHORT[d.getMonth()]}`;
-    }
-
-    function formatDisplayDate(d) {
-      const today = new Date();
-      const isToday = (d.toDateString() === today.toDateString());
-      const yesterday = new Date();
-      yesterday.setDate(today.getDate() - 1);
-      const isYesterday = (d.toDateString() === yesterday.toDateString());
-
-      const dStr = `${d.getDate() < 10 ? '0' + d.getDate() : d.getDate()}-${MONTHS_SHORT[d.getMonth()]}-${d.getFullYear()}`;
-      if (isToday) return `Today (${dStr})`;
-      if (isYesterday) return `Yesterday (${dStr})`;
-      return `${dStr} (Custom)`;
-    }
-
-    // Tab Navigation
-    function switchTab(tabId) {
-      const tabCounter = document.getElementById('tabCounter');
-      const tabLogs = document.getElementById('tabLogs');
-      const tabInventory = document.getElementById('tabInventory');
-      const btnCounter = document.getElementById('navBtnCounter');
-      const btnLogs = document.getElementById('navBtnLogs');
-      const btnInventory = document.getElementById('navBtnInventory');
-
-      if (tabCounter) tabCounter.classList.add('hidden');
-      if (tabLogs) tabLogs.classList.add('hidden');
-      if (tabInventory) tabInventory.classList.add('hidden');
-
-      [btnCounter, btnLogs, btnInventory].forEach(btn => {
-        if (btn) btn.className = "flex flex-col items-center gap-0.5 text-slate-400 hover:text-slate-200 font-medium transition active:scale-95";
-      });
-
-      if (tabId === 'counter') {
-        if (tabCounter) tabCounter.classList.remove('hidden');
-        if (btnCounter) btnCounter.className = "flex flex-col items-center gap-0.5 text-orange-400 font-bold transition active:scale-95";
-        renderCounterList();
-      } else if (tabId === 'logs') {
-        if (tabLogs) tabLogs.classList.remove('hidden');
-        if (btnLogs) btnLogs.className = "flex flex-col items-center gap-0.5 text-orange-400 font-bold transition active:scale-95";
-        renderDailyLogs();
-      } else if (tabId === 'inventory') {
-        if (tabInventory) tabInventory.classList.remove('hidden');
-        if (btnInventory) btnInventory.className = "flex flex-col items-center gap-0.5 text-orange-400 font-bold transition active:scale-95";
-        renderMasterInventory();
-      }
-    }
-
-    // Google Sheets Queue & Push Engine
-    function enqueueSheetAction(record) {
-      offlineQueue.push(record);
-      saveStorage();
-      updateSyncStatusUI();
-      triggerQueueFlush();
-    }
-
-    function updateSyncStatusUI() {
-      const dot = document.getElementById('syncStatusDot');
-      const txt = document.getElementById('syncStatusText');
-      const countEl = document.getElementById('modalQueueCount');
-
-      if (countEl) countEl.innerText = `${offlineQueue.length} actions pending`;
-
-      if (!sheetUrl) {
-        if (dot) dot.className = "w-2.5 h-2.5 rounded-full bg-rose-500 shadow-sm shadow-rose-500/50";
-        if (txt) {
-          txt.innerText = "No URL";
-          txt.className = "text-rose-400 font-semibold";
-        }
-        return;
-      }
-
-      if (offlineQueue.length > 0) {
-        if (dot) dot.className = "w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse shadow-sm shadow-amber-400/50";
-        if (txt) {
-          txt.innerText = `${offlineQueue.length} Pending`;
-          txt.className = "text-amber-300 font-semibold";
-        }
-      } else {
-        if (dot) dot.className = "w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-sm shadow-emerald-400/50";
-        if (txt) {
-          txt.innerText = "Synced";
-          txt.className = "text-emerald-400 font-semibold";
-        }
-      }
-    }
-
-    async function triggerQueueFlush() {
-      if (isFlushing || offlineQueue.length === 0 || !sheetUrl) return;
-      if (!navigator.onLine) {
-        updateSyncStatusUI();
-        return;
-      }
-
-      isFlushing = true;
-      const dot = document.getElementById('syncStatusDot');
-      const txt = document.getElementById('syncStatusText');
-      if (dot) dot.className = "w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse shadow-sm shadow-amber-400/50";
-      if (txt) {
-        txt.innerText = "Syncing...";
-        txt.className = "text-amber-300 font-bold";
-      }
-
-      while (offlineQueue.length > 0) {
-        const item = offlineQueue[0];
-        const targetMonthTab = item.sheetTab || getAutoMonthTab(workingDate);
-        const payload = {
-          action: item.type === 'IN' ? 'inward' : (item.type.startsWith('UNDO') ? 'undo' : 'sale'),
-          itemName: item.itemName,
-          type: item.type,
-          quantity: item.quantity,
-          unitCost: item.unitCost,
-          dateLabel: item.dateLabel,
-          sheetTab: targetMonthTab
-        };
-
-        try {
-          await fetch(sheetUrl, {
-            method: 'POST',
-            mode: 'no-cors',
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify(payload)
-          });
-
-          offlineQueue.shift();
-          saveStorage();
-        } catch (err) {
-          break;
-        }
-      }
-
-      isFlushing = false;
-      updateSyncStatusUI();
-    }
-
-    // 2-Way Sync: Pull latest items, stock, prices & daily sales from the active month's sheet tab
-    async function pullFromSheet(silent = false) {
-      if (!sheetUrl) {
-        if (!silent) {
-          openSyncModal();
-          showToast("Please enter your Apps Script Web App URL first!");
-        }
-        return;
-      }
-
-      if (offlineQueue.length > 0) {
-        if (!silent) {
-          showToast("Flushing pending offline sales first before pulling...");
-        }
-        await triggerQueueFlush();
-        if (offlineQueue.length > 0) return;
-      }
-
-      const activeMonthTab = getAutoMonthTab(workingDate);
-      const activeDateLabel = formatSheetDate(workingDate);
-
-      const dot = document.getElementById('syncStatusDot');
-      const txt = document.getElementById('syncStatusText');
-      if (dot) dot.className = "w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse shadow-sm shadow-cyan-400/50";
-      if (txt) {
-        txt.innerText = "Pulling...";
-        txt.className = "text-cyan-300 font-bold";
-      }
-
-      try {
-        const pullEndpoint = `${sheetUrl}${sheetUrl.includes('?') ? '&' : '?'}action=pull&sheetTab=${encodeURIComponent(activeMonthTab)}&dateLabel=${encodeURIComponent(activeDateLabel)}&_t=${Date.now()}`;
-        const response = await fetch(pullEndpoint, { method: 'GET' });
-        const result = await response.json();
-
-        if (result && result.status === "ok" && Array.isArray(result.items) && result.items.length > 0) {
-          const existingIdMap = {};
-          inventory.forEach(itm => {
-            existingIdMap[itm.name.trim().toLowerCase()] = itm.id;
-          });
-
-          inventory = result.items.map((rowItem, index) => {
-            const normKey = rowItem.name.trim().toLowerCase();
-            return {
-              id: existingIdMap[normKey] || `itm_sheet_${index + 1}`,
-              name: rowItem.name,
-              remaining: Number(rowItem.remaining) || 0,
-              cost: Number(rowItem.cost) || 0
-            };
-          });
-
-          // Sync Daily Sold columns from Google Sheet into app's Daily Logs & Header Stats
-          if (Array.isArray(result.dailySales)) {
-            const updatedIdMap = {};
-            inventory.forEach(itm => {
-              updatedIdMap[itm.name.trim().toLowerCase()] = itm.id;
-            });
-
-            const sheetLogMap = {};
-            result.dailySales.forEach(s => {
-              const normKey = s.itemName.trim().toLowerCase();
-              const itemId = updatedIdMap[normKey] || normKey;
-              const comboKey = `${s.dateLabel}__${itemId}`;
-              sheetLogMap[comboKey] = {
-                itemId: itemId,
-                itemName: s.itemName,
-                unitCost: Number(s.unitCost) || 0,
-                dateLabel: s.dateLabel,
-                quantity: Number(s.quantity) || 0
-              };
-            });
-
-            const pulledTabLower = (result.sheetTab || activeMonthTab).toLowerCase();
-            const preservedLogs = salesLogs.filter(l => {
-              if (l.type !== 'OUT') return true;
-              const logMonth = (l.dateLabel.split('-')[1] || '').toLowerCase();
-              return logMonth !== pulledTabLower;
-            });
-
-            const localOutGrouped = {};
-            salesLogs.filter(l => l.type === 'OUT').forEach(l => {
-              const comboKey = `${l.dateLabel}__${l.itemId}`;
-              if (!localOutGrouped[comboKey]) localOutGrouped[comboKey] = [];
-              localOutGrouped[comboKey].push(l);
-            });
-
-            const reconciledOutLogs = [];
-            for (const [comboKey, sheetEntry] of Object.entries(sheetLogMap)) {
-              const existingEntries = localOutGrouped[comboKey] || [];
-              const localSum = existingEntries.reduce((sum, e) => sum + e.quantity, 0);
-
-              if (localSum === sheetEntry.quantity && existingEntries.length > 0) {
-                reconciledOutLogs.push(...existingEntries);
-              } else {
-                reconciledOutLogs.push({
-                  id: 'sheet_log_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
-                  itemId: sheetEntry.itemId,
-                  itemName: sheetEntry.itemName,
-                  type: 'OUT',
-                  quantity: sheetEntry.quantity,
-                  unitCost: sheetEntry.unitCost,
-                  dateLabel: sheetEntry.dateLabel,
-                  timestamp: 'Sheet Sync'
-                });
-              }
-            }
-
-            salesLogs = [...reconciledOutLogs, ...preservedLogs];
-          }
-
-          saveStorage();
-          updateFilterCounts();
-          renderCounterList();
-          renderMasterInventory();
-          renderDailyLogs();
-          updateHeaderStats();
-
-          if (!silent) {
-            showToast(`Pulled ${inventory.length} items from '${result.sheetTab || activeMonthTab}' tab!`);
-          }
-        } else if (!silent) {
-          showToast(`No items found in '${activeMonthTab}' tab yet.`);
-        }
-      } catch (err) {
-        if (!silent) {
-          showToast("Pull failed: Make sure Code.gs is deployed as a New Version.");
-        }
-      } finally {
-        updateSyncStatusUI();
-      }
-    }
-
-    async function pushAllItemsToSheet() {
-      if (!sheetUrl) {
-        openSyncModal();
-        showToast("Please enter your Apps Script Web App URL first!");
-        return;
-      }
-
-      const activeMonthTab = getMonthTabForDate(workingDate);
-      sheetTab = activeMonthTab;
-      showToast(`Pushing ${inventory.length} items to '${activeMonthTab}' tab...`);
-      const payload = {
-        action: "bulk_sync",
-        dateLabel: formatSheetDate(workingDate),
-        sheetTab: activeMonthTab,
-        items: inventory.map(i => ({ name: i.name, remaining: i.remaining, cost: i.cost }))
-      };
-
-      try {
-        await fetch(sheetUrl, {
-          method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify(payload)
-        });
-        showToast(`Snapshot sent to '${activeMonthTab}' tab!`);
-      } catch (err) {
-        showToast("Network error. Added to queue.");
-      }
-    }
-
-    // Step Quantity in Counter (+ / -)
-    function stepCounterQty(itemId, delta) {
-      const item = inventory.find(i => i.id === itemId);
-      if (!item || item.remaining <= 0) return;
-
-      const input = document.getElementById(`qty_${itemId}`);
-      if (!input) return;
-
-      let currentVal = parseInt(input.value, 10);
-      let nextVal;
-
-      if (isNaN(currentVal) || input.value.trim() === '') {
-        nextVal = delta > 0 ? 1 : 1;
-      } else {
-        nextVal = currentVal + delta;
-      }
-
-      if (nextVal < 1) nextVal = 1;
-      if (nextVal > item.remaining) {
-        nextVal = item.remaining;
-        showToast(`Stock limit: only ${item.remaining} pcs available!`);
-      }
-
-      input.value = nextVal;
-    }
-
-    function validateSaleInput(itemId, val) {
-      const item = inventory.find(i => i.id === itemId);
-      if (!item) return;
-
-      const input = document.getElementById(`qty_${itemId}`);
-      if (val === '' || val === undefined) return;
-
-      let num = parseInt(val, 10);
-      if (isNaN(num) || num < 1) {
-        input.value = '';
-        return;
-      }
-
-      if (num > item.remaining) {
-        input.value = item.remaining;
-        showToast(`Clamped to available stock (${item.remaining} pcs)`);
-      }
-    }
-
-    // Execute Out / Sell Action
-    function executeSale(itemId) {
-      const item = inventory.find(i => i.id === itemId);
-      if (!item) return;
-
-      if (item.remaining <= 0) {
-        showToast("Cannot sell: item is Out of Stock!");
-        return;
-      }
-
-      const input = document.getElementById(`qty_${itemId}`);
-      let qty = 1;
-      if (input && input.value.trim() !== '') {
-        const parsed = parseInt(input.value, 10);
-        if (!isNaN(parsed) && parsed > 0) {
-          qty = parsed;
-        }
-      }
-
-      if (qty > item.remaining) {
-        showToast(`Only ${item.remaining} pcs in stock!`);
-        return;
-      }
-
-      item.remaining -= qty;
-
-      const logRecord = {
-        id: 'log_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
-        itemId: item.id,
-        itemName: item.name,
-        type: 'OUT',
-        quantity: qty,
-        unitCost: item.cost,
-        dateLabel: formatSheetDate(workingDate),
-        sheetTab: getAutoMonthTab(workingDate),
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-      };
-
-      salesLogs.unshift(logRecord);
-      enqueueSheetAction(logRecord);
-      saveStorage();
-
-      if (input) input.value = '';
-
-      updateFilterCounts();
-      renderCounterList();
-      updateHeaderStats();
-
-      showToast(`Sold ${qty} pcs of ${item.name}!`);
-    }
-
-    // Inward Modal & Action
-    function openInward(itemId) {
-      const item = inventory.find(i => i.id === itemId);
-      if (!item) return;
-
-      selectedInwardId = itemId;
-      document.getElementById('inwardItemName').innerText = item.name;
-      document.getElementById('inwardItemStock').innerText = `Current Stock: ${item.remaining} pcs`;
-      document.getElementById('inwardQtyInput').value = 5;
-      document.getElementById('inwardModal').classList.remove('hidden');
-    }
-
-    function closeInwardModal() {
-      document.getElementById('inwardModal').classList.add('hidden');
-      selectedInwardId = null;
-    }
-
-    function adjustInwardQty(delta) {
-      const input = document.getElementById('inwardQtyInput');
-      let val = (parseInt(input.value, 10) || 1) + delta;
-      if (val < 1) val = 1;
-      input.value = val;
-    }
-
-    function setInwardQuick(val) {
-      document.getElementById('inwardQtyInput').value = val;
-    }
-
-    function confirmInward() {
-      const item = inventory.find(i => i.id === selectedInwardId);
-      if (!item) return;
-
-      const qty = parseInt(document.getElementById('inwardQtyInput').value, 10) || 1;
-      item.remaining += qty;
-
-      const logRecord = {
-        id: 'log_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
-        itemId: item.id,
-        itemName: item.name,
-        type: 'IN',
-        quantity: qty,
-        unitCost: item.cost,
-        dateLabel: formatSheetDate(workingDate),
-        sheetTab: getAutoMonthTab(workingDate),
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-      };
-
-      salesLogs.unshift(logRecord);
-      enqueueSheetAction(logRecord);
-      saveStorage();
-
-      closeInwardModal();
-      updateFilterCounts();
-      renderCounterList();
-      renderMasterInventory();
-      updateHeaderStats();
-
-      showToast(`Added +${qty} pcs to ${item.name}!`);
-    }
-
-    // Add Brand New Item Directly in App
-    function openNewItemModal() {
-      document.getElementById('newItemNameInput').value = '';
-      document.getElementById('newItemStockInput').value = '0';
-      document.getElementById('newItemCostInput').value = '';
-      document.getElementById('newItemModal').classList.remove('hidden');
-      setTimeout(() => document.getElementById('newItemNameInput').focus(), 100);
-    }
-
-    function closeNewItemModal() {
-      document.getElementById('newItemModal').classList.add('hidden');
-    }
-
-    function confirmAddNewItem() {
-      const rawName = document.getElementById('newItemNameInput').value.trim().toUpperCase();
-      const stockVal = parseInt(document.getElementById('newItemStockInput').value, 10) || 0;
-      const costVal = parseFloat(document.getElementById('newItemCostInput').value);
-
-      if (!rawName) {
-        showToast("Please enter the Item Name!");
-        return;
-      }
-      if (isNaN(costVal) || costVal < 0) {
-        showToast("Please enter a valid Cost Price!");
-        return;
-      }
-
-      const duplicate = inventory.find(i => i.name.trim().toLowerCase() === rawName.toLowerCase());
-      if (duplicate) {
-        showToast("Item already exists in inventory!");
-        return;
-      }
-
-      const newItem = {
-        id: 'itm_custom_' + Date.now(),
-        name: rawName,
-        remaining: stockVal,
-        cost: costVal
-      };
-
-      inventory.unshift(newItem);
-      saveStorage();
-
-      if (stockVal > 0) {
-        enqueueSheetAction({
-          id: 'new_' + Date.now(),
-          itemId: newItem.id,
-          itemName: newItem.name,
-          type: 'IN',
-          quantity: stockVal,
-          unitCost: newItem.cost,
-          dateLabel: formatSheetDate(workingDate),
-          sheetTab: getAutoMonthTab(workingDate),
-          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-        });
-      } else {
-        pushAllItemsToSheet();
-      }
-
-      closeNewItemModal();
-      updateFilterCounts();
-      renderMasterInventory();
-      renderCounterList();
-      showToast(`Added "${newItem.name}" to inventory!`);
-    }
-
-    // Daily Header Stats
-    function updateHeaderStats() {
-      const targetLabel = formatSheetDate(workingDate);
-      let dayRev = 0;
-      let daySoldPcs = 0;
-
-      salesLogs.forEach(l => {
-        if (l.dateLabel === targetLabel && l.type === 'OUT') {
-          daySoldPcs += l.quantity;
-          dayRev += (l.quantity * l.unitCost);
-        }
-      });
-
-      document.getElementById('statSalesAmount').innerText = `₹${Math.round(dayRev).toLocaleString('en-IN')}`;
-      document.getElementById('statItemsSold').innerText = `${daySoldPcs} pcs`;
-
-      const today = new Date();
-      const isToday = (workingDate.toDateString() === today.toDateString());
-
-      document.getElementById('labelSalesTitle').innerText = isToday ? "Today's Sales" : `${targetLabel} Sales`;
-      document.getElementById('labelItemsTitle').innerText = isToday ? "Today's Sold" : `Sold (${targetLabel})`;
-      document.getElementById('currentDateBadge').innerText = formatDisplayDate(workingDate);
-    }
-
-    function setQuickDate(type) {
-      const prevMonth = getAutoMonthTab(workingDate);
-      const d = new Date();
-      if (type === 'yesterday') {
-        d.setDate(d.getDate() - 1);
-      }
-      workingDate = d;
-      calYear = workingDate.getFullYear();
-      calMonth = workingDate.getMonth();
-
-      updateHeaderStats();
-      if (!document.getElementById('tabLogs').classList.contains('hidden')) {
-        renderDailyLogs();
-      }
-      if (getAutoMonthTab(workingDate) !== prevMonth && sheetUrl && navigator.onLine) {
-        pullFromSheet(true);
-      }
-      showToast(`Operating date set: ${formatDisplayDate(workingDate)}`);
-    }
-
-    // Calendar Picker Modal Logic
-    function openCalendarModal() {
-      renderCalendarDays();
-      document.getElementById('calendarModal').classList.remove('hidden');
-    }
-
-    function closeCalendarModal() {
-      document.getElementById('calendarModal').classList.add('hidden');
-    }
-
-    function navMonth(delta) {
-      calMonth += delta;
-      if (calMonth < 0) { calMonth = 11; calYear--; }
-      if (calMonth > 11) { calMonth = 0; calYear++; }
-      renderCalendarDays();
-    }
-
-    function renderCalendarDays() {
-      document.getElementById('calMonthYearLabel').innerText = `${MONTHS[calMonth]} ${calYear}`;
-      const grid = document.getElementById('calDaysGrid');
-      grid.innerHTML = '';
-
-      const firstDay = new Date(calYear, calMonth, 1).getDay();
-      const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
-
-      for (let i = 0; i < firstDay; i++) {
-        const blank = document.createElement('div');
-        blank.className = "h-8";
-        grid.appendChild(blank);
-      }
-
-      for (let d = 1; d <= daysInMonth; d++) {
-        const btn = document.createElement('button');
-        const targetDate = new Date(calYear, calMonth, d);
-        const isSelected = (targetDate.toDateString() === workingDate.toDateString());
-
-        btn.type = "button";
-        btn.innerText = d;
-        btn.className = isSelected
-          ? "h-8 rounded-lg bg-orange-600 text-white font-bold font-num text-xs shadow-md shadow-orange-600/40 flex items-center justify-center ring-2 ring-orange-400"
-          : "h-8 rounded-lg bg-workshop-800 hover:bg-workshop-700 text-slate-200 font-num text-xs flex items-center justify-center border border-workshop-700/60 transition";
-
-        btn.onclick = () => {
-          const prevMonth = getAutoMonthTab(workingDate);
-          workingDate = targetDate;
-          closeCalendarModal();
-          updateHeaderStats();
-          if (!document.getElementById('tabLogs').classList.contains('hidden')) {
-            renderDailyLogs();
-          }
-          if (getAutoMonthTab(workingDate) !== prevMonth && sheetUrl && navigator.onLine) {
-            pullFromSheet(true);
-          }
-          showToast(`Operating date set: ${formatSheetDate(workingDate)} (${getAutoMonthTab(workingDate)} tab)`);
-        };
-
-        grid.appendChild(btn);
-      }
-    }
-
-    // Filter Badges & Search
-    function updateFilterCounts() {
-      const totalCount = inventory.length;
-      const inCount = inventory.filter(i => i.remaining > 0).length;
-      const lowCount = inventory.filter(i => i.remaining > 0 && i.remaining <= 5).length;
-      const outCount = inventory.filter(i => i.remaining <= 0).length;
-
-      const allEl = document.getElementById('countAllStock');
-      if (allEl) allEl.innerText = totalCount;
-      document.getElementById('countInStock').innerText = inCount;
-      document.getElementById('countLowStock').innerText = lowCount;
-      document.getElementById('countOutStock').innerText = outCount;
-
-      const searchInp = document.getElementById('searchInput');
-      if (searchInp) searchInp.placeholder = `Search ${totalCount} items...`;
-      const masterTitle = document.getElementById('masterCatalogTitle');
-      if (masterTitle) masterTitle.innerText = `Inventory (${totalCount} Parts)`;
-    }
-
-    function setFilter(flt) {
-      activeFilter = flt;
-      const btns = { all: 'fltAll', in_stock: 'fltIn', low_stock: 'fltLow', out: 'fltOut' };
-      for (const [key, id] of Object.entries(btns)) {
-        const btn = document.getElementById(id);
-        if (key === flt) {
-          btn.className = "px-2.5 py-1 rounded-lg bg-orange-600 text-white font-bold shrink-0 transition";
-        } else {
-          btn.className = "px-2.5 py-1 rounded-lg bg-workshop-800 text-slate-300 font-semibold border border-workshop-700 shrink-0 transition";
-        }
-      }
-      renderCounterList();
-    }
-
-    function handleSearch(val) {
-      searchQuery = val.trim();
-      document.getElementById('clearSearchBtn').classList.toggle('hidden', searchQuery.length === 0);
-      renderCounterList();
-    }
-
-    function clearSearch() {
-      document.getElementById('searchInput').value = '';
-      handleSearch('');
-    }
-
-    function handleSortChange(sortVal) {
-      activeSort = sortVal;
-      renderCounterList();
-    }
-
-    // Render Counter Items List
-    function renderCounterList() {
-      const container = document.getElementById('counterItemsList');
-      if (!container) return;
-
-      let filtered = inventory.filter(item => {
-        if (searchQuery) {
-          const matchName = item.name.toLowerCase().includes(searchQuery.toLowerCase());
-          if (!matchName) return false;
-        }
-        if (activeFilter === 'in_stock') return item.remaining > 0;
-        if (activeFilter === 'low_stock') return item.remaining > 0 && item.remaining <= 5;
-        if (activeFilter === 'out') return item.remaining <= 0;
-        return true;
-      });
-
-      if (activeSort === 'stock_desc') {
-        filtered.sort((a, b) => b.remaining - a.remaining);
-      } else if (activeSort === 'stock_asc') {
-        filtered.sort((a, b) => a.remaining - b.remaining);
-      } else if (activeSort === 'price_desc') {
-        filtered.sort((a, b) => b.cost - a.cost);
-      } else if (activeSort === 'price_asc') {
-        filtered.sort((a, b) => a.cost - b.cost);
-      } else if (activeSort === 'name_asc') {
-        filtered.sort((a, b) => a.name.localeCompare(b.name));
-      }
-
-      if (filtered.length === 0) {
-        container.innerHTML = `
-          <div class="p-8 text-center text-slate-500 text-xs">
-            <i class="fa-solid fa-magnifying-glass text-2xl mb-2 block"></i>
-            No parts match your filter criteria.
-          </div>
-        `;
-        return;
-      }
-
-      container.innerHTML = filtered.map(item => {
-        const isOutOfStock = item.remaining <= 0;
-        const isLowStock = item.remaining > 0 && item.remaining <= 5;
-
-        let badgeHtml = '';
-        if (isOutOfStock) {
-          badgeHtml = `<span class="text-[10px] bg-rose-500/20 text-rose-400 font-bold px-2 py-0.5 rounded-full border border-rose-500/30">0 In Stock</span>`;
-        } else if (isLowStock) {
-          badgeHtml = `<span class="text-[10px] bg-amber-500/20 text-amber-400 font-bold px-2 py-0.5 rounded-full border border-amber-500/30 font-num">${item.remaining} left</span>`;
-        } else {
-          badgeHtml = `<span class="text-[10px] bg-emerald-500/20 text-emerald-400 font-bold px-2 py-0.5 rounded-full border border-emerald-500/30 font-num">${item.remaining} pcs</span>`;
-        }
-
-        return `
-          <div class="bg-workshop-950/70 border border-workshop-700/80 rounded-2xl p-3 space-y-2.5 transition shadow-sm hover:border-slate-500">
-            <div class="flex items-start justify-between gap-2">
-              <div class="min-w-0">
-                <h4 class="text-xs font-bold text-slate-100 truncate">${item.name}</h4>
-                <div class="flex items-center gap-2 mt-1">
-                  <span class="text-xs font-black text-emerald-400 font-num">₹${item.cost}</span>
-                  <span class="text-slate-600 text-xs">&bull;</span>
-                  ${badgeHtml}
-                </div>
-              </div>
-              
-              <button onclick="openInward('${item.id}')" class="px-2 py-1 rounded-lg bg-workshop-800 hover:bg-cyan-900/40 text-cyan-400 border border-workshop-700 text-[10px] font-bold shrink-0 transition active:scale-95">
-                <i class="fa-solid fa-plus text-[9px] mr-0.5"></i> Inward
-              </button>
-            </div>
-
-            <div class="flex items-center gap-2 pt-1 border-t border-workshop-800">
-              <div class="flex items-center bg-workshop-900 border border-workshop-700 rounded-xl overflow-hidden shrink-0">
-                <button type="button" onclick="stepCounterQty('${item.id}', -1)" ${isOutOfStock ? 'disabled' : ''} 
-                  class="w-8 h-8 flex items-center justify-center text-slate-300 hover:bg-workshop-800 active:scale-95 text-xs font-bold disabled:opacity-40">
-                  <i class="fa-solid fa-minus"></i>
-                </button>
-                <input type="number" id="qty_${item.id}" value="" placeholder="${isOutOfStock ? '0' : '1'}" min="1" max="${item.remaining}" 
-                  oninput="validateSaleInput('${item.id}', this.value)" ${isOutOfStock ? 'disabled' : ''}
-                  class="w-10 text-center bg-transparent text-white placeholder-slate-500 font-num font-bold text-xs focus:outline-none disabled:text-slate-500">
-                <button type="button" onclick="stepCounterQty('${item.id}', 1)" ${isOutOfStock ? 'disabled' : ''} 
-                  class="w-8 h-8 flex items-center justify-center text-slate-300 hover:bg-workshop-800 active:scale-95 text-xs font-bold disabled:opacity-40">
-                  <i class="fa-solid fa-plus"></i>
-                </button>
-              </div>
-
-              <button type="button" onclick="executeSale('${item.id}')" ${isOutOfStock ? 'disabled' : ''} 
-                class="flex-1 py-2 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition active:scale-95 shadow-sm
-                ${isOutOfStock ? 'bg-workshop-800 text-slate-500 border border-workshop-700 cursor-not-allowed' : 'bg-orange-600 hover:bg-orange-500 text-white shadow-orange-600/30'}">
-                <i class="fa-solid fa-arrow-up-from-bracket text-[11px]"></i>
-                <span>${isOutOfStock ? 'Out of Stock' : 'Out / Sell'}</span>
-              </button>
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
-
-    // Render Daily Consolidated Logs with Edit/Reduce Buttons
-    function renderDailyLogs() {
-      const container = document.getElementById('logsContainer');
-      const title = document.getElementById('dailyLogsDateTitle');
-      const revEl = document.getElementById('logSummaryRevenue');
-      const pcsEl = document.getElementById('logSummaryPcs');
-      if (!container) return;
-
-      const dateLabel = formatSheetDate(workingDate);
-      if (title) title.innerText = `Activity for ${dateLabel}`;
-
-      const dayLogs = salesLogs.filter(l => l.dateLabel === dateLabel);
-
-      if (dayLogs.length === 0) {
-        if (revEl) revEl.innerText = "₹0";
-        if (pcsEl) pcsEl.innerText = "0 pcs";
-        container.innerHTML = `
-          <div class="p-8 text-center bg-workshop-950/40 rounded-2xl border border-workshop-800/80 text-slate-500 text-xs space-y-2">
-            <i class="fa-solid fa-clipboard-list text-3xl text-slate-600 block"></i>
-            <span>No activity recorded for ${dateLabel}.</span>
-          </div>
-        `;
-        return;
-      }
-
-      const grouped = {};
-      let totalPcs = 0;
-      let totalRev = 0;
-
-      dayLogs.forEach(entry => {
-        if (!grouped[entry.itemId]) {
-          grouped[entry.itemId] = {
-            itemName: entry.itemName,
-            unitCost: entry.unitCost,
-            totalOutQty: 0,
-            totalInQty: 0,
-            entries: []
-          };
-        }
-        if (entry.type === 'OUT') {
-          grouped[entry.itemId].totalOutQty += entry.quantity;
-          totalPcs += entry.quantity;
-          totalRev += (entry.quantity * entry.unitCost);
-        } else {
-          grouped[entry.itemId].totalInQty += entry.quantity;
-        }
-        grouped[entry.itemId].entries.push(entry);
-      });
-
-      if (revEl) revEl.innerText = `₹${Math.round(totalRev).toLocaleString('en-IN')}`;
-      if (pcsEl) pcsEl.innerText = `${totalPcs} pcs`;
-
-      container.innerHTML = Object.values(grouped).map(g => {
-        const outSum = g.totalOutQty;
-        const inSum = g.totalInQty;
-        const itemTotalAmount = outSum * g.unitCost;
-
-        const pillsHtml = g.entries.map(e => {
-          const isOut = e.type === 'OUT';
-          return `
-            <button type="button" onclick="openUndoModal('${e.id}')" 
-              class="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg text-[10px] font-mono border transition active:scale-95
-              ${isOut ? 'bg-workshop-900 border-workshop-700 text-slate-300 hover:border-amber-500/60' : 'bg-cyan-950/40 border-cyan-800/50 text-cyan-300 hover:border-cyan-500'}">
-              <span>${e.type} <b>${e.quantity}</b> @ ${e.timestamp}</span>
-              <i class="fa-solid fa-pen-to-square text-amber-400 text-[9px]" title="Edit or reduce quantity"></i>
-            </button>
-          `;
-        }).join('');
-
-        return `
-          <div class="bg-workshop-950/70 border border-workshop-700/80 rounded-2xl p-3 space-y-2 shadow-sm">
-            <div class="flex items-center justify-between gap-2">
-              <h4 class="text-xs font-bold text-slate-100 truncate">${g.itemName}</h4>
-              <span class="text-xs font-black text-emerald-400 font-num">₹${Math.round(itemTotalAmount).toLocaleString('en-IN')}</span>
-            </div>
-            
-            <div class="flex flex-wrap items-center gap-2 text-[11px] font-mono">
-              ${outSum > 0 ? `<span class="text-amber-400 font-bold">${outSum} pcs sold</span>` : ''}
-              ${inSum > 0 ? `<span class="text-cyan-400 font-bold">+${inSum} pcs inward</span>` : ''}
-              <span class="text-slate-600">&bull;</span>
-              <span class="text-slate-400">@ ₹${g.unitCost}</span>
-            </div>
-
-            <div class="flex flex-wrap gap-1.5 pt-1">
-              ${pillsHtml}
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
-
-    // Edit / Reduce Mistaken Transaction Quantity Logic
-    function openUndoModal(logId) {
-      const logEntry = salesLogs.find(l => l.id === logId);
-      if (!logEntry) return;
-
-      selectedUndoLogId = logId;
-      document.getElementById('undoItemName').innerText = `${logEntry.itemName} (Was ${logEntry.quantity} pcs)`;
-      document.getElementById('undoDescription').innerText = `Reduce or adjust the piece count for ${logEntry.dateLabel}. The difference will automatically update your inventory and Google Sheet.`;
-      document.getElementById('editLogQtyInput').value = logEntry.quantity;
-
-      document.getElementById('undoModal').classList.remove('hidden');
-    }
-
-    function closeUndoModal() {
-      document.getElementById('undoModal').classList.add('hidden');
-      selectedUndoLogId = null;
-    }
-
-    function stepEditLogQty(delta) {
-      const input = document.getElementById('editLogQtyInput');
-      if (!input) return;
-      let val = (parseInt(input.value, 10) || 0) + delta;
-      if (val < 0) val = 0;
-      input.value = val;
-    }
-
-    function removeFullLogEntry() {
-      const input = document.getElementById('editLogQtyInput');
-      if (input) input.value = 0;
-      confirmEditLogQty();
-    }
-
-    function confirmEditLogQty() {
-      if (!selectedUndoLogId) return;
-      const logIndex = salesLogs.findIndex(l => l.id === selectedUndoLogId);
-      if (logIndex === -1) {
-        closeUndoModal();
-        return;
-      }
-
-      const logEntry = salesLogs[logIndex];
-      const item = inventory.find(i => i.id === logEntry.itemId);
-      const oldQty = logEntry.quantity;
-      const newQty = Math.max(0, parseInt(document.getElementById('editLogQtyInput').value, 10) || 0);
-
-      if (newQty === oldQty) {
-        closeUndoModal();
-        return;
-      }
-
-      const diff = oldQty - newQty;
-
-      if (logEntry.type === 'OUT' && diff < 0 && item && Math.abs(diff) > item.remaining) {
-        showToast(`Cannot increase: only ${item.remaining} pcs left in stock!`);
-        return;
-      }
-
-      if (item) {
-        if (logEntry.type === 'OUT') {
-          item.remaining += diff;
-        } else if (logEntry.type === 'IN') {
-          item.remaining = Math.max(0, item.remaining - diff);
-        }
-      }
-
-      if (newQty === 0) {
-        salesLogs.splice(logIndex, 1);
-      } else {
-        logEntry.quantity = newQty;
-      }
-
-      let syncType = '';
-      if (logEntry.type === 'OUT') {
-        syncType = diff > 0 ? 'UNDO_OUT' : 'OUT';
-      } else {
-        syncType = diff > 0 ? 'UNDO_IN' : 'IN';
-      }
-
-      const deltaRecord = {
-        id: 'adj_' + Date.now(),
-        itemId: logEntry.itemId,
-        itemName: logEntry.itemName,
-        type: syncType,
-        quantity: Math.abs(diff),
-        unitCost: logEntry.unitCost,
-        dateLabel: logEntry.dateLabel,
-        sheetTab: logEntry.sheetTab || getAutoMonthTab(workingDate),
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-      };
-
-      enqueueSheetAction(deltaRecord);
-      saveStorage();
-
-      closeUndoModal();
-      updateFilterCounts();
-      updateHeaderStats();
-      renderDailyLogs();
-      renderCounterList();
-
-      if (newQty === 0) {
-        showToast(`Removed entry & restored ${oldQty} pcs!`);
-      } else {
-        showToast(`Updated ${logEntry.itemName} to ${newQty} pcs!`);
-      }
-    }
-
-    // Render Master Inventory View
-    function renderMasterInventory() {
-      const container = document.getElementById('masterInventoryContainer');
-      if (!container) return;
-
-      container.innerHTML = inventory.map((item, idx) => {
-        const isOutOfStock = item.remaining <= 0;
-        const isLowStock = item.remaining > 0 && item.remaining <= 5;
-
-        return `
-          <div class="bg-workshop-950/70 border border-workshop-700/80 rounded-2xl p-3 flex items-center justify-between gap-3 shadow-sm">
-            <div class="min-w-0 flex-1">
-              <div class="flex items-center gap-2">
-                <span class="text-[10px] text-slate-500 font-mono font-bold">#${idx + 1}</span>
-                <h4 class="text-xs font-bold text-slate-100 truncate">${item.name}</h4>
-              </div>
-              <div class="flex items-center gap-2 mt-1 text-[11px] font-mono">
-                <span class="text-emerald-400 font-bold">₹${item.cost}</span>
-                <span class="text-slate-600">&bull;</span>
-                <span class="text-slate-400">Stock: <b class="${isOutOfStock ? 'text-rose-400' : isLowStock ? 'text-amber-400' : 'text-slate-200'}">${item.remaining} pcs</b></span>
-              </div>
-            </div>
-            <button onclick="openInward('${item.id}')" class="px-2.5 py-1.5 rounded-lg bg-workshop-800 hover:bg-cyan-950 text-cyan-400 border border-workshop-700 text-xs font-bold shrink-0 transition active:scale-95">
-              + Inward
-            </button>
-          </div>
-        `;
-      }).join('');
-    }
-
-    // Sync Settings Modal
-    function openSyncModal() {
-      document.getElementById('sheetUrlInput').value = sheetUrl;
-      document.getElementById('modalAutoMonthLabel').innerText = getAutoMonthTab(workingDate);
-      document.getElementById('modalQueueCount').innerText = `${offlineQueue.length} actions pending`;
-      document.getElementById('syncModal').classList.remove('hidden');
-    }
-
-    function closeSyncModal() {
-      document.getElementById('syncModal').classList.add('hidden');
-    }
-
-    async function saveSheetSettings() {
-      sheetUrl = document.getElementById('sheetUrlInput').value.trim();
-      saveStorage();
-      closeSyncModal();
-      updateSyncStatusUI();
-
-      if (!sheetUrl) {
-        showToast("Settings saved (No URL entered).");
-        return;
-      }
-
-      const activeMonthTab = getAutoMonthTab(workingDate);
-      const activeDateLabel = formatSheetDate(workingDate);
-
-      showToast(`Testing connection with '${activeMonthTab}' tab...`);
-      try {
-        await fetch(sheetUrl, {
-          method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify({ action: "ping", dateLabel: activeDateLabel, sheetTab: activeMonthTab })
-        });
-        showToast("Connected to Google Sheets successfully!");
-        triggerQueueFlush();
-      } catch (err) {
-        showToast("Connection failed. Check your Web App URL.");
-      }
-    }
-
-    function showToast(msg) {
-      const box = document.getElementById('toastBox');
-      const txt = document.getElementById('toastText');
-      txt.lastElementChild.innerText = msg;
-      box.classList.remove('opacity-0', 'translate-y-3');
-      setTimeout(() => {
-        box.classList.add('opacity-0', 'translate-y-3');
-      }, 2500);
-    }
-
-    // Background Watchers for Midnight Rollover & Connectivity
-    window.addEventListener('online', () => {
-      showToast("Internet connected! Flushing queue...");
-      triggerQueueFlush();
-    });
-
-    window.addEventListener('focus', () => {
-      const now = new Date();
-      if (workingDate.toDateString() !== now.toDateString() && document.getElementById('currentDateBadge').innerText.includes('Today')) {
-        workingDate = now;
-        updateHeaderStats();
-        renderCounterList();
-      }
-      triggerQueueFlush();
-    });
-
-    // App Initialization
-    window.onload = function() {
-      loadStorage();
-      updateFilterCounts();
-      renderCounterList();
-      updateHeaderStats();
-      updateSyncStatusUI();
-      if (sheetUrl && navigator.onLine) {
-        pullFromSheet(true);
-      }
-    };
-  </script>
-</body>
-</html>
+      { name: "B AF121612 OIL FILTER", remaining: 125, price: 180 },
+      { name: "B 24151182 BRAKE SHOES SPRING", remaining: 80, price: 25 },
+      { name: "B JH511207 RACKER ARM", remaining: 70, price: 320 },
+      { name: "B AA101473 CLUTCH HUB 4/S", remaining: 105, price: 350 },
+      { name: "MILEX CLUTCH CABLE COMP", remaining: 100, price: 65 },
+      { name: "B 36AF0030 KIT PAPER FILT", remaining: 50, price: 75 },
+      { name: "B AA101207 HOUSING CLUTCH", remaining: 71, price: 300 },
+      { name: "SU 2003 BLaDE FUSES 10AMPD", remaining: 0, price: 3.5 },
+      { name: "B AA191092 CLUTCH CABEL COM", remaining: 40, price: 380 },
+      { name: "B 24151268 BRAKE SHOES", remaining: 36, price: 285 },
+      { name: "B 24151173 BRAKE SHOES SPRING", remaining: 20, price: 25 },
+      { name: "GTX ESSENTIAL 20W50 500ML", remaining: 33, price: 190 },
+      { name: "B P-PLUS 2.1LTR", remaining: 71, price: 820 },
+      { name: "MAHLE OIL FILTER COMP", remaining: 30, price: 85 },
+      { name: "B 24151171 BRAKE LINING", remaining: 53, price: 285 },
+      { name: "MILEX GEAR CABLE COMPACT", remaining: 80, price: 40 },
+      { name: "DOT.3 BREAK FLUID 100 ML", remaining: 20, price: 3
