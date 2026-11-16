@@ -3,17 +3,24 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <meta name="theme-color" content="#0f172a" />
+  <meta name="theme-color" content="#0b1120" />
+  <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="A.M Analyser" />
+
+  <!-- Embedded W3C Compliant Web App Manifest -->
+  <link rel="manifest" href="data:application/manifest+json;utf-8,%7B%22name%22%3A%22A.M%20Analyser%20-%20Auto%20Parts%20Counter%22%2C%22short_name%22%3A%22A.M%20Analyser%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230b1120%22%2C%22theme_color%22%3A%22%23f97316%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22https%3A%2F%2Fplacehold.co%2F192x192%2Ff97316%2Fffffff%3Ftext%3DAM%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image%2Fpng%22%7D%2C%7B%22src%22%3A%22https%3A%2F%2Fplacehold.co%2F512x512%2Ff97316%2Fffffff%3Ftext%3DAM%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fpng%22%7D%5D%7D" />
+
   <title>A.M Analyser — Auto Parts Counter</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
     * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
     body {
       background-color: #0b1120;
       color: #f8fafc;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       overscroll-behavior-y: contain;
     }
     input[type="number"]::-webkit-inner-spin-button,
@@ -28,7 +35,7 @@
     .toast-enter { animation: fadeSlideUp 0.2s ease-out forwards; }
   </style>
 </head>
-<body class="pb-24 select-none">
+<body class="pb-24 select-none min-h-screen">
 
   <!-- Top Brand Header -->
   <header class="sticky top-0 z-30 bg-[#0b1120]/95 backdrop-blur border-b border-slate-800/80">
@@ -50,7 +57,7 @@
 
       <!-- Sync Status Pill -->
       <button onclick="openSettingsModal()" id="syncPill"
-        class="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-900 border border-slate-700/80 text-xs font-semibold text-slate-200 active:scale-95 transition">
+        class="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#0f172a] border border-slate-700/80 text-xs font-semibold text-slate-200 active:scale-95 transition">
         <span id="syncDot" class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
         <span id="syncText">No URL</span>
       </button>
@@ -60,7 +67,7 @@
   <main class="max-w-xl mx-auto px-4 pt-3 space-y-3.5">
 
     <!-- Operating Date Card -->
-    <section class="bg-slate-900/90 border border-slate-800 rounded-2xl p-3.5 flex items-center justify-between gap-2">
+    <section class="bg-[#0f172a] border border-slate-800 rounded-2xl p-3.5 flex items-center justify-between gap-2">
       <label class="flex items-center gap-3 cursor-pointer flex-1 min-w-0 relative">
         <div class="w-10 h-10 rounded-xl bg-orange-500/15 border border-orange-500/30 flex items-center justify-center text-orange-400 shrink-0">
           📅
@@ -87,11 +94,11 @@
 
     <!-- Sales KPI Cards -->
     <section class="grid grid-cols-2 gap-3">
-      <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-3.5">
+      <div class="bg-[#0f172a] border border-slate-800 rounded-2xl p-3.5">
         <div id="kpiSalesTitle" class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Today's Sales</div>
         <div id="kpiSalesAmount" class="text-xl font-black text-emerald-400 mt-1">₹0</div>
       </div>
-      <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-3.5">
+      <div class="bg-[#0f172a] border border-slate-800 rounded-2xl p-3.5">
         <div id="kpiSoldTitle" class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Today's Sold</div>
         <div id="kpiSoldPcs" class="text-xl font-black text-amber-400 mt-1">0 pcs</div>
       </div>
@@ -103,7 +110,7 @@
         <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm">🔍</span>
         <input type="text" id="searchInput" oninput="renderActiveTab()"
           placeholder="Search 182 items..."
-          class="w-full bg-slate-900 border border-slate-800 rounded-xl pl-9 pr-8 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-orange-500" />
+          class="w-full bg-[#0f172a] border border-slate-800 rounded-xl pl-9 pr-8 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-orange-500" />
         <button id="clearSearchBtn" onclick="clearSearch()"
           class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white text-xs font-bold px-1.5 py-0.5">
           ✕
@@ -111,7 +118,7 @@
       </div>
 
       <select id="sortSelect" onchange="renderActiveTab()"
-        class="bg-slate-900 border border-slate-800 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-200 focus:outline-none focus:border-orange-500">
+        class="bg-[#0f172a] border border-slate-800 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-200 focus:outline-none focus:border-orange-500">
         <option value="default">Default</option>
         <option value="stock_desc">Stock: High → Low</option>
         <option value="stock_asc">Stock: Low → High</option>
@@ -127,15 +134,15 @@
         All (182)
       </button>
       <button onclick="setStockFilter('instock')" data-filter="instock"
-        class="filter-chip px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-900 border border-slate-800 text-slate-300 shrink-0">
+        class="filter-chip px-3 py-1.5 rounded-lg text-xs font-bold bg-[#0f172a] border border-slate-800 text-slate-300 shrink-0">
         In Stock (0)
       </button>
       <button onclick="setStockFilter('low')" data-filter="low"
-        class="filter-chip px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-900 border border-slate-800 text-slate-300 shrink-0">
+        class="filter-chip px-3 py-1.5 rounded-lg text-xs font-bold bg-[#0f172a] border border-slate-800 text-slate-300 shrink-0">
         Low ≤5 (0)
       </button>
       <button onclick="setStockFilter('out')" data-filter="out"
-        class="filter-chip px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-900 border border-slate-800 text-slate-300 shrink-0">
+        class="filter-chip px-3 py-1.5 rounded-lg text-xs font-bold bg-[#0f172a] border border-slate-800 text-slate-300 shrink-0">
         Out of Stock (0)
       </button>
     </section>
@@ -145,14 +152,14 @@
 
     <!-- TAB 2: INVENTORY MASTER VIEW -->
     <section id="viewInventory" class="hidden space-y-3">
-      <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-3.5 flex items-center justify-between gap-2">
+      <div class="bg-[#0f172a] border border-slate-800 rounded-2xl p-3.5 flex items-center justify-between gap-2">
         <div>
           <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Master Catalog</div>
           <div id="inventoryHeaderCount" class="text-sm font-extrabold text-white mt-0.5">Inventory (182 Parts)</div>
         </div>
         <div class="flex items-center gap-1.5">
           <button onclick="openNewItemModal()"
-            class="px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-extrabold active:scale-95 transition">
+            class="px-3 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-extrabold active:scale-95 transition">
             + New
           </button>
           <button onclick="pullFromSheet(true)"
@@ -171,7 +178,7 @@
 
     <!-- TAB 3: DAILY LOGS VIEW -->
     <section id="viewLogs" class="hidden space-y-3">
-      <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-3.5 flex items-center justify-between">
+      <div class="bg-[#0f172a] border border-slate-800 rounded-2xl p-3.5 flex items-center justify-between">
         <div>
           <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Transaction Ledger</div>
           <div id="logsDateHeader" class="text-sm font-extrabold text-white mt-0.5">Logs</div>
@@ -210,12 +217,12 @@
 
   <!-- Toast Notification -->
   <div id="toastBox" class="fixed bottom-20 inset-x-0 z-50 flex justify-center pointer-events-none px-4 hidden">
-    <div id="toastInner" class="toast-enter bg-slate-800 border border-slate-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-2xl"></div>
+    <div id="toastInner" class="toast-enter bg-[#0f172a] border border-slate-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-2xl"></div>
   </div>
 
   <!-- MODAL 1: Google Sheet Settings -->
   <div id="settingsModal" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm hidden flex items-center justify-center p-4">
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md p-5 space-y-4">
+    <div class="bg-[#0f172a] border border-slate-800 rounded-2xl w-full max-w-md p-5 space-y-4">
       <div class="flex items-center justify-between">
         <h2 class="text-base font-extrabold text-white">Google Sheet Connection</h2>
         <button onclick="closeModal('settingsModal')" class="text-slate-400 hover:text-white text-lg font-bold">✕</button>
@@ -223,7 +230,11 @@
       <div class="space-y-2">
         <label class="text-xs font-bold text-slate-400">Apps Script Web App URL (/exec)</label>
         <input type="url" id="webAppUrlInput" placeholder="https://script.google.com/macros/s/.../exec"
-          class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-orange-500" />
+          class="w-full bg-[#0b1120] border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-orange-500" />
+      </div>
+      <div class="bg-[#0b1120] border border-slate-800 rounded-xl px-3.5 py-2.5 flex items-center justify-between text-xs">
+        <span class="text-slate-400 font-semibold">Active Month Sheet Tab:</span>
+        <span id="modalSheetTabLabel" class="font-extrabold text-amber-400 uppercase">nov</span>
       </div>
       <div class="grid grid-cols-2 gap-2">
         <button onclick="pullFromSheet(true)"
@@ -244,7 +255,7 @@
 
   <!-- MODAL 2: Inward Stock Modal -->
   <div id="inwardModal" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm hidden flex items-center justify-center p-4">
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-sm p-5 space-y-4">
+    <div class="bg-[#0f172a] border border-slate-800 rounded-2xl w-full max-w-sm p-5 space-y-4">
       <div class="flex items-center justify-between">
         <h2 class="text-base font-extrabold text-white">Add Inward Stock</h2>
         <button onclick="closeModal('inwardModal')" class="text-slate-400 hover:text-white text-lg font-bold">✕</button>
@@ -256,10 +267,10 @@
       <div class="space-y-1.5">
         <label class="text-xs font-bold text-slate-400">Quantity Received (pcs)</label>
         <input type="number" id="inwardQtyInput" inputmode="numeric" placeholder="Enter qty"
-          class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-3 text-base font-extrabold text-white focus:outline-none focus:border-emerald-500" />
+          class="w-full bg-[#0b1120] border border-slate-800 rounded-xl px-3.5 py-3 text-base font-extrabold text-white focus:outline-none focus:border-emerald-400" />
       </div>
       <button onclick="confirmInwardStock()"
-        class="w-full py-3 rounded-xl bg-emerald-600 text-white text-xs font-extrabold active:scale-95">
+        class="w-full py-3 rounded-xl bg-emerald-400 text-slate-950 text-xs font-extrabold active:scale-95">
         Confirm Inward Stock
       </button>
     </div>
@@ -267,7 +278,7 @@
 
   <!-- MODAL 3: Add New Item Modal -->
   <div id="newItemModal" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm hidden flex items-center justify-center p-4">
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-sm p-5 space-y-4">
+    <div class="bg-[#0f172a] border border-slate-800 rounded-2xl w-full max-w-sm p-5 space-y-4">
       <div class="flex items-center justify-between">
         <h2 class="text-base font-extrabold text-white">Add New Part to Catalog</h2>
         <button onclick="closeModal('newItemModal')" class="text-slate-400 hover:text-white text-lg font-bold">✕</button>
@@ -276,23 +287,23 @@
         <div>
           <label class="text-xs font-bold text-slate-400">Part Code &amp; Name</label>
           <input type="text" id="newPartNameInput" placeholder="e.g. B AF121612 OIL FILTER"
-            class="w-full mt-1 bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm font-bold text-white uppercase focus:outline-none focus:border-emerald-500" />
+            class="w-full mt-1 bg-[#0b1120] border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm font-bold text-white uppercase focus:outline-none focus:border-emerald-400" />
         </div>
         <div class="grid grid-cols-2 gap-2.5">
           <div>
             <label class="text-xs font-bold text-slate-400">Opening Stock</label>
             <input type="number" id="newPartStockInput" inputmode="numeric" placeholder="0"
-              class="w-full mt-1 bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm font-extrabold text-white focus:outline-none focus:border-emerald-500" />
+              class="w-full mt-1 bg-[#0b1120] border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm font-extrabold text-white focus:outline-none focus:border-emerald-400" />
           </div>
           <div>
             <label class="text-xs font-bold text-slate-400">Cost Price (₹)</label>
             <input type="number" id="newPartPriceInput" inputmode="decimal" step="0.01" placeholder="0"
-              class="w-full mt-1 bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm font-extrabold text-white focus:outline-none focus:border-emerald-500" />
+              class="w-full mt-1 bg-[#0b1120] border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm font-extrabold text-white focus:outline-none focus:border-emerald-400" />
           </div>
         </div>
       </div>
       <button onclick="saveNewCatalogItem()"
-        class="w-full py-3 rounded-xl bg-emerald-600 text-white text-xs font-extrabold active:scale-95">
+        class="w-full py-3 rounded-xl bg-emerald-400 text-slate-950 text-xs font-extrabold active:scale-95">
         Save Item &amp; Sync to Sheet
       </button>
     </div>
@@ -300,9 +311,9 @@
 
   <!-- MODAL 4: Edit / Reduce Daily Log Qty Modal -->
   <div id="editLogModal" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm hidden flex items-center justify-center p-4">
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-sm p-5 space-y-4">
+    <div class="bg-[#0f172a] border border-slate-800 rounded-2xl w-full max-w-sm p-5 space-y-4">
       <div class="flex items-center justify-between">
-        <h2 class="text-base font-extrabold text-white">Edit / Reduce Sold Quantity</h2>
+        <h2 class="text-base font-extrabold text-white">Edit / Reduce Quantity</h2>
         <button onclick="closeModal('editLogModal')" class="text-slate-400 hover:text-white text-lg font-bold">✕</button>
       </div>
       <div>
@@ -315,7 +326,7 @@
           −
         </button>
         <input type="number" id="editLogQtyInput" inputmode="numeric"
-          class="w-24 h-12 text-center bg-slate-950 border border-slate-700 rounded-xl text-xl font-black text-amber-400 focus:outline-none focus:border-orange-500" />
+          class="w-24 h-12 text-center bg-[#0b1120] border border-slate-700 rounded-xl text-xl font-black text-amber-400 focus:outline-none focus:border-orange-500" />
         <button onclick="adjustEditLogQty(1)"
           class="w-12 h-12 rounded-xl bg-slate-800 border border-slate-700 text-xl font-black text-white active:scale-95">
           +
@@ -336,6 +347,7 @@
   </div>
 
   <script>
+    // Storage Keys
     const STORAGE_INV_KEY = 'am_stock_v15';
     const STORAGE_LOG_KEY = 'am_logs_v15';
     const STORAGE_QUEUE_KEY = 'am_queue_v15';
@@ -362,4 +374,969 @@
       { name: "MAHLE OIL FILTER COMP", remaining: 30, price: 85 },
       { name: "B 24151171 BRAKE LINING", remaining: 53, price: 285 },
       { name: "MILEX GEAR CABLE COMPACT", remaining: 80, price: 40 },
-      { name: "DOT.3 BREAK FLUID 100 ML", remaining: 20, price: 3
+      { name: "DOT.3 BREAK FLUID 100 ML", remaining: 20, price: 35 },
+      { name: "PREMIUM LONG LIFE 200 G", remaining: 20, price: 100 },
+      { name: "JL351218 PLUG BS6", remaining: 25, price: 170 },
+      { name: "DOT. 3 BREAK FLUID 250 ML", remaining: 20, price: 80 },
+      { name: "WAXPAL WHEEL BEARING GREASE 200 GMS", remaining: 20, price: 80 },
+      { name: "B AM101174 TIMING CHAIN", remaining: 21, price: 315 },
+      { name: "B 36AT0003 GAS GOLD FILTER", remaining: 15, price: 55 },
+      { name: "B 31101020 ARM RACKER", remaining: 20, price: 160 },
+      { name: "B 22151106 BRAKE DRUM", remaining: 28, price: 1230 },
+      { name: "B 36RA0002 CLUCH PLATE", remaining: 29, price: 550 },
+      { name: "B 24181153 LOCK SET", remaining: 19, price: 930 },
+      { name: "B DF101055 TEPIT SCREW", remaining: 0, price: 14 },
+      { name: "MILEX CLUTCH CABLE BS7", remaining: 20, price: 60 },
+      { name: "B 36AA4007 CLUTCH RIVIT", remaining: 40, price: 90 },
+      { name: "B AZ511010 PLUG SLEEVE", remaining: 20, price: 110 },
+      { name: "B DK101064 CHAIN CAM 100", remaining: 15, price: 225 },
+      { name: "B AA101471 CLUTCH WHEEL 4", remaining: 40, price: 210 },
+      { name: "B 36AA4025 CLUTCH PLATE", remaining: 38, price: 520 },
+      { name: "B AA101844 HEAD SEAL COMP", remaining: 20, price: 70 },
+      { name: "B 36AA4050 ENG PAKIG KIT", remaining: 18, price: 480 },
+      { name: "B AM121213 AIR FILTER BS", remaining: 17, price: 330 },
+      { name: "B AA191093 GEAR CABEL COM", remaining: 16, price: 275 },
+      { name: "MOTUL CNG POUCH 1LTR", remaining: 5, price: 345 },
+      { name: "B AA191103 CLUCH CABLE", remaining: 12, price: 380 },
+      { name: "GTX 20W50 1LTR", remaining: 8, price: 520 },
+      { name: "B AP111023 NEUTRAL SWITCH", remaining: 10, price: 90 },
+      { name: "RTV GASKET SEALANT CLR 25GMS", remaining: 10, price: 40 },
+      { name: "B AA121336 OIL PUMP ASS", remaining: 10, price: 240 },
+      { name: "GTX ESSENTIAL 20W50 1LTR", remaining: 7, price: 350 },
+      { name: "B AA101481 CLUCH RELEASE", remaining: 10, price: 90 },
+      { name: "B 36AA4105 CYL BLOCK PIST", remaining: 10, price: 3700 },
+      { name: "ISK REAR WHEEL BEARING KIT", remaining: 18, price: 1150 },
+      { name: "B AA111082 ARMATURE", remaining: 15, price: 990 },
+      { name: "GU BT MRT", remaining: 6, price: 30 },
+      { name: "SINGLE STEP COMPOUD", remaining: 6, price: 220 },
+      { name: "B 24171094 REAR SHOKER", remaining: 6, price: 720 },
+      { name: "PAVANA REAR DOOR LOCK R/E", remaining: 5, price: 115 },
+      { name: "B DS101277 TENSIONER ASSY", remaining: 0, price: 165 },
+      { name: "WAX PAL RUBBING 200GMD", remaining: 0, price: 120 },
+      { name: "ANTI RUST LUBSPRAY", remaining: 0, price: 120 },
+      { name: "B AF201262 RELAY STARTER", remaining: 0, price: 540 },
+      { name: "B AA102166 CLUCH HUB", remaining: 0, price: 310 },
+      { name: "VARROC STATER MOTER ASSY", remaining: 4, price: 3200 },
+      { name: "GO GREEN ENERGY +20E50 2.1 L", remaining: 0, price: 710 },
+      { name: "B JN351604 STARTER RELY", remaining: 0, price: 390 },
+      { name: "B AN101123 BORE KIT 205CC", remaining: 4, price: 2850 },
+      { name: "3M PLW 100 ML", remaining: 0, price: 170 },
+      { name: "B AA161337 CROSS BAR BS4", remaining: 0, price: 1050 },
+      { name: "B 36AF0038 KIT SECONDERY", remaining: 0, price: 200 },
+      { name: "VARROC ROTAT ASSY AN09", remaining: 0, price: 1150 },
+      { name: "MILEX ACC CABLE COMPACT", remaining: 0, price: 40 },
+      { name: "B AZ521003 HEAD GASKET BS", remaining: 0, price: 115 },
+      { name: "B 24151175 STRUT LH COMP", remaining: 0, price: 106 },
+      { name: "VARROC HALF BENDEX PINIUM", remaining: 0, price: 670 },
+      { name: "ISK CONE SET ST006", remaining: 20, price: 540 },
+      { name: "SPHEEROL CVPERF 80K 0.50KG", remaining: 0, price: 290 },
+      { name: "B AT161215 ACC CABLE", remaining: 0, price: 210 },
+      { name: "AT161222 CLUCH CABLE BS6", remaining: 0, price: 325 },
+      { name: "B AA201012 RELAY STARTER", remaining: 0, price: 360 },
+      { name: "B 24151179 STRUT LH COMP", remaining: 0, price: 105 },
+      { name: "TRANS MAX AXLE 140 500ML", remaining: 20, price: 190 },
+      { name: "SU 1633 MOBILE C ,3.4AMPS 12V", remaining: 0, price: 150 },
+      { name: "B AN101257 CHAIN GIDE", remaining: 0, price: 110 },
+      { name: "B AB171044 FRONT SHOCKER", remaining: 0, price: 750 },
+      { name: "SU 4101 H4 LED HL BULB 12V", remaining: 4, price: 580 },
+      { name: "B 24151164 WHEEL CYLENDER", remaining: 0, price: 380 },
+      { name: "B 36AA4144 BRAKE SHOE SET", remaining: 0, price: 390 },
+      { name: "B 36AA4042 ENG PAK KIT 20", remaining: 0, price: 480 },
+      { name: "B 39218106 DOWEL PIN BUSH", remaining: 0, price: 11 },
+      { name: "MOTOMAX BIKE POLISH LIQUID 50ML", remaining: 0, price: 35 },
+      { name: "VARROC CLUCH LEVAR", remaining: 0, price: 70 },
+      { name: "B 24151172 BRAKE SHOE PAT", remaining: 0, price: 20 },
+      { name: "MOTOMAX BIKE LIQUID 100ML", remaining: 0, price: 60 },
+      { name: "B AA101569 TIMING CHAIN", remaining: 0, price: 180 },
+      { name: "POTP4360/55 12v", remaining: 0, price: 100 },
+      { name: "PAVANA START BUTTON R/E", remaining: 0, price: 60 },
+      { name: "B AA101472 CLUTCH STEEL PLATE", remaining: 0, price: 130 },
+      { name: "PREMIUM LONGLIFE", remaining: 6, price: 225 },
+      { name: "SPHEEROL ESSENTIAL GREASE 500G", remaining: 6, price: 195 },
+      { name: "MOTO MAX INSTA SHINE", remaining: 0, price: 16 },
+      { name: "MOTOMAX RAT REPALENT", remaining: 0, price: 150 },
+      { name: "B JZ551417 CLUCH PLET 4S", remaining: 0, price: 65 },
+      { name: "ISK CONE SET ST009", remaining: 0, price: 550 },
+      { name: "VARROC WHEEL CUP SMALl", remaining: 0, price: 270 },
+      { name: "B AF111049 HT COIL BS6", remaining: 0, price: 480 },
+      { name: "VARROC ARMATUR ASSY W/COT", remaining: 0, price: 1050 },
+      { name: "B DK101755 RACKER ARM", remaining: 0, price: 295 },
+      { name: "B 24151266 FRONT WHEEL AXAL", remaining: 0, price: 710 },
+      { name: "B AA101033 CRANK SHAFT", remaining: 2, price: 3200 },
+      { name: "B 36AA4080 BORE KIT 175CC", remaining: 0, price: 2300 },
+      { name: "B AA101864 ASSY CAM SHAFT", remaining: 0, price: 835 },
+      { name: "B AA102003 CAM SHAFT", remaining: 0, price: 750 },
+      { name: "B AA191094 GEAR CABEL COM", remaining: 0, price: 275 },
+      { name: "B AB101067 CROSS", remaining: 0, price: 275 },
+      { name: "B AL241023 WIPER SET LATE", remaining: 0, price: 250 },
+      { name: "B 36AA4020 CHAIN TENSIONER", remaining: 0, price: 200 },
+      { name: "B AA191091 ACC CABEL COM", remaining: 0, price: 190 },
+      { name: "SPHEEROL CV PERF 40K GREASE 500G", remaining: 0, price: 190 },
+      { name: "MILEX CLUTCH CABEL COM", remaining: 0, price: 180 },
+      { name: "MILEX GEAR CABEL COM", remaining: 0, price: 135 },
+      { name: "MILEX ACC CABEL COM", remaining: 0, price: 115 },
+      { name: "24151097 MC. KIT", remaining: 0, price: 270 },
+      { name: "ST OIL FILTER COM", remaining: 0, price: 85 },
+      { name: "POT HS145/40 2W12V 260", remaining: 0, price: 85 },
+      { name: "B AA101210 CLUTCH PLATE", remaining: 0, price: 70 },
+      { name: "MOTAMAX 2K RUBBING COMPUND 100GM", remaining: 0, price: 60 },
+      { name: "BOSH HALOGEN BULB SXL(16)", remaining: 0, price: 50 },
+      { name: "B AB171016 FRONT SHOCKER", remaining: 0, price: 40 },
+      { name: "B AB181012 BALLS N/M BIG", remaining: 0, price: 40 },
+      { name: "B 39100006 PIN HOLLOW DOW", remaining: 0, price: 3.5 },
+      { name: "TW SHINER SPONGE", remaining: 0, price: 25 },
+      { name: "TW 1STP POLISH COMPND", remaining: 0, price: 160 },
+      { name: "su 1302 3 pin metal horn relay 12v", remaining: 0, price: 120 },
+      { name: "su 1304 dual relay 12v", remaining: 0, price: 160 },
+      { name: "su 1201 melody maker 4 wire 12 v", remaining: 0, price: 140 },
+      { name: "su 3947w parking light white 12 v", remaining: 0, price: 55 },
+      { name: "SH wire 4MM DXL", remaining: 0, price: 20 },
+      { name: "B DK101237 WASHER COPPER", remaining: 0, price: 6.5 },
+      { name: "B AA201239 HORN DC", remaining: 0, price: 200 },
+      { name: "GABRIEL FRENT SHOKER N/M", remaining: 0, price: 560 },
+      { name: "VARROC BENDEX ASSY", remaining: 0, price: 1150 },
+      { name: "MK CLUTCH PLATE 4STOK 205", remaining: 0, price: 220 },
+      { name: "B AF181010 LOCK SET RR 4S", remaining: 0, price: 950 },
+      { name: "GTX 20W50 500ML", remaining: 0, price: 250 },
+      { name: "PoT H4 P43 100/90 12V", remaining: 0, price: 100 },
+      { name: "B 36AA4119 HEAD ASSY", remaining: 0, price: 4125 },
+      { name: "B 36 AA4116 HEAD ASSY", remaining: 0, price: 3600 },
+      { name: "2K2 RC 100 GMS", remaining: 0, price: 120 },
+      { name: "WAXPAL LIQUID POLISH", remaining: 0, price: 145 },
+      { name: "B AA101666 CAM SHAFT ASSY", remaining: 5, price: 900 },
+      { name: "B AM110003 IGNITER DCSTAR", remaining: 0, price: 1400 },
+      { name: "B JP591065 SENSOR OXYGEN", remaining: 0, price: 2170 },
+      { name: "B 24151174 BRAKE TATA L /", remaining: 0, price: 275 },
+      { name: "WAXPOL SCOOTET POLISH 50 GMS", remaining: 0, price: 65 },
+      { name: "C CABLE USB TO C TYPE", remaining: 0, price: 150 },
+      { name: "B AM101172 CHINE GUIDE BS", remaining: 0, price: 105 },
+      { name: "B 36AA4118 HEAD ASSY", remaining: 0, price: 4200 },
+      { name: "B AA151047 FR HUB", remaining: 0, price: 1250 },
+      { name: "B AT161220 GEAR CABLE", remaining: 0, price: 235 },
+      { name: "GEVO LUGS 780G", remaining: 0, price: 10 },
+      { name: "ISK CONE SET-004", remaining: 0, price: 510 },
+      { name: "MILEX GEAR CABLE O/M", remaining: 0, price: 26 },
+      { name: "OSRAM HEADLIGHT BULB", remaining: 0, price: 95 },
+      { name: "PAVANA OIL PUMP 3WH R/E", remaining: 0, price: 140 },
+      { name: "ROOTS CHARGER 3PIN", remaining: 0, price: 150 },
+      { name: "SH BT ACE", remaining: 0, price: 45 },
+      { name: "SU 1705 H4 BULB HOLDER 5MM", remaining: 0, price: 60 },
+      { name: "SU 1801 PP SWITCH", remaining: 0, price: 45 },
+      { name: "SU 2007 BLADE FUSES 30AMPS", remaining: 0, price: 3.5 },
+      { name: "B AF201036 REGULATOR", remaining: 0, price: 1460 },
+      { name: "VARROC MGRT-RING", remaining: 0, price: 360 },
+      { name: "SU 1630 MICRO CHARGER 12V 24V", remaining: 0, price: 140 },
+      { name: "SU 7501 SPEAKER WIRE 91M", remaining: 0, price: 16 },
+      { name: "SU 1630 MICRO CHARGER 12V-24V", remaining: 0, price: 140 },
+      { name: "FIVIQICK 0.45 GMS", remaining: 0, price: 4.75 },
+      { name: "su 2828 led parking light white 12v", remaining: 10, price: 60 },
+      { name: "B AF121568 INJECTOR", remaining: 0, price: 2800 },
+      { name: "B 24151163 CYL ASSY WHEEL", remaining: 0, price: 350 },
+      { name: "B AA101210 CLUCH PLATE 1", remaining: -5, price: 45 },
+      { name: "B 39193815 NUT HEXAGON", remaining: -10, price: 20 },
+      { name: "B AA111094 SHAFY GEAT", remaining: 10, price: 1500 },
+      { name: "B 24151168 ASSEMBLY AUTO", remaining: 10, price: 80 },
+      { name: "B DU101223 OIL NUT O/S", remaining: 100, price: 25 },
+      { name: "OSRAM P43 60/55 12V", remaining: 20, price: 75 },
+      { name: "SU 1712 2W FUSE BOX", remaining: 3, price: 30 },
+      { name: "POT CABLE TAG 400MM BL", remaining: 100, price: 3 }
+    ];
+
+    let inventory = [];
+    let salesLogs = [];
+    let offlineQueue = [];
+    let activeTab = 'counter';
+    let stockFilter = 'all';
+    let workingDate = new Date();
+    let inwardTargetIndex = -1;
+    let editLogTargetId = null;
+
+    // Register Offline Service Worker
+    if ('serviceWorker' in navigator) {
+      const swCode = `
+        self.addEventListener('install', () => self.skipWaiting());
+        self.addEventListener('activate', (e) => e.waitUntil(clients.claim()));
+        self.addEventListener('fetch', (e) => {
+          if (e.request.method === 'GET' && e.request.url.startsWith('http')) {
+            e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
+          }
+        });
+      `;
+      const swBlob = new Blob([swCode], { type: 'application/javascript' });
+      navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(() => {});
+    }
+
+    function initApp() {
+      try {
+        Object.keys(localStorage).forEach(k => {
+          if ((k.startsWith('am_stock_v') || k.startsWith('am_logs_v') || k.startsWith('am_queue_v')) &&
+              k !== STORAGE_INV_KEY && k !== STORAGE_LOG_KEY && k !== STORAGE_QUEUE_KEY) {
+            localStorage.removeItem(k);
+          }
+        });
+
+        const savedInv = localStorage.getItem(STORAGE_INV_KEY);
+        inventory = savedInv ? JSON.parse(savedInv) : DEFAULT_CATALOG.map(x => ({ ...x }));
+        if (!savedInv) saveInventory();
+
+        const savedLogs = localStorage.getItem(STORAGE_LOG_KEY);
+        salesLogs = savedLogs ? JSON.parse(savedLogs) : [];
+
+        const savedQueue = localStorage.getItem(STORAGE_QUEUE_KEY);
+        offlineQueue = savedQueue ? JSON.parse(savedQueue) : [];
+      } catch (err) {
+        inventory = DEFAULT_CATALOG.map(x => ({ ...x }));
+        salesLogs = [];
+        offlineQueue = [];
+      }
+
+      updateOperatingDateUI();
+      updateSyncStatusUI();
+      updateFilterBadges();
+      renderActiveTab();
+
+      const url = getWebAppUrl();
+      if (url && offlineQueue.length === 0) {
+        pullFromSheet(false);
+      } else if (url && offlineQueue.length > 0) {
+        flushOfflineQueue();
+      }
+    }
+
+    function saveInventory() {
+      try {
+        localStorage.setItem(STORAGE_INV_KEY, JSON.stringify(inventory));
+      } catch (e) {}
+      updateFilterBadges();
+    }
+
+    function saveLogs() {
+      try {
+        localStorage.setItem(STORAGE_LOG_KEY, JSON.stringify(salesLogs));
+      } catch (e) {}
+    }
+
+    function saveQueue() {
+      try {
+        localStorage.setItem(STORAGE_QUEUE_KEY, JSON.stringify(offlineQueue));
+      } catch (e) {}
+      document.getElementById('queueCountBadge').textContent = offlineQueue.length;
+    }
+
+    function getWebAppUrl() {
+      try {
+        return (localStorage.getItem(STORAGE_URL_KEY) || localStorage.getItem('am_sheet_url') || '').trim();
+      } catch (e) {
+        return '';
+      }
+    }
+
+    function updateSyncStatusUI() {
+      const url = getWebAppUrl();
+      const dot = document.getElementById('syncDot');
+      const txt = document.getElementById('syncText');
+      document.getElementById('queueCountBadge').textContent = offlineQueue.length;
+
+      if (!url) {
+        dot.className = 'w-2.5 h-2.5 rounded-full bg-rose-500';
+        txt.textContent = 'No URL';
+      } else if (offlineQueue.length > 0) {
+        dot.className = 'w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse';
+        txt.textContent = `Pending (${offlineQueue.length})`;
+      } else {
+        dot.className = 'w-2.5 h-2.5 rounded-full bg-emerald-400';
+        txt.textContent = 'Synced';
+      }
+    }
+
+    // Date Formatting Helpers
+    function getLocalDateKey(d) {
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${y}-${m}-${day}`;
+    }
+
+    function formatSheetDate(d) {
+      const day = String(d.getDate()).padStart(2, '0');
+      const mon = MONTHS_CAP[d.getMonth()];
+      return `${day}-${mon}`;
+    }
+
+    function getSheetTabName(d) {
+      return MONTHS_SHORT[d.getMonth()];
+    }
+
+    function setOperatingOffset(offsetDays) {
+      const d = new Date();
+      d.setDate(d.getDate() + offsetDays);
+      workingDate = d;
+      updateOperatingDateUI();
+      renderActiveTab();
+      if (getWebAppUrl() && offlineQueue.length === 0) pullFromSheet(false);
+    }
+
+    function onDatePickerChange(isoStr) {
+      if (!isoStr) return;
+      const [y, m, day] = isoStr.split('-').map(Number);
+      workingDate = new Date(y, m - 1, day);
+      updateOperatingDateUI();
+      renderActiveTab();
+      if (getWebAppUrl() && offlineQueue.length === 0) pullFromSheet(false);
+    }
+
+    function updateOperatingDateUI() {
+      const today = new Date();
+      const yesterday = new Date();
+      yesterday.setDate(today.getDate() - 1);
+
+      const wKey = getLocalDateKey(workingDate);
+      const tKey = getLocalDateKey(today);
+      const yKey = getLocalDateKey(yesterday);
+
+      const day = String(workingDate.getDate()).padStart(2, '0');
+      const mon = MONTHS_CAP[workingDate.getMonth()];
+      const yr = workingDate.getFullYear();
+      const fullStr = `${day}-${mon}-${yr}`;
+
+      const lbl = document.getElementById('operatingDateLabel');
+      const btnT = document.getElementById('btnToday');
+      const btnY = document.getElementById('btnYesterday');
+
+      document.getElementById('datePickerInput').value = wKey;
+      const modalTabEl = document.getElementById('modalSheetTabLabel');
+      if (modalTabEl) modalTabEl.textContent = getSheetTabName(workingDate);
+
+      if (wKey === tKey) {
+        lbl.textContent = `Today (${fullStr})`;
+        document.getElementById('kpiSalesTitle').textContent = "Today's Sales";
+        document.getElementById('kpiSoldTitle').textContent = "Today's Sold";
+        btnT.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-orange-500 text-white shadow shadow-orange-500/30 active:scale-95 transition';
+        btnY.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-800 text-slate-300 border border-slate-700 active:scale-95 transition';
+      } else if (wKey === yKey) {
+        lbl.textContent = `Yesterday (${fullStr})`;
+        document.getElementById('kpiSalesTitle').textContent = "Yesterday's Sales";
+        document.getElementById('kpiSoldTitle').textContent = "Yesterday's Sold";
+        btnY.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-orange-500 text-white shadow shadow-orange-500/30 active:scale-95 transition';
+        btnT.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-800 text-slate-300 border border-slate-700 active:scale-95 transition';
+      } else {
+        lbl.textContent = `Selected (${fullStr})`;
+        document.getElementById('kpiSalesTitle').textContent = `${day}-${mon} Sales`;
+        document.getElementById('kpiSoldTitle').textContent = `${day}-${mon} Sold`;
+        btnT.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-800 text-slate-300 border border-slate-700 active:scale-95 transition';
+        btnY.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-800 text-slate-300 border border-slate-700 active:scale-95 transition';
+      }
+    }
+
+    function updateFilterBadges() {
+      const total = inventory.length;
+      const inStock = inventory.filter(i => i.remaining > 0).length;
+      const low = inventory.filter(i => i.remaining > 0 && i.remaining <= 5).length;
+      const out = inventory.filter(i => i.remaining <= 0).length;
+
+      document.getElementById('searchInput').placeholder = `Search ${total} items...`;
+      document.getElementById('inventoryHeaderCount').textContent = `Inventory (${total} Parts)`;
+
+      document.querySelectorAll('.filter-chip').forEach(btn => {
+        const f = btn.dataset.filter;
+        if (f === 'all') btn.textContent = `All (${total})`;
+        if (f === 'instock') btn.textContent = `In Stock (${inStock})`;
+        if (f === 'low') btn.textContent = `Low ≤5 (${low})`;
+        if (f === 'out') btn.textContent = `Out of Stock (${out})`;
+      });
+    }
+
+    function setStockFilter(f) {
+      stockFilter = f;
+      document.querySelectorAll('.filter-chip').forEach(btn => {
+        if (btn.dataset.filter === f) {
+          btn.className = 'filter-chip px-3 py-1.5 rounded-lg text-xs font-bold bg-orange-500 text-white shrink-0';
+        } else {
+          btn.className = 'filter-chip px-3 py-1.5 rounded-lg text-xs font-bold bg-[#0f172a] border border-slate-800 text-slate-300 shrink-0';
+        }
+      });
+      renderActiveTab();
+    }
+
+    function clearSearch() {
+      document.getElementById('searchInput').value = '';
+      renderActiveTab();
+    }
+
+    function getFilteredSortedItems() {
+      const q = document.getElementById('searchInput').value.trim().toLowerCase();
+      document.getElementById('clearSearchBtn').classList.toggle('hidden', q.length === 0);
+      const sortMode = document.getElementById('sortSelect').value;
+
+      let list = inventory.map((item, idx) => ({ ...item, origIndex: idx }));
+
+      if (q) {
+        list = list.filter(i => i.name.toLowerCase().includes(q));
+      }
+
+      if (stockFilter === 'instock') list = list.filter(i => i.remaining > 0);
+      else if (stockFilter === 'low') list = list.filter(i => i.remaining > 0 && i.remaining <= 5);
+      else if (stockFilter === 'out') list = list.filter(i => i.remaining <= 0);
+
+      if (sortMode === 'stock_desc') list.sort((a, b) => b.remaining - a.remaining);
+      else if (sortMode === 'stock_asc') list.sort((a, b) => a.remaining - b.remaining);
+      else if (sortMode === 'name_asc') list.sort((a, b) => a.name.localeCompare(b.name));
+      else if (sortMode === 'price_desc') list.sort((a, b) => b.price - a.price);
+
+      return list;
+    }
+
+    function switchTab(tab) {
+      activeTab = tab;
+      document.getElementById('viewCounter').classList.toggle('hidden', tab !== 'counter');
+      document.getElementById('viewInventory').classList.toggle('hidden', tab !== 'inventory');
+      document.getElementById('viewLogs').classList.toggle('hidden', tab !== 'logs');
+
+      document.getElementById('navCounter').className = `flex flex-col items-center justify-center gap-1 text-xs ${tab === 'counter' ? 'text-orange-400 font-extrabold' : 'text-slate-400 font-bold'}`;
+      document.getElementById('navInventory').className = `flex flex-col items-center justify-center gap-1 text-xs ${tab === 'inventory' ? 'text-orange-400 font-extrabold' : 'text-slate-400 font-bold'}`;
+      document.getElementById('navLogs').className = `flex flex-col items-center justify-center gap-1 text-xs ${tab === 'logs' ? 'text-orange-400 font-extrabold' : 'text-slate-400 font-bold'}`;
+
+      renderActiveTab();
+    }
+
+    function renderActiveTab() {
+      updateDailyKPIs();
+      if (activeTab === 'counter') renderCounterList();
+      else if (activeTab === 'inventory') renderInventoryList();
+      else renderDailyLogs();
+    }
+
+    function updateDailyKPIs() {
+      const targetDateLabel = formatSheetDate(workingDate);
+      const daySales = salesLogs.filter(l => l.dateLabel === targetDateLabel && l.type === 'OUT');
+      const totalRev = daySales.reduce((acc, l) => acc + (l.qty * l.price), 0);
+      const totalPcs = daySales.reduce((acc, l) => acc + l.qty, 0);
+
+      document.getElementById('kpiSalesAmount').textContent = `₹${Math.round(totalRev).toLocaleString('en-IN')}`;
+      document.getElementById('kpiSoldPcs').textContent = `${totalPcs} pcs`;
+    }
+
+    function renderCounterList() {
+      const container = document.getElementById('viewCounter');
+      const list = getFilteredSortedItems();
+
+      if (list.length === 0) {
+        container.innerHTML = `<div class="text-center py-10 text-sm text-slate-500">No matching parts found.</div>`;
+        return;
+      }
+
+      container.innerHTML = list.map(item => {
+        const idx = item.origIndex;
+        const badgeClass = item.remaining <= 0
+          ? 'bg-rose-500/15 text-rose-400 border-rose-500/30'
+          : item.remaining <= 5
+            ? 'bg-amber-500/15 text-amber-400 border-amber-500/30'
+            : 'bg-emerald-400/15 text-emerald-400 border-emerald-400/30';
+
+        return `
+          <div class="bg-[#0f172a] border border-slate-800/90 rounded-2xl p-3.5 space-y-3">
+            <div class="flex items-start justify-between gap-2">
+              <div class="min-w-0">
+                <div class="text-sm font-extrabold text-white leading-snug break-words">${item.name}</div>
+                <div class="text-xs font-bold text-slate-400 mt-1">₹${item.price} / pc</div>
+              </div>
+              <span class="px-2.5 py-1 rounded-lg border text-xs font-extrabold shrink-0 ${badgeClass}">
+                ${item.remaining} left
+              </span>
+            </div>
+
+            <div class="flex items-center justify-between gap-2">
+              <div class="flex items-center gap-1.5">
+                <button onclick="stepQty(${idx}, -1)"
+                  class="w-9 h-9 rounded-xl bg-slate-800 border border-slate-700 text-base font-black text-slate-200 active:scale-95">
+                  −
+                </button>
+                <input type="number" id="qty_${idx}" inputmode="numeric" placeholder="Qty"
+                  class="w-16 h-9 text-center bg-[#0b1120] border border-slate-700 rounded-xl text-sm font-extrabold text-white placeholder-slate-600 focus:outline-none focus:border-orange-500" />
+                <button onclick="stepQty(${idx}, 1)"
+                  class="w-9 h-9 rounded-xl bg-slate-800 border border-slate-700 text-base font-black text-slate-200 active:scale-95">
+                  +
+                </button>
+              </div>
+
+              <button onclick="recordSale(${idx})"
+                class="px-4 h-9 rounded-xl bg-orange-500 hover:bg-orange-400 text-white text-xs font-extrabold shadow shadow-orange-500/20 active:scale-95 transition">
+                Out / Sell
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function stepQty(idx, delta) {
+      const inp = document.getElementById(`qty_${idx}`);
+      if (!inp) return;
+      const cur = parseInt(inp.value, 10) || 0;
+      const next = Math.max(0, cur + delta);
+      inp.value = next === 0 ? '' : next;
+    }
+
+    function recordSale(idx) {
+      const inp = document.getElementById(`qty_${idx}`);
+      const qty = parseInt(inp ? inp.value : '', 10);
+      if (!qty || qty <= 0) {
+        showToast('Enter a valid quantity first');
+        if (inp) inp.focus();
+        return;
+      }
+
+      const item = inventory[idx];
+      item.remaining = item.remaining - qty;
+      saveInventory();
+
+      const dateLabel = formatSheetDate(workingDate);
+      const sheetTab = getSheetTabName(workingDate);
+      const nowTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+      const logEntry = {
+        id: 'log_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+        type: 'OUT',
+        item: item.name,
+        qty: qty,
+        price: item.price,
+        dateLabel: dateLabel,
+        sheetTab: sheetTab,
+        time: nowTime
+      };
+      salesLogs.unshift(logEntry);
+      saveLogs();
+
+      enqueueSync({
+        action: 'OUT',
+        item: item.name,
+        qty: qty,
+        price: item.price,
+        remaining: item.remaining,
+        dateLabel: dateLabel,
+        sheetTab: sheetTab
+      });
+
+      if (inp) inp.value = '';
+      renderActiveTab();
+      showToast(`Sold ${qty} × ${item.name} (${dateLabel})`);
+    }
+
+    function renderInventoryList() {
+      const container = document.getElementById('inventoryList');
+      const list = getFilteredSortedItems();
+
+      if (list.length === 0) {
+        container.innerHTML = `<div class="text-center py-10 text-sm text-slate-500">No matching items.</div>`;
+        return;
+      }
+
+      container.innerHTML = list.map(item => {
+        const idx = item.origIndex;
+        return `
+          <div class="bg-[#0f172a] border border-slate-800 rounded-2xl p-3.5 flex items-center justify-between gap-2">
+            <div class="min-w-0">
+              <div class="text-xs font-extrabold text-white truncate">
+                <span class="text-slate-500 mr-1">#${idx + 1}</span> ${item.name}
+              </div>
+              <div class="text-xs text-slate-400 mt-1">
+                <span class="text-emerald-400 font-bold">₹${item.price}</span> · Stock: <span class="text-white font-bold">${item.remaining} pcs</span>
+              </div>
+            </div>
+            <button onclick="openInwardModal(${idx})"
+              class="px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-xs font-extrabold text-emerald-400 shrink-0 active:scale-95">
+              + Inward
+            </button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function openInwardModal(idx) {
+      inwardTargetIndex = idx;
+      const item = inventory[idx];
+      document.getElementById('inwardItemName').textContent = item.name;
+      document.getElementById('inwardCurrentStock').textContent = `Current Remaining Stock: ${item.remaining} pcs`;
+      document.getElementById('inwardQtyInput').value = '';
+      document.getElementById('inwardModal').classList.remove('hidden');
+      setTimeout(() => document.getElementById('inwardQtyInput').focus(), 100);
+    }
+
+    function confirmInwardStock() {
+      const qty = parseInt(document.getElementById('inwardQtyInput').value, 10);
+      if (!qty || qty <= 0 || inwardTargetIndex < 0) {
+        showToast('Enter a valid inward quantity');
+        return;
+      }
+
+      const item = inventory[inwardTargetIndex];
+      item.remaining += qty;
+      saveInventory();
+
+      const dateLabel = formatSheetDate(workingDate);
+      const sheetTab = getSheetTabName(workingDate);
+      const nowTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+      salesLogs.unshift({
+        id: 'log_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+        type: 'IN',
+        item: item.name,
+        qty: qty,
+        price: item.price,
+        dateLabel: dateLabel,
+        sheetTab: sheetTab,
+        time: nowTime
+      });
+      saveLogs();
+
+      enqueueSync({
+        action: 'IN',
+        item: item.name,
+        qty: qty,
+        price: item.price,
+        remaining: item.remaining,
+        dateLabel: dateLabel,
+        sheetTab: sheetTab
+      });
+
+      closeModal('inwardModal');
+      renderActiveTab();
+      showToast(`Added +${qty} pcs to ${item.name}`);
+    }
+
+    function openNewItemModal() {
+      document.getElementById('newPartNameInput').value = '';
+      document.getElementById('newPartStockInput').value = '';
+      document.getElementById('newPartPriceInput').value = '';
+      document.getElementById('newItemModal').classList.remove('hidden');
+    }
+
+    function saveNewCatalogItem() {
+      const name = document.getElementById('newPartNameInput').value.trim().toUpperCase();
+      const stock = parseInt(document.getElementById('newPartStockInput').value, 10) || 0;
+      const price = parseFloat(document.getElementById('newPartPriceInput').value) || 0;
+
+      if (!name) {
+        showToast('Enter a valid part name');
+        return;
+      }
+
+      if (inventory.some(i => i.name.toLowerCase() === name.toLowerCase())) {
+        showToast('Part already exists in catalog');
+        return;
+      }
+
+      inventory.push({ name: name, remaining: stock, price: price });
+      saveInventory();
+
+      const dateLabel = formatSheetDate(workingDate);
+      const sheetTab = getSheetTabName(workingDate);
+
+      enqueueSync({
+        action: 'ADD_ITEM',
+        item: name,
+        remaining: stock,
+        price: price,
+        dateLabel: dateLabel,
+        sheetTab: sheetTab
+      });
+
+      closeModal('newItemModal');
+      renderActiveTab();
+      showToast(`Added ${name} to catalog`);
+    }
+
+    function renderDailyLogs() {
+      const dateLabel = formatSheetDate(workingDate);
+      document.getElementById('logsDateHeader').textContent = `Entries for ${dateLabel} (${getSheetTabName(workingDate).toUpperCase()})`;
+
+      const container = document.getElementById('dailyLogsList');
+      const dayLogs = salesLogs.filter(l => l.dateLabel === dateLabel);
+
+      if (dayLogs.length === 0) {
+        container.innerHTML = `<div class="bg-[#0f172a] border border-slate-800 rounded-2xl p-8 text-center text-xs text-slate-500">No transactions recorded for ${dateLabel}.</div>`;
+        return;
+      }
+
+      const grouped = {};
+      dayLogs.forEach(entry => {
+        if (!grouped[entry.item]) {
+          grouped[entry.item] = { item: entry.item, price: entry.price, entries: [] };
+        }
+        grouped[entry.item].entries.push(entry);
+      });
+
+      container.innerHTML = Object.values(grouped).map(group => {
+        const pillsHtml = group.entries.map(e => {
+          const isOut = e.type === 'OUT';
+          const pillStyle = isOut
+            ? 'bg-orange-500/15 border-orange-500/40 text-orange-300'
+            : 'bg-emerald-400/15 border-emerald-400/40 text-emerald-400';
+          return `
+            <button onclick="openEditLogModal('${e.id}')"
+              class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-extrabold ${pillStyle} active:scale-95">
+              <span>${e.type} ${e.qty}</span>
+              <span class="opacity-70 text-[10px]">@${e.time || ''}</span>
+              <span class="ml-0.5 text-white">✎</span>
+            </button>
+          `;
+        }).join('');
+
+        return `
+          <div class="bg-[#0f172a] border border-slate-800 rounded-2xl p-3.5 space-y-2.5">
+            <div class="flex items-start justify-between gap-2">
+              <div class="text-xs font-extrabold text-white leading-snug">${group.item}</div>
+              <div class="text-xs font-bold text-slate-400 shrink-0">₹${group.price}/pc</div>
+            </div>
+            <div class="flex flex-wrap gap-1.5">${pillsHtml}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function openEditLogModal(logId) {
+      const entry = salesLogs.find(l => l.id === logId);
+      if (!entry) return;
+      editLogTargetId = logId;
+      document.getElementById('editLogItemName').textContent = entry.item;
+      document.getElementById('editLogMeta').textContent = `Original: ${entry.type} ${entry.qty} pcs on ${entry.dateLabel}`;
+      document.getElementById('editLogQtyInput').value = entry.qty;
+      document.getElementById('editLogModal').classList.remove('hidden');
+    }
+
+    function adjustEditLogQty(delta) {
+      const inp = document.getElementById('editLogQtyInput');
+      const cur = parseInt(inp.value, 10) || 0;
+      inp.value = Math.max(0, cur + delta);
+    }
+
+    function reverseLogCompletely() {
+      document.getElementById('editLogQtyInput').value = 0;
+      confirmEditLogQty();
+    }
+
+    function confirmEditLogQty() {
+      const idx = salesLogs.findIndex(l => l.id === editLogTargetId);
+      if (idx === -1) return;
+
+      const entry = salesLogs[idx];
+      const newQty = Math.max(0, parseInt(document.getElementById('editLogQtyInput').value, 10) || 0);
+      const diff = newQty - entry.qty;
+
+      if (diff === 0) {
+        closeModal('editLogModal');
+        return;
+      }
+
+      const invItem = inventory.find(i => i.name.toLowerCase() === entry.item.toLowerCase());
+
+      if (entry.type === 'OUT') {
+        if (invItem) {
+          invItem.remaining -= diff;
+          saveInventory();
+        }
+        if (diff < 0) {
+          enqueueSync({
+            action: 'UNDO_OUT',
+            item: entry.item,
+            qty: Math.abs(diff),
+            price: entry.price,
+            dateLabel: entry.dateLabel,
+            sheetTab: entry.sheetTab || getSheetTabName(workingDate)
+          });
+        } else {
+          enqueueSync({
+            action: 'OUT',
+            item: entry.item,
+            qty: diff,
+            price: entry.price,
+            dateLabel: entry.dateLabel,
+            sheetTab: entry.sheetTab || getSheetTabName(workingDate)
+          });
+        }
+      } else {
+        if (invItem) {
+          invItem.remaining += diff;
+          saveInventory();
+        }
+        enqueueSync({
+          action: diff < 0 ? 'UNDO_IN' : 'IN',
+          item: entry.item,
+          qty: Math.abs(diff),
+          price: entry.price,
+          dateLabel: entry.dateLabel,
+          sheetTab: entry.sheetTab || getSheetTabName(workingDate)
+        });
+      }
+
+      if (newQty === 0) {
+        salesLogs.splice(idx, 1);
+        showToast(`Reversed ${entry.item} & restored stock`);
+      } else {
+        entry.qty = newQty;
+        showToast(`Updated ${entry.item} to ${newQty} pcs`);
+      }
+
+      saveLogs();
+      closeModal('editLogModal');
+      renderActiveTab();
+    }
+
+    // Sync & Offline Queue
+    function enqueueSync(payloadObj) {
+      offlineQueue.push(payloadObj);
+      saveQueue();
+      updateSyncStatusUI();
+      flushOfflineQueue();
+    }
+
+    async function flushOfflineQueue() {
+      const url = getWebAppUrl();
+      if (!url || offlineQueue.length === 0) return;
+
+      while (offlineQueue.length > 0) {
+        const nextPayload = offlineQueue[0];
+        try {
+          await fetch(url, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify(nextPayload)
+          });
+          offlineQueue.shift();
+          saveQueue();
+          updateSyncStatusUI();
+        } catch (err) {
+          updateSyncStatusUI();
+          break;
+        }
+      }
+    }
+
+    async function pushAllItemsToSheet() {
+      const url = getWebAppUrl();
+      if (!url) {
+        showToast('Paste your Web App URL first');
+        openSettingsModal();
+        return;
+      }
+
+      const sheetTab = getSheetTabName(workingDate);
+      const dateLabel = formatSheetDate(workingDate);
+      showToast(`Pushing ${inventory.length} items to "${sheetTab}"...`);
+
+      try {
+        await fetch(url, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({
+            action: 'PUSH_ALL',
+            sheetTab: sheetTab,
+            dateLabel: dateLabel,
+            items: inventory
+          })
+        });
+        showToast(`Pushed ${inventory.length} items to "${sheetTab}" tab`);
+      } catch (err) {
+        showToast('Push failed — check internet or URL');
+      }
+    }
+
+    async function pullFromSheet(notifyUser) {
+      const url = getWebAppUrl();
+      if (!url) {
+        if (notifyUser) showToast('Paste your Web App URL first');
+        return;
+      }
+
+      const sheetTab = getSheetTabName(workingDate);
+      if (notifyUser) showToast(`Pulling "${sheetTab}" from Google Sheet...`);
+
+      try {
+        const res = await fetch(`${url}?action=pull&sheetTab=${encodeURIComponent(sheetTab)}`);
+        const data = await res.json();
+
+        if (data.status === 'ok' && Array.isArray(data.items) && data.items.length > 0) {
+          inventory = data.items.map(it => ({
+            name: String(it.name).trim(),
+            remaining: Number(it.remaining) || 0,
+            price: Number(it.price) || 0
+          }));
+          saveInventory();
+
+          if (Array.isArray(data.logs)) {
+            const pulledDateLabels = new Set(data.logs.map(l => l.dateLabel));
+            salesLogs = salesLogs.filter(l => !pulledDateLabels.has(l.dateLabel));
+            data.logs.forEach((l, i) => {
+              salesLogs.push({
+                id: `sheet_${l.dateLabel}_${i}_${Math.random().toString(36).slice(2, 5)}`,
+                type: 'OUT',
+                item: l.item,
+                qty: Number(l.qty) || 0,
+                price: Number(l.price) || 0,
+                dateLabel: l.dateLabel,
+                sheetTab: sheetTab,
+                time: 'Sheet'
+              });
+            });
+            saveLogs();
+          }
+
+          renderActiveTab();
+          if (notifyUser) showToast(`Synced ${inventory.length} items from "${sheetTab}"`);
+        } else if (notifyUser) {
+          showToast(`Tab "${sheetTab}" is empty in Sheet`);
+        }
+      } catch (err) {
+        if (notifyUser) showToast('Pull failed — verify deployment access is "Anyone"');
+      }
+    }
+
+    // Modal & Toast Helpers
+    function openSettingsModal() {
+      document.getElementById('webAppUrlInput').value = getWebAppUrl();
+      document.getElementById('modalSheetTabLabel').textContent = getSheetTabName(workingDate);
+      document.getElementById('settingsModal').classList.remove('hidden');
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.add('hidden');
+    }
+
+    function saveWebAppUrl() {
+      const val = document.getElementById('webAppUrlInput').value.trim();
+      try {
+        localStorage.setItem(STORAGE_URL_KEY, val);
+      } catch (e) {}
+      updateSyncStatusUI();
+      closeModal('settingsModal');
+      if (val) {
+        showToast('URL saved! Testing connection...');
+        pullFromSheet(true);
+      } else {
+        showToast('URL cleared');
+      }
+    }
+
+    let toastTimer = null;
+    function showToast(msg) {
+      const box = document.getElementById('toastBox');
+      const inner = document.getElementById('toastInner');
+      inner.textContent = msg;
+      box.classList.remove('hidden');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => box.classList.add('hidden'), 2600);
+    }
+
+    window.addEventListener('online', () => {
+      updateSyncStatusUI();
+      flushOfflineQueue();
+    });
+
+    window.onload = function() {
+      initApp();
+    };
+  </script>
+</body>
+</html>
