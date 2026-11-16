@@ -229,6 +229,10 @@
             <h3 id="masterCatalogTitle" class="text-xs font-bold text-white truncate">Inventory (182 Parts)</h3>
           </div>
           <div class="flex items-center gap-1.5 shrink-0">
+            <button onclick="openNewItemModal()" class="px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center gap-1 shadow-sm transition active:scale-95" title="Add a brand new item">
+              <i class="fa-solid fa-plus text-[10px]"></i>
+              <span>New</span>
+            </button>
             <button onclick="pullFromSheet(false)" class="px-2.5 py-1.5 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold flex items-center gap-1 shadow-sm transition active:scale-95" title="Fetch new items & edits from Google Sheet">
               <i class="fa-solid fa-cloud-arrow-down text-[10px]"></i>
               <span>Pull</span>
@@ -337,6 +341,46 @@
       </div>
     </div>
 
+    <!-- ADD NEW ITEM MODAL -->
+    <div id="newItemModal" class="hidden fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div class="bg-workshop-900 border border-workshop-700 rounded-3xl w-full max-w-xs p-4 space-y-4 shadow-2xl">
+        <div class="flex items-center justify-between border-b border-workshop-700 pb-2">
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-circle-plus text-emerald-400"></i>
+            <h3 class="font-bold text-xs uppercase tracking-wider text-white">Add New Part / Item</h3>
+          </div>
+          <button onclick="closeNewItemModal()" class="text-slate-400 hover:text-white text-sm p-1">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <div class="space-y-3 text-xs">
+          <div>
+            <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wide block mb-1">Part Code & Item Name *</label>
+            <input type="text" id="newItemNameInput" placeholder="e.g. B 36AA4099 CLUTCH CABLE"
+              class="w-full bg-workshop-950 border border-workshop-700 rounded-xl px-3 py-2 text-white font-sans text-xs uppercase focus:outline-none focus:border-emerald-500">
+          </div>
+
+          <div class="grid grid-cols-2 gap-2.5">
+            <div>
+              <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wide block mb-1">Opening Stock</label>
+              <input type="number" id="newItemStockInput" value="0" min="0"
+                class="w-full bg-workshop-950 border border-workshop-700 rounded-xl px-3 py-2 text-white font-num font-bold text-xs focus:outline-none focus:border-emerald-500">
+            </div>
+            <div>
+              <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wide block mb-1">Cost Price (₹) *</label>
+              <input type="number" id="newItemCostInput" placeholder="0" min="0" step="0.01"
+                class="w-full bg-workshop-950 border border-workshop-700 rounded-xl px-3 py-2 text-white font-num font-bold text-xs focus:outline-none focus:border-emerald-500">
+            </div>
+          </div>
+        </div>
+
+        <button onclick="confirmAddNewItem()" class="w-full bg-emerald-600 hover:bg-emerald-500 py-2.5 rounded-xl text-white font-bold text-xs transition active:scale-95 shadow-md shadow-emerald-600/30">
+          Save Item & Sync to Sheet
+        </button>
+      </div>
+    </div>
+
     <!-- EDIT / REDUCE TRANSACTION MODAL -->
     <div id="undoModal" class="hidden fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 flex items-center justify-center p-4">
       <div class="bg-workshop-900 border border-workshop-700 rounded-3xl w-full max-w-xs p-4 space-y-4 shadow-2xl">
@@ -433,7 +477,7 @@
   </div>
 
   <script>
-    // EXACT 182 INVENTORY ITEMS (Clean Reset)
+    // MASTER DEFAULT INVENTORY (182 Items - Locked Default Catalog)
     const DEFAULT_CATALOG = [
       { id: "itm_1", name: "B AF121612 OIL FILTER", remaining: 125, cost: 180 },
       { id: "itm_2", name: "B 24151182 BRAKE SHOES SPRING", remaining: 80, cost: 25 },
@@ -619,9 +663,9 @@
       { id: "itm_182", name: "POT CABLE TAG 400MM BL", remaining: 100, cost: 3 }
     ];
 
-    const STORAGE_KEY_INVENTORY = 'am_stock_v13';
-    const STORAGE_KEY_LOGS = 'am_logs_v13';
-    const STORAGE_KEY_QUEUE = 'am_queue_v13';
+    const STORAGE_KEY_INVENTORY = 'am_stock_v14';
+    const STORAGE_KEY_LOGS = 'am_logs_v14';
+    const STORAGE_KEY_QUEUE = 'am_queue_v14';
     const STORAGE_KEY_URL = 'am_sheet_url';
     const STORAGE_KEY_TAB = 'am_sheet_tab';
 
@@ -675,7 +719,7 @@
     // Register Inline Service Worker Blob
     if ('serviceWorker' in navigator) {
       const swCode = `
-        const CACHE_NAME = 'am-analyser-v13';
+        const CACHE_NAME = 'am-analyser-v14';
         self.addEventListener('install', (e) => { self.skipWaiting(); });
         self.addEventListener('activate', (e) => { e.waitUntil(clients.claim()); });
         self.addEventListener('fetch', (e) => {
@@ -690,10 +734,10 @@
       navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(() => {});
     }
 
-    // Storage Management (Wipes legacy v1..v12 keys cleanly while keeping Sheet URL)
+    // Storage Management (Wipes legacy keys cleanly while keeping Sheet URL)
     function loadStorage() {
       try {
-        ['v5', 'v8_nocart', 'v9', 'v10', 'v11', 'v12'].forEach(ver => {
+        ['v5', 'v8_nocart', 'v9', 'v10', 'v11', 'v12', 'v13'].forEach(ver => {
           localStorage.removeItem(`am_stock_${ver}`);
           localStorage.removeItem(`am_logs_${ver}`);
           localStorage.removeItem(`am_queue_${ver}`);
@@ -1116,6 +1160,74 @@
       updateHeaderStats();
 
       showToast(`Added +${qty} pcs to ${item.name}!`);
+    }
+
+    // Add Brand New Item Directly in App
+    function openNewItemModal() {
+      document.getElementById('newItemNameInput').value = '';
+      document.getElementById('newItemStockInput').value = '0';
+      document.getElementById('newItemCostInput').value = '';
+      document.getElementById('newItemModal').classList.remove('hidden');
+      setTimeout(() => document.getElementById('newItemNameInput').focus(), 100);
+    }
+
+    function closeNewItemModal() {
+      document.getElementById('newItemModal').classList.add('hidden');
+    }
+
+    function confirmAddNewItem() {
+      const rawName = document.getElementById('newItemNameInput').value.trim().toUpperCase();
+      const stockVal = parseInt(document.getElementById('newItemStockInput').value, 10) || 0;
+      const costVal = parseFloat(document.getElementById('newItemCostInput').value);
+
+      if (!rawName) {
+        showToast("Please enter the Item Name!");
+        return;
+      }
+      if (isNaN(costVal) || costVal < 0) {
+        showToast("Please enter a valid Cost Price!");
+        return;
+      }
+
+      const duplicate = inventory.find(i => i.name.trim().toLowerCase() === rawName.toLowerCase());
+      if (duplicate) {
+        showToast("Item already exists in inventory!");
+        return;
+      }
+
+      const newItem = {
+        id: 'itm_custom_' + Date.now(),
+        name: rawName,
+        remaining: stockVal,
+        cost: costVal
+      };
+
+      // Add to top of inventory so it's immediately visible
+      inventory.unshift(newItem);
+      saveStorage();
+
+      // Queue an inward/create action so Google Sheets creates the new row automatically
+      if (stockVal > 0) {
+        enqueueSheetAction({
+          id: 'new_' + Date.now(),
+          itemId: newItem.id,
+          itemName: newItem.name,
+          type: 'IN',
+          quantity: stockVal,
+          unitCost: newItem.cost,
+          dateLabel: formatSheetDate(workingDate),
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        });
+      } else {
+        // Push full snapshot if opening stock is 0 so the row still gets created in Sheets
+        pushAllItemsToSheet();
+      }
+
+      closeNewItemModal();
+      updateFilterCounts();
+      renderMasterInventory();
+      renderCounterList();
+      showToast(`Added "${newItem.name}" to inventory!`);
     }
 
     // Daily Header Stats
